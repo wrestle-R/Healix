@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { onAuthStateChanged, auth } from '../../firebase.config.js';
 import PatientNavbar from '../components/Patient/PatientNavbar.jsx';
+import { useUser } from '../context/UserContext.jsx';
 
 const PatientDashboard = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  
+  // Get user context
+  const userContext = useUser();
+  console.log('User Context:', userContext);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {

@@ -1,9 +1,35 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/VisitorNavbar';
+import { useUser } from '../context/UserContext';
 
 const Landing = () => {
   const navigate = useNavigate();
+  const { user, loading } = useUser();
+
+  // Console log the user context
+  console.log('User context in Landing:', { user, loading });
+
+  // Redirect logged-in users to their respective dashboards
+  React.useEffect(() => {
+    if (!loading && user) {
+      console.log('User is logged in, redirecting to dashboard');
+      if (user.role === 'patient') {
+        navigate('/patient-dashboard');
+      } else if (user.role === 'doctor') {
+        navigate('/doctor-dashboard');
+      }
+    }
+  }, [user, loading, navigate]);
+
+  // Show loading or redirect in progress
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-white">Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-black">
@@ -17,17 +43,17 @@ const Landing = () => {
             Your Health, Our Priority
           </h2>
           <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-            Professional medical care with compassionate service. 
+            Professional medical care with compassionate service.
             Book your appointment today and take the first step towards better health.
           </p>
           <div className="space-x-4">
-            <button 
+            <button
               onClick={() => navigate('/login')}
               className="bg-green-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-green-700 transition-colors"
             >
               Sign In
             </button>
-            <button 
+            <button
               onClick={() => navigate('/register')}
               className="border-2 border-green-400 text-green-400 px-8 py-3 rounded-lg text-lg font-semibold hover:bg-green-400 hover:text-black transition-colors"
             >
