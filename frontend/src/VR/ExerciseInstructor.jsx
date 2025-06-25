@@ -2,132 +2,89 @@ import React, { useEffect, useRef } from 'react';
 
 const ExerciseInstructor = ({ exercise, currentStep, isActive }) => {
   const instructorRef = useRef();
-  const avatarRef = useRef();
 
-  useEffect(() => {
-    if (isActive && instructorRef.current) {
-      demonstrateExercise();
-    }
-  }, [isActive, currentStep, exercise]);
-
-  const demonstrateExercise = () => {
-    const avatar = avatarRef.current;
-    if (!avatar) return;
-
-    // Stop any existing animations
-    avatar.removeAttribute('animation');
-    avatar.removeAttribute('animation__2');
-
+  // NOW USE THE RIGHT MODEL FOR EACH EXERCISE!
+  const getModelPath = () => {
     switch (exercise.id) {
       case 'arm-raise':
-        // Animate the entire avatar for arm raising
-        avatar.setAttribute('animation', {
-          property: 'rotation',
-          from: '0 0 0',
-          to: '0 0 5',
-          dur: 2000,
-          dir: 'alternate',
-          loop: true,
-          easing: 'easeInOutQuad'
-        });
-        avatar.setAttribute('animation__2', {
-          property: 'position',
-          from: '0 0 0',
-          to: '0 0.1 0',
-          dur: 2000,
-          dir: 'alternate',
-          loop: true,
-          easing: 'easeInOutQuad'
-        });
-        break;
-
+        return '/models/Arms_Up.glb';    // ✅ Perfect arm-raise animation!
       case 'squat':
-        // Realistic squatting motion
-        avatar.setAttribute('animation', {
-          property: 'position',
-          from: '0 0 0',
-          to: '0 -0.3 0',
-          dur: 3000,
-          dir: 'alternate',
-          loop: true,
-          easing: 'easeInOutQuad'
-        });
-        break;
-
+        return '/models/Squat.glb';      // ✅ Perfect squat animation!
       case 'balance':
-        // Balance exercise - subtle body sway
-        avatar.setAttribute('animation', {
-          property: 'rotation',
-          from: '0 0 -3',
-          to: '0 0 3',
-          dur: 4000,
-          dir: 'alternate',
-          loop: true,
-          easing: 'easeInOutSine'
-        });
-        break;
-
       default:
-        break;
+        return '/models/Stand.glb';      // ✅ Perfect balance/standing animation!
+    }
+  };
+
+  const getExerciseName = () => {
+    switch (exercise.id) {
+      case 'arm-raise':
+        return 'Professional Arm Raise Demo';
+      case 'squat':
+        return 'Professional Squat Demo';
+      case 'balance':
+        return 'Professional Balance Demo';
+      default:
+        return 'Professional Therapy Demo';
     }
   };
 
   return (
-    <a-entity ref={instructorRef} position="2 0 -2">
-      {/* Ready Player Me Avatar - Replace ALL the old model */}
+    <a-entity ref={instructorRef} position="2.5 0 -1">
+      {/* PERFECT GLB MIXAMO MODEL! */}
       <a-gltf-model 
-        ref={avatarRef}
-        src="https://models.readyplayer.me/685c3742f3e9ba0f88c194ec.glb"
+        src={getModelPath()}
         position="0 0 0"
-        scale="1 1 1"
-        rotation="0 180 0"
+        scale="1 1 1"              // GLB perfect scale
+        rotation="0 -60 0"         // Face towards user
         shadow="cast: true"
-        animation-mixer="clip: *; loop: repeat; timeScale: 0.8"
+        animation-mixer={isActive ? "clip: *; loop: repeat; timeScale: 0.7" : ""}
       ></a-gltf-model>
 
-      {/* Speech Bubble - Keep this */}
-      <a-entity position="0 2.2 0">
-        <a-plane 
-          width="2" 
-          height="0.8" 
-          color="#FFFFFF" 
-          opacity="0.9"
-          position="0 0 0.01"
-          shadow="cast: true"
-        ></a-plane>
-        <a-text 
-          position="0 0 0.02" 
-          value={isActive ? "Follow my movements!" : "Ready to start?"} 
-          align="center" 
-          color="#2C3E50"
-          scale="1.8 1.8 1.8"
-          font="kelsonsans"
-        ></a-text>
-      </a-entity>
+      {/* Exercise type indicator */}
+      <a-sphere 
+        position="0 2.8 0" 
+        radius="0.12" 
+        color={exercise.id === 'arm-raise' ? "#10B981" : 
+               exercise.id === 'squat' ? "#3742FA" : "#FF6B35"}
+        animation="property: scale; to: 1.4 1.4 1.4; dur: 1200; dir: alternate; loop: true"
+      ></a-sphere>
 
-      {/* Floating instruction arrows - Keep these */}
-      {isActive && exercise.id === 'arm-raise' && (
-        <>
-          <a-cone 
-            position="-0.8 1.8 0" 
-            radius-bottom="0.08" 
-            radius-top="0" 
-            height="0.15" 
-            color="#E74C3C"
-            rotation="0 0 90"
-            animation="property: position; to: -0.8 2.2 0; dur: 1000; dir: alternate; loop: true"
-          ></a-cone>
-          <a-cone 
-            position="0.8 1.8 0" 
-            radius-bottom="0.08" 
-            radius-top="0" 
-            height="0.15" 
-            color="#E74C3C"
-            rotation="0 0 -90"
-            animation="property: position; to: 0.8 2.2 0; dur: 1000; dir: alternate; loop: true"
-          ></a-cone>
-        </>
+      {/* Professional status */}
+      {isActive && (
+        <a-text 
+          position="0 3.2 0" 
+          value={getExerciseName()}
+          align="center" 
+          color="#FFFFFF"
+          scale="1.3 1.3 1.3"
+          animation="property: scale; to: 1.5 1.5 1.5; dur: 2000; dir: alternate; loop: true"
+        ></a-text>
       )}
+
+      {/* Exercise instructions */}
+      {isActive && (
+        <a-text 
+          position="0 3.6 0" 
+          value={exercise.id === 'arm-raise' ? 'Watch my arms and follow!' : 
+                 exercise.id === 'squat' ? 'Bend your knees like me!' : 
+                 'Balance and stay steady!'}
+          align="center" 
+          color="#00FF00"
+          scale="1 1 1"
+        ></a-text>
+      )}
+
+      {/* Professional platform */}
+      <a-ring 
+        position="0 0.05 0" 
+        radius-inner="1" 
+        radius-outer="1.3" 
+        color="#4CAF50"
+        rotation="-90 0 0"
+        opacity="0.4"
+        animation="property: rotation; to: -90 0 360; dur: 10000; loop: true"
+      ></a-ring>
     </a-entity>
   );
 };
