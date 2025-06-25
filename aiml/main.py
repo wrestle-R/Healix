@@ -6,12 +6,23 @@ from dotenv import load_dotenv
 from langchain_groq import ChatGroq
 from langchain.schema.output_parser import StrOutputParser
 from langchain.prompts import ChatPromptTemplate
+from fastapi.middleware.cors import CORSMiddleware 
+
 
 # Load environment variables
 load_dotenv()
 
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 app = FastAPI(title="Medical Advisor API")
+
+# Configure CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],  # Your frontend's origin
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all methods (GET, POST, etc.)
+    allow_headers=["*"],  # Allow all headers
+)
 
 # Define request/response models
 class SymptomQuery(BaseModel):
