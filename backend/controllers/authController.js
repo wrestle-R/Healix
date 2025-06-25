@@ -1,5 +1,15 @@
 const Patient = require('../models/patient');
 const Doctor = require('../models/doctor');
+const jwt = require('jsonwebtoken');
+
+// Generate JWT token
+const generateToken = (userId, firebaseId, role) => {
+  return jwt.sign(
+    { userId, firebaseId, role },
+    process.env.JWT_SECRET || 'your-secret-key',
+    { expiresIn: '7d' }
+  );
+};
 
 // Create user in MongoDB after Firebase registration
 const createUser = async (req, res) => {
@@ -80,6 +90,9 @@ const createUser = async (req, res) => {
     await user.save();
     console.log('User saved successfully');
 
+    // Generate JWT token
+    const token = generateToken(user._id, user.firebaseId, user.role);
+
     res.status(201).json({
       message: 'User created successfully',
       user: {
@@ -89,7 +102,8 @@ const createUser = async (req, res) => {
         email: user.email,
         profilePicture: user.profilePicture,
         role: user.role
-      }
+      },
+      token
     });
 
   } catch (error) {
@@ -152,6 +166,9 @@ const validateRole = async (req, res) => {
       });
     }
 
+    // Generate JWT token
+    const token = generateToken(user._id, user.firebaseId, user.role);
+
     res.status(200).json({
       message: 'Role validated successfully',
       user: {
@@ -161,7 +178,8 @@ const validateRole = async (req, res) => {
         email: user.email,
         profilePicture: user.profilePicture,
         role: user.role
-      }
+      },
+      token
     });
 
   } catch (error) {
@@ -187,6 +205,9 @@ const getUserByFirebaseId = async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
+    // Generate JWT token
+    const token = generateToken(user._id, user.firebaseId, user.role);
+
     res.status(200).json({
       user: {
         id: user._id,
@@ -195,7 +216,8 @@ const getUserByFirebaseId = async (req, res) => {
         email: user.email,
         profilePicture: user.profilePicture,
         role: user.role
-      }
+      },
+      token
     });
 
   } catch (error) {

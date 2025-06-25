@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { createUserWithEmailAndPassword, signInWithPopup, provider, auth, updateProfile, signOut } from '../../firebase.config.js';
+import { useUser } from '../context/UserContext.jsx';
 import toast from 'react-hot-toast';
 
 const Register = () => {
@@ -12,6 +13,7 @@ const Register = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { login: contextLogin } = useUser();
 
   const createUserInMongoDB = async (userData) => {
     try {
@@ -109,7 +111,10 @@ const Register = () => {
         role: userType,
       };
 
-      await createUserInMongoDB(userData);
+      const response = await createUserInMongoDB(userData);
+      
+      // Store user data in context
+      contextLogin(response.user, response.token);
       
       toast.success(`${userType} account created successfully!`);
       navigate(userType === 'doctor' ? '/doctor-dashboard' : '/patient-dashboard');
@@ -143,7 +148,10 @@ const Register = () => {
         role: userType,
       };
 
-      await createUserInMongoDB(userData);
+      const response = await createUserInMongoDB(userData);
+      
+      // Store user data in context
+      contextLogin(response.user, response.token);
       
       toast.success(`${userType} account created successfully!`);
       navigate(userType === 'doctor' ? '/doctor-dashboard' : '/patient-dashboard');

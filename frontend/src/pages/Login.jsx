@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { signInWithEmailAndPassword, signInWithPopup, provider, auth, signOut } from '../../firebase.config.js';
+import { useUser } from '../context/UserContext.jsx';
 import toast from 'react-hot-toast';
 
 const Login = () => {
@@ -10,6 +11,7 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { login: contextLogin } = useUser();
 
   const validateUserRole = async (firebaseId, selectedRole) => {
     try {
@@ -81,8 +83,11 @@ const Login = () => {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // Validate user role
-      await validateUserRole(user.uid, userType);
+      // Validate user role and get user data
+      const userData = await validateUserRole(user.uid, userType);
+      
+      // Store user data in context
+      contextLogin(userData.user, userData.token);
       
       toast.success(`Welcome back!`);
       navigate(userType === 'doctor' ? '/doctor-dashboard' : '/patient-dashboard');
@@ -123,8 +128,11 @@ const Login = () => {
         throw new Error('Sign in was cancelled');
       }
 
-      // Validate user role
-      await validateUserRole(user.uid, userType);
+      // Validate user role and get user data
+      const userData = await validateUserRole(user.uid, userType);
+      
+      // Store user data in context
+      contextLogin(userData.user, userData.token);
       
       toast.success(`Welcome back!`);
       navigate(userType === 'doctor' ? '/doctor-dashboard' : '/patient-dashboard');
