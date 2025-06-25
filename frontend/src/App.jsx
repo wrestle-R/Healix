@@ -5,6 +5,7 @@ import Login from './pages/Login.jsx'
 import Register from './pages/Register.jsx'
 import PatientDashboard from './pages/PatientDashboard.jsx'
 import DoctorDashboard from './pages/DoctorDashboard.jsx'
+import VRTherapyApp from './VR/VRTherapyApp.jsx'
 
 const App = () => {
   return (
@@ -15,6 +16,7 @@ const App = () => {
         <Route path="/register" element={<Register />} />
         <Route path="/patient-dashboard" element={<PatientDashboard />} />
         <Route path="/doctor-dashboard" element={<DoctorDashboard />} />
+        <Route path="/vr-therapy" element={<VRTherapyApp />} />
       </Routes>
     </Router>
   )
