@@ -1,79 +1,86 @@
 import React, { useState, useRef, useEffect, Suspense } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
+import { Canvas, useFrame, useLoader } from '@react-three/fiber';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import * as THREE from 'three';
 import { Mic, MicOff, Send, Volume2, VolumeX } from 'lucide-react';
 
-// 3D Doctor Model Component
-function DoctorModel({ isListening, isSpeaking }) {
+// GLB Doctor Model Component
+function DoctorGLBModel({ isListening, isSpeaking }) {
   const meshRef = useRef();
-  const headRef = useRef();
+  const mixerRef = useRef();
   
-  useFrame((state) => {
-    if (meshRef.current) {
-      // Gentle floating animation
-      meshRef.current.position.y = Math.sin(state.clock.elapsedTime) * 0.1;
+  // Load the GLB file - you'll need to put your GLB file in the public folder
+  const gltf = useLoader(GLTFLoader, '/doc.glb');
+  
+  // Set up animations if they exist in the GLB file
+  useEffect(() => {
+    if (gltf.animations && gltf.animations.length > 0) {
+      mixerRef.current = new THREE.AnimationMixer(gltf.scene);
+      
+      // Play idle animation if available
+      const idleAction = mixerRef.current.clipAction(gltf.animations[0]);
+      idleAction.play();
     }
     
-    if (headRef.current) {
-      // Head bobbing when speaking
+    // Scale and position the model appropriately
+    gltf.scene.scale.setScalar(2); // Made bigger
+    gltf.scene.position.set(0, -0.5, 0); // Adjusted position
+    
+    // Ensure materials are properly set up
+    gltf.scene.traverse((child) => {
+      if (child.isMesh) {
+        child.castShadow = true;
+        child.receiveShadow = true;
+        if (child.material) {
+          child.material.needsUpdate = true;
+        }
+      }
+    });
+  }, [gltf]);
+  
+  // Animation loop
+  useFrame((state, delta) => {
+    if (mixerRef.current) {
+      mixerRef.current.update(delta);
+    }
+    
+    if (meshRef.current) {
+      // Gentle floating animation
+      meshRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.5) * 0.05;
+      
+      // Slight rotation when speaking
       if (isSpeaking) {
-        headRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 8) * 0.1;
+        meshRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 2) * 0.02;
       }
     }
   });
-
+  
   return (
     <group ref={meshRef}>
-      {/* Body */}
-      <mesh position={[0, -0.5, 0]}>
-        <cylinderGeometry args={[0.8, 1, 2, 8]} />
-        <meshStandardMaterial color="#4A90E2" />
-      </mesh>
+      <primitive object={gltf.scene} />
       
-      {/* Head */}
-      <group ref={headRef}>
-        <mesh position={[0, 1, 0]}>
-          <sphereGeometry args={[0.6, 16, 16]} />
-          <meshStandardMaterial color="#FDBCB4" />
-        </mesh>
-        
-        {/* Eyes */}
-        <mesh position={[-0.2, 1.1, 0.5]}>
-          <sphereGeometry args={[0.08, 8, 8]} />
-          <meshStandardMaterial color="#000" />
-        </mesh>
-        <mesh position={[0.2, 1.1, 0.5]}>
-          <sphereGeometry args={[0.08, 8, 8]} />
-          <meshStandardMaterial color="#000" />
-        </mesh>
-        
-        {/* Mouth - changes based on speaking */}
-        <mesh position={[0, 0.8, 0.5]} scale={isSpeaking ? [1.2, 0.8, 1] : [1, 1, 1]}>
-          <sphereGeometry args={[0.1, 8, 8]} />
-          <meshStandardMaterial color="#FF6B6B" />
-        </mesh>
-      </group>
-      
-      {/* Stethoscope */}
-      <mesh position={[0.3, 0.2, 0.8]} rotation={[0, 0, 0.3]}>
-        <torusGeometry args={[0.15, 0.02, 8, 16]} />
-        <meshStandardMaterial color="#333" />
-      </mesh>
-      
-      {/* White coat */}
-      <mesh position={[0, -0.3, 0.1]}>
-        <boxGeometry args={[1.6, 1.4, 0.2]} />
-        <meshStandardMaterial color="#FFFFFF" />
-      </mesh>
-      
-      {/* Listening indicator */}
+      {/* Listening indicator - floating sphere above the model */}
       {isListening && (
-        <mesh position={[0, 2.5, 0]}>
-          <sphereGeometry args={[0.1, 8, 8]} />
+        <mesh position={[0, 3, 0]}>
+          <sphereGeometry args={[0.1, 16, 16]} />
           <meshStandardMaterial 
             color="#00FF00" 
             emissive="#00AA00"
-            emissiveIntensity={0.5}
+            emissiveIntensity={0.8}
+          />
+        </mesh>
+      )}
+      
+      {/* Speaking indicator - pulsing ring around the model */}
+      {isSpeaking && (
+        <mesh position={[0, 1, 0]} rotation={[Math.PI / 2, 0, 0]}>
+          <ringGeometry args={[1.5, 1.8, 32]} />
+          <meshStandardMaterial 
+            color="#0066FF" 
+            emissive="#0044BB"
+            emissiveIntensity={0.6}
+            transparent
+            opacity={0.7}
           />
         </mesh>
       )}
@@ -81,16 +88,105 @@ function DoctorModel({ isListening, isSpeaking }) {
   );
 }
 
-// Scene component
+// Fallback model in case GLB fails to load
+function FallbackDoctor({ isListening, isSpeaking }) {
+  const meshRef = useRef();
+  
+  useFrame((state) => {
+    if (meshRef.current) {
+      meshRef.current.position.y = Math.sin(state.clock.elapsedTime) * 0.1;
+    }
+  });
+
+  return (
+    <group ref={meshRef}>
+      {/* Simple fallback doctor */}
+      <mesh position={[0, 0, 0]}>
+        <capsuleGeometry args={[0.5, 1.5, 4, 8]} />
+        <meshStandardMaterial color="#4A90E2" />
+      </mesh>
+      
+      {/* Head */}
+      <mesh position={[0, 1.2, 0]}>
+        <sphereGeometry args={[0.4, 16, 16]} />
+        <meshStandardMaterial color="#FDBCB4" />
+      </mesh>
+      
+      {/* Simple face */}
+      <mesh position={[-0.15, 1.3, 0.35]}>
+        <sphereGeometry args={[0.05, 8, 8]} />
+        <meshStandardMaterial color="#000" />
+      </mesh>
+      <mesh position={[0.15, 1.3, 0.35]}>
+        <sphereGeometry args={[0.05, 8, 8]} />
+        <meshStandardMaterial color="#000" />
+      </mesh>
+      
+      {/* Status indicators */}
+      {isListening && (
+        <mesh position={[0, 2.5, 0]}>
+          <sphereGeometry args={[0.1, 8, 8]} />
+          <meshStandardMaterial color="#00FF00" emissive="#00AA00" emissiveIntensity={0.5} />
+        </mesh>
+      )}
+    </group>
+  );
+}
+
+// Scene component with error boundary
 function Scene({ isListening, isSpeaking }) {
+  const [modelError, setModelError] = useState(false);
+  
   return (
     <>
       <ambientLight intensity={0.6} />
-      <pointLight position={[10, 10, 10]} intensity={0.8} />
-      <pointLight position={[-10, -10, -5]} intensity={0.3} />
-      <DoctorModel isListening={isListening} isSpeaking={isSpeaking} />
+      <directionalLight 
+        position={[5, 5, 5]} 
+        intensity={0.8}
+        castShadow
+        shadow-mapSize-width={2048}
+        shadow-mapSize-height={2048}
+      />
+      <pointLight position={[-5, 3, -5]} intensity={0.3} />
+      
+      <Suspense fallback={<FallbackDoctor isListening={isListening} isSpeaking={isSpeaking} />}>
+        {!modelError ? (
+          <ErrorBoundary onError={() => setModelError(true)}>
+            <DoctorGLBModel isListening={isListening} isSpeaking={isSpeaking} />
+          </ErrorBoundary>
+        ) : (
+          <FallbackDoctor isListening={isListening} isSpeaking={isSpeaking} />
+        )}
+      </Suspense>
     </>
   );
+}
+
+// Simple Error Boundary Component
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.log('GLB Model Error:', error, errorInfo);
+    if (this.props.onError) {
+      this.props.onError();
+    }
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return this.props.children;
+    }
+
+    return this.props.children;
+  }
 }
 
 // Main Chatbot Component
@@ -145,15 +241,18 @@ export default function TalkingDoctorChatbot() {
       
       recognitionRef.current.onresult = (event) => {
         const transcript = event.results[0][0].transcript;
+        console.log('Speech recognized:', transcript);
         handleUserInput(transcript);
         setIsListening(false);
       };
       
-      recognitionRef.current.onerror = () => {
+      recognitionRef.current.onerror = (event) => {
+        console.log('Speech recognition error:', event.error);
         setIsListening(false);
       };
       
       recognitionRef.current.onend = () => {
+        console.log('Speech recognition ended');
         setIsListening(false);
       };
     }
@@ -162,7 +261,9 @@ export default function TalkingDoctorChatbot() {
   // Start the conversation
   useEffect(() => {
     if (currentStep === 0) {
-      askQuestion(0);
+      setTimeout(() => {
+        askQuestion(0);
+      }, 1000); // Delay to ensure everything is loaded
     }
   }, []);
 
@@ -255,9 +356,14 @@ export default function TalkingDoctorChatbot() {
   };
 
   const startListening = () => {
-    if (recognitionRef.current && !isListening) {
+    if (recognitionRef.current && !isListening && !isSpeaking) {
       setIsListening(true);
-      recognitionRef.current.start();
+      try {
+        recognitionRef.current.start();
+      } catch (error) {
+        console.log('Speech recognition error:', error);
+        setIsListening(false);
+      }
     }
   };
 
@@ -285,11 +391,16 @@ export default function TalkingDoctorChatbot() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white flex">
       {/* 3D Doctor */}
       <div className="w-1/2 relative">
-        <Canvas camera={{ position: [0, 0, 5], fov: 45 }}>
+        <Canvas 
+          camera={{ position: [0, 1, 4], fov: 45 }}
+          shadows
+          style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}
+        >
           <Suspense fallback={null}>
             <Scene isListening={isListening} isSpeaking={isSpeaking} />
           </Suspense>
         </Canvas>
+        
         
         {/* Voice controls overlay */}
         <div className="absolute top-4 right-4 flex gap-2">
@@ -308,6 +419,11 @@ export default function TalkingDoctorChatbot() {
               Stop
             </button>
           )}
+        </div>
+        
+        {/* Loading indicator */}
+        <div className="absolute bottom-4 left-4 text-white text-sm bg-black bg-opacity-50 px-3 py-2 rounded">
+          {isListening ? '🎤 Listening...' : isSpeaking ? '🗣️ Speaking...' : '👨‍⚕️ Ready'}
         </div>
       </div>
 
