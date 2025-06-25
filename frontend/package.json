@@ -10,6 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@readyplayerme/react-avatar-creator": "^0.5.0",
+    "@readyplayerme/visage": "^6.12.0",
     "@tailwindcss/vite": "^4.1.10",
     "aframe": "^1.7.1",
     "aframe-animation-component": "^5.1.2",

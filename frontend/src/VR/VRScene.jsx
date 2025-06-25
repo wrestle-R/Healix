@@ -24,7 +24,12 @@ const VRScene = ({ exercise, currentStep, isActive, onRepComplete }) => {
     >
       {/* Assets */}
       <a-assets>
-        <a-asset-item id="instructor-model" src="/models/instructor.gltf"></a-asset-item>
+        {/* Ready Player Me Avatar */}
+        <a-asset-item 
+          id="avatar-model" 
+          src="https://models.readyplayer.me/685c3742f3e9ba0f88c194ec.glb"
+        ></a-asset-item>
+        
         <img id="floor-texture" src="/textures/floor.jpg" />
         <img id="wall-texture" src="/textures/wall.jpg" />
         
@@ -56,7 +61,7 @@ const VRScene = ({ exercise, currentStep, isActive, onRepComplete }) => {
       {/* Environment */}
       <TherapyEnvironment />
 
-      {/* Exercise Instructor */}
+      {/* Exercise Instructor with Ready Player Me Avatar */}
       <ExerciseInstructor 
         exercise={exercise}
         currentStep={currentStep}
@@ -171,6 +176,17 @@ const VRScene = ({ exercise, currentStep, isActive, onRepComplete }) => {
           particle-system="preset: snow; particleCount: 100; color: #4CAF50, #2196F3; size: 0.5"
         ></a-entity>
       )}
+
+      {/* Loading indicator for avatar */}
+      <a-text 
+        position="2 0.5 -2" 
+        value="Loading instructor..." 
+        align="center" 
+        color="#666"
+        scale="1 1 1"
+        visible="true"
+        animation="property: visible; to: false; delay: 3000"
+      ></a-text>
     </a-scene>
   );
 };
