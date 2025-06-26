@@ -6,10 +6,16 @@ import ExerciseUI from './ExerciseUI';
 const VRTherapyApp = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [repsCompleted, setRepsCompleted] = useState(0);
-  const [isExerciseActive, setIsExerciseActive] = useState(true); // AUTO START!
+  const [isExerciseActive, setIsExerciseActive] = useState(false); // CHANGED: Start inactive
   const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0);
 
   const exercises = [
+    {
+      id: 'stand', // CHANGED: Default to standing
+      name: 'Standing Pose',
+      duration: '2 min',
+      difficulty: 'Easy'
+    },
     {
       id: 'arm-raise',
       name: 'Arm Raise Therapy',
@@ -32,7 +38,7 @@ const VRTherapyApp = () => {
 
   const currentExercise = exercises[currentExerciseIndex];
 
-  // Auto-increment reps
+  // Auto-increment reps ONLY when active
   useEffect(() => {
     let interval;
     if (isExerciseActive && repsCompleted < 10) {
@@ -48,8 +54,22 @@ const VRTherapyApp = () => {
     return () => clearInterval(interval);
   }, [isExerciseActive, repsCompleted]);
 
+  // START FUNCTION - ADDED BACK!
+  const startExercise = () => {
+    console.log('Starting VR Exercise:', currentExercise.name);
+    setIsExerciseActive(true);
+    setRepsCompleted(0);
+  };
+
   const completeRep = () => {
     setRepsCompleted(prev => prev + 1);
+  };
+
+  const nextExercise = () => {
+    // Move to next exercise
+    setCurrentExerciseIndex(prev => (prev + 1) % exercises.length);
+    setRepsCompleted(0);
+    setIsExerciseActive(false); // Stop current exercise
   };
 
   const exitVR = () => {
@@ -69,6 +89,8 @@ const VRTherapyApp = () => {
         currentStep={currentStep}
         repsCompleted={repsCompleted}
         isActive={isExerciseActive}
+        onStart={startExercise}  // ADDED BACK!
+        onNext={nextExercise}    // ADDED BACK!
         onExit={exitVR}
       />
     </div>

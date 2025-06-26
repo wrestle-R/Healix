@@ -36,18 +36,18 @@ const VRScene = ({ exercise, currentStep, isActive, onRepComplete }) => {
       {/* Clean Environment */}
       <TherapyEnvironment />
 
-      {/* Just the Model */}
-      <ExerciseInstructor exercise={exercise} currentStep={currentStep} isActive={true} />
+      {/* Instructor - Now responds to isActive state */}
+      <ExerciseInstructor exercise={exercise} currentStep={currentStep} isActive={isActive} />
 
-      {/* Clean Exercise Area */}
-      <ExerciseArea exercise={exercise} isActive={true} onRepComplete={onRepComplete} />
+      {/* Exercise Area */}
+      <ExerciseArea exercise={exercise} isActive={isActive} onRepComplete={onRepComplete} />
 
       {/* Camera */}
       <a-entity id="cameraRig" position="0 1.6 3">
         <a-camera look-controls="enabled: true" wasd-controls="enabled: true" cursor="rayOrigin: mouse; fuse: false"></a-camera>
       </a-entity>
 
-      {/* Simple Floor */}
+      {/* Floor */}
       <a-plane 
         id="floor" 
         position="0 0 0" 
