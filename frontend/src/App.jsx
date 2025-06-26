@@ -11,8 +11,8 @@ import Login from "./pages/Login.jsx";
 import Register from "./pages/Register.jsx";
 import PatientDashboard from "./pages/PatientDashboard.jsx";
 import DoctorDashboard from "./pages/DoctorDashboard.jsx";
+import { Toaster } from "sonner";
 
-// Component to handle root route redirection
 const RootRedirect = () => {
   const { user, loading } = useUser();
 
@@ -54,6 +54,7 @@ const App = () => {
   return (
     <UserProvider>
       <AppRoutes />
+      <Toaster richColors position="top-right" />
     </UserProvider>
   );
 };

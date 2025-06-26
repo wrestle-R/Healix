@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { Badge } from "@/components/ui/badge";
+
 const API_URL = import.meta.env.VITE_API_URL;
 
 const initialState = {
@@ -22,8 +24,7 @@ const initialState = {
     zipCode: "",
     country: "India",
   },
-  height: { value: "", unit: "cm" },
-  weight: { value: "", unit: "kg" },
+  profilePicture: "",
   emergencyContacts: [
     {
       name: "",
@@ -32,13 +33,47 @@ const initialState = {
       email: "",
     },
   ],
+  height: { value: "", unit: "cm" },
+  weight: { value: "", unit: "kg" },
+  medicalHistory: [
+    {
+      condition: "",
+      diagnosedDate: "",
+      status: "active",
+      notes: "",
+    },
+  ],
+  allergies: [
+    {
+      allergen: "",
+      severity: "",
+      reaction: "",
+      notes: "",
+    },
+  ],
+  currentMedications: [
+    {
+      name: "",
+      dosage: "",
+      frequency: "",
+      startDate: "",
+      endDate: "",
+      prescribedBy: "",
+      isActive: false,
+      notes: "",
+    },
+  ],
+  smokingStatus: "never",
+  alcoholConsumption: "never",
+  exerciseFrequency: "none",
+  dietType: "vegetarian",
 };
 
 const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
-
 const maritalStatuses = ["single", "married", "divorced", "widowed"];
-
 const genders = ["male", "female", "other", "prefer-not-to-say"];
+const allergySeverities = ["mild", "moderate", "severe"];
+const medicalStatuses = ["active", "resolved", "chronic"];
 
 const PatientProfileForm = () => {
   const { user, refetchUser } = useUser();
@@ -59,7 +94,6 @@ const PatientProfileForm = () => {
       );
       const data = await res.json();
       if (data.success && data.patient) {
-        // Ensure all fields exist
         setProfile({
           ...initialState,
           ...data.patient,
@@ -70,6 +104,18 @@ const PatientProfileForm = () => {
             data.patient.emergencyContacts?.length > 0
               ? data.patient.emergencyContacts
               : initialState.emergencyContacts,
+          medicalHistory:
+            data.patient.medicalHistory?.length > 0
+              ? data.patient.medicalHistory
+              : initialState.medicalHistory,
+          allergies:
+            data.patient.allergies?.length > 0
+              ? data.patient.allergies
+              : initialState.allergies,
+          currentMedications:
+            data.patient.currentMedications?.length > 0
+              ? data.patient.currentMedications
+              : initialState.currentMedications,
         });
       }
       setLoading(false);
@@ -79,7 +125,7 @@ const PatientProfileForm = () => {
   }, [user]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
     if (name.startsWith("address.")) {
       const key = name.split(".")[1];
       setProfile((prev) => ({
@@ -99,10 +145,14 @@ const PatientProfileForm = () => {
         weight: { ...prev.weight, [key]: value },
       }));
     } else {
-      setProfile((prev) => ({ ...prev, [name]: value }));
+      setProfile((prev) => ({
+        ...prev,
+        [name]: type === "checkbox" ? checked : value,
+      }));
     }
   };
 
+  // Emergency Contacts
   const handleEmergencyContactChange = (idx, e) => {
     const { name, value } = e.target;
     setProfile((prev) => {
@@ -111,7 +161,6 @@ const PatientProfileForm = () => {
       return { ...prev, emergencyContacts: contacts };
     });
   };
-
   const addEmergencyContact = () => {
     setProfile((prev) => ({
       ...prev,
@@ -121,7 +170,6 @@ const PatientProfileForm = () => {
       ],
     }));
   };
-
   const removeEmergencyContact = (idx) => {
     setProfile((prev) => {
       const contacts = [...prev.emergencyContacts];
@@ -130,14 +178,141 @@ const PatientProfileForm = () => {
     });
   };
 
+  // Medical History
+  const handleMedicalHistoryChange = (idx, e) => {
+    const { name, value } = e.target;
+    setProfile((prev) => {
+      const arr = [...prev.medicalHistory];
+      arr[idx][name] = value;
+      return { ...prev, medicalHistory: arr };
+    });
+  };
+  const addMedicalHistory = () => {
+    setProfile((prev) => ({
+      ...prev,
+      medicalHistory: [
+        ...prev.medicalHistory,
+        { condition: "", diagnosedDate: "", status: "active", notes: "" },
+      ],
+    }));
+  };
+  const removeMedicalHistory = (idx) => {
+    setProfile((prev) => {
+      const arr = [...prev.medicalHistory];
+      arr.splice(idx, 1);
+      return { ...prev, medicalHistory: arr };
+    });
+  };
+
+  // Allergies
+  const handleAllergyChange = (idx, e) => {
+    const { name, value } = e.target;
+    setProfile((prev) => {
+      const arr = [...prev.allergies];
+      arr[idx][name] = value;
+      return { ...prev, allergies: arr };
+    });
+  };
+  const addAllergy = () => {
+    setProfile((prev) => ({
+      ...prev,
+      allergies: [
+        ...prev.allergies,
+        { allergen: "", severity: "", reaction: "", notes: "" },
+      ],
+    }));
+  };
+  const removeAllergy = (idx) => {
+    setProfile((prev) => {
+      const arr = [...prev.allergies];
+      arr.splice(idx, 1);
+      return { ...prev, allergies: arr };
+    });
+  };
+
+  // Current Medications
+  const handleMedicationChange = (idx, e) => {
+    const { name, value, type, checked } = e.target;
+    setProfile((prev) => {
+      const arr = [...prev.currentMedications];
+      arr[idx][name] = type === "checkbox" ? checked : value;
+      return { ...prev, currentMedications: arr };
+    });
+  };
+  const addMedication = () => {
+    setProfile((prev) => ({
+      ...prev,
+      currentMedications: [
+        ...prev.currentMedications,
+        {
+          name: "",
+          dosage: "",
+          frequency: "",
+          startDate: "",
+          endDate: "",
+          prescribedBy: "",
+          isActive: false,
+          notes: "",
+        },
+      ],
+    }));
+  };
+  const removeMedication = (idx) => {
+    setProfile((prev) => {
+      const arr = [...prev.currentMedications];
+      arr.splice(idx, 1);
+      return { ...prev, currentMedications: arr };
+    });
+  };
+
+  const isProfileComplete = () => {
+    return (
+      profile.firstName &&
+      profile.lastName &&
+      profile.dateOfBirth &&
+      profile.gender &&
+      profile.bloodGroup &&
+      profile.phoneNumber &&
+      profile.height.value &&
+      profile.weight.value &&
+      Array.isArray(profile.emergencyContacts) &&
+      profile.emergencyContacts.length > 0 &&
+      profile.emergencyContacts.every(
+        (c) => c.name && c.relationship && c.phoneNumber
+      )
+      // maritalStatus, address, and allergens are NOT required for completion
+    );
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!isProfileComplete()) {
+      toast.error("Please fill all required fields.");
+      return;
+    }
     setLoading(true);
     const token = localStorage.getItem("token");
 
-    // Remove fields that should not be sent to backend
     const { _id, firebaseUid, createdAt, updatedAt, __v, ...safeProfile } =
       profile;
+
+    safeProfile.allergies = (safeProfile.allergies || []).filter(
+      (a) => a.allergen || a.severity || a.reaction || a.notes
+    );
+
+    if (
+      !safeProfile.address?.street &&
+      !safeProfile.address?.city &&
+      !safeProfile.address?.state &&
+      !safeProfile.address?.zipCode &&
+      !safeProfile.address?.country
+    ) {
+      delete safeProfile.address;
+    }
+
+    if (!safeProfile.maritalStatus) {
+      delete safeProfile.maritalStatus;
+    }
 
     const res = await fetch(
       `${API_URL}/api/patients/profile/${user.firebaseUid}`,
@@ -153,8 +328,8 @@ const PatientProfileForm = () => {
     const data = await res.json();
     setLoading(false);
     if (data.success) {
-      toast.success("Profile updated!");
-      await refetchUser(); // update context
+      toast.success("Profile updated successfully!");
+      await refetchUser();
       navigate("/patient-dashboard");
     } else {
       toast.error(data.message || "Failed to update profile");
@@ -164,10 +339,21 @@ const PatientProfileForm = () => {
   return (
     <Card>
       <CardContent className="p-6">
-        <h2 className="text-2xl font-bold mb-4">My Profile</h2>
-        <form onSubmit={handleSubmit} className="grid gap-4">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-2xl font-bold">My Profile</h2>
+          {isProfileComplete() ? (
+            <Badge className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">
+              Profile Completed
+            </Badge>
+          ) : (
+            <Badge className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800">
+              Complete Profile
+            </Badge>
+          )}
+        </div>
+        <form onSubmit={handleSubmit} className="grid gap-4 overflow-x-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
+            <div className="min-w-0">
               <label className="block text-sm mb-1">First Name</label>
               <input
                 type="text"
@@ -178,7 +364,7 @@ const PatientProfileForm = () => {
                 required
               />
             </div>
-            <div>
+            <div className="min-w-0">
               <label className="block text-sm mb-1">Last Name</label>
               <input
                 type="text"
@@ -189,7 +375,7 @@ const PatientProfileForm = () => {
                 required
               />
             </div>
-            <div>
+            <div className="min-w-0">
               <label className="block text-sm mb-1">Email</label>
               <input
                 type="email"
@@ -201,7 +387,7 @@ const PatientProfileForm = () => {
                 disabled
               />
             </div>
-            <div>
+            <div className="min-w-0">
               <label className="block text-sm mb-1">Phone Number</label>
               <input
                 type="tel"
@@ -212,7 +398,7 @@ const PatientProfileForm = () => {
                 required
               />
             </div>
-            <div>
+            <div className="min-w-0">
               <label className="block text-sm mb-1">Date of Birth</label>
               <input
                 type="date"
@@ -223,7 +409,7 @@ const PatientProfileForm = () => {
                 required
               />
             </div>
-            <div>
+            <div className="min-w-0">
               <label className="block text-sm mb-1">Gender</label>
               <select
                 name="gender"
@@ -240,7 +426,7 @@ const PatientProfileForm = () => {
                 ))}
               </select>
             </div>
-            <div>
+            <div className="min-w-0">
               <label className="block text-sm mb-1">Blood Group</label>
               <select
                 name="bloodGroup"
@@ -257,7 +443,7 @@ const PatientProfileForm = () => {
                 ))}
               </select>
             </div>
-            <div>
+            <div className="min-w-0">
               <label className="block text-sm mb-1">Marital Status</label>
               <select
                 name="maritalStatus"
@@ -275,7 +461,7 @@ const PatientProfileForm = () => {
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div>
+            <div className="min-w-0">
               <label className="block text-sm mb-1">Street</label>
               <input
                 type="text"
@@ -286,7 +472,7 @@ const PatientProfileForm = () => {
                 required
               />
             </div>
-            <div>
+            <div className="min-w-0">
               <label className="block text-sm mb-1">City</label>
               <input
                 type="text"
@@ -297,7 +483,7 @@ const PatientProfileForm = () => {
                 required
               />
             </div>
-            <div>
+            <div className="min-w-0">
               <label className="block text-sm mb-1">State</label>
               <input
                 type="text"
@@ -308,7 +494,7 @@ const PatientProfileForm = () => {
                 required
               />
             </div>
-            <div>
+            <div className="min-w-0">
               <label className="block text-sm mb-1">ZIP Code</label>
               <input
                 type="text"
@@ -321,7 +507,7 @@ const PatientProfileForm = () => {
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
+            <div className="min-w-0">
               <label className="block text-sm mb-1">Height (cm)</label>
               <input
                 type="number"
@@ -333,7 +519,7 @@ const PatientProfileForm = () => {
                 required
               />
             </div>
-            <div>
+            <div className="min-w-0">
               <label className="block text-sm mb-1">Weight (kg)</label>
               <input
                 type="number"
@@ -346,18 +532,212 @@ const PatientProfileForm = () => {
               />
             </div>
           </div>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="min-w-0">
+              <label className="block text-sm mb-1">Smoking Status</label>
+              <select
+                name="smokingStatus"
+                className="w-full border rounded px-2 py-1"
+                value={profile.smokingStatus}
+                onChange={handleChange}
+              >
+                <option value="never">Never</option>
+                <option value="former">Former</option>
+                <option value="current">Current</option>
+              </select>
+            </div>
+            <div className="min-w-0">
+              <label className="block text-sm mb-1">Alcohol Consumption</label>
+              <select
+                name="alcoholConsumption"
+                className="w-full border rounded px-2 py-1"
+                value={profile.alcoholConsumption}
+                onChange={handleChange}
+              >
+                <option value="never">Never</option>
+                <option value="occasionally">Occasionally</option>
+                <option value="regularly">Regularly</option>
+                <option value="heavy">Heavy</option>
+              </select>
+            </div>
+            <div className="min-w-0">
+              <label className="block text-sm mb-1">Exercise Frequency</label>
+              <select
+                name="exerciseFrequency"
+                className="w-full border rounded px-2 py-1"
+                value={profile.exerciseFrequency}
+                onChange={handleChange}
+              >
+                <option value="none">None</option>
+                <option value="rarely">Rarely</option>
+                <option value="weekly">Weekly</option>
+                <option value="daily">Daily</option>
+              </select>
+            </div>
+            <div className="min-w-0">
+              <label className="block text-sm mb-1">Diet Type</label>
+              <select
+                name="dietType"
+                className="w-full border rounded px-2 py-1"
+                value={profile.dietType}
+                onChange={handleChange}
+              >
+                <option value="vegetarian">Vegetarian</option>
+                <option value="non-vegetarian">Non-Vegetarian</option>
+                <option value="vegan">Vegan</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+          </div>
+          {/* Medical History */}
+          <div>
+            <label className="block text-sm mb-1">Medical History</label>
+            {profile.medicalHistory.map((mh, idx) => (
+              <div
+                key={idx}
+                className="flex flex-col gap-2 mb-2 md:grid md:grid-cols-4 md:gap-2 md:items-center"
+              >
+                <input
+                  type="text"
+                  name="condition"
+                  placeholder="Condition"
+                  className="border rounded px-2 py-1 w-full md:w-auto"
+                  value={mh.condition}
+                  onChange={(e) => handleMedicalHistoryChange(idx, e)}
+                />
+                <input
+                  type="date"
+                  name="diagnosedDate"
+                  className="border rounded px-2 py-1 w-full md:w-auto"
+                  value={mh.diagnosedDate?.slice(0, 10) || ""}
+                  onChange={(e) => handleMedicalHistoryChange(idx, e)}
+                />
+                <select
+                  name="status"
+                  className="border rounded px-2 py-1 w-full md:w-auto"
+                  value={mh.status}
+                  onChange={(e) => handleMedicalHistoryChange(idx, e)}
+                >
+                  {medicalStatuses.map((s) => (
+                    <option key={s} value={s}>
+                      {s.charAt(0).toUpperCase() + s.slice(1)}
+                    </option>
+                  ))}
+                </select>
+                <input
+                  type="text"
+                  name="notes"
+                  placeholder="Notes"
+                  className="border rounded px-2 py-1 w-full md:w-auto"
+                  value={mh.notes}
+                  onChange={(e) => handleMedicalHistoryChange(idx, e)}
+                />
+                {profile.medicalHistory.length > 1 && (
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="sm"
+                    className="md:col-span-4"
+                    onClick={() => removeMedicalHistory(idx)}
+                  >
+                    Remove
+                  </Button>
+                )}
+              </div>
+            ))}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={addMedicalHistory}
+              className="mt-2"
+            >
+              Add Medical History
+            </Button>
+          </div>
+
+          {/* Allergies */}
+          <div>
+            <label className="block text-sm mb-1">Allergies</label>
+            {profile.allergies.map((al, idx) => (
+              <div
+                key={idx}
+                className="flex flex-col gap-2 mb-2 md:grid md:grid-cols-4 md:gap-2 md:items-center"
+              >
+                <input
+                  type="text"
+                  name="allergen"
+                  placeholder="Allergen"
+                  className="border rounded px-2 py-1 w-full md:w-auto"
+                  value={al.allergen}
+                  onChange={(e) => handleAllergyChange(idx, e)}
+                />
+                <select
+                  name="severity"
+                  className="border rounded px-2 py-1 w-full md:w-auto"
+                  value={al.severity}
+                  onChange={(e) => handleAllergyChange(idx, e)}
+                >
+                  <option value="">Severity</option>
+                  {allergySeverities.map((s) => (
+                    <option key={s} value={s}>
+                      {s.charAt(0).toUpperCase() + s.slice(1)}
+                    </option>
+                  ))}
+                </select>
+                <input
+                  type="text"
+                  name="reaction"
+                  placeholder="Reaction"
+                  className="border rounded px-2 py-1 w-full md:w-auto"
+                  value={al.reaction}
+                  onChange={(e) => handleAllergyChange(idx, e)}
+                />
+                <input
+                  type="text"
+                  name="notes"
+                  placeholder="Notes"
+                  className="border rounded px-2 py-1 w-full md:w-auto"
+                  value={al.notes}
+                  onChange={(e) => handleAllergyChange(idx, e)}
+                />
+                {profile.allergies.length > 1 && (
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="sm"
+                    className="md:col-span-4"
+                    onClick={() => removeAllergy(idx)}
+                  >
+                    Remove
+                  </Button>
+                )}
+              </div>
+            ))}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={addAllergy}
+              className="mt-2"
+            >
+              Add Allergy
+            </Button>
+          </div>
+
+          {/* Emergency Contacts */}
           <div>
             <label className="block text-sm mb-1">Emergency Contacts</label>
             {profile.emergencyContacts.map((contact, idx) => (
               <div
                 key={idx}
-                className="flex flex-col md:flex-row gap-2 mb-2 items-center"
+                className="flex flex-col gap-2 mb-2 md:grid md:grid-cols-4 md:gap-2 md:items-center"
               >
                 <input
                   type="text"
                   name="name"
                   placeholder="Name"
-                  className="border rounded px-2 py-1 flex-1"
+                  className="border rounded px-2 py-1 w-full md:w-auto"
                   value={contact.name}
                   onChange={(e) => handleEmergencyContactChange(idx, e)}
                   required
@@ -366,7 +746,7 @@ const PatientProfileForm = () => {
                   type="text"
                   name="relationship"
                   placeholder="Relationship"
-                  className="border rounded px-2 py-1 flex-1"
+                  className="border rounded px-2 py-1 w-full md:w-auto"
                   value={contact.relationship}
                   onChange={(e) => handleEmergencyContactChange(idx, e)}
                   required
@@ -375,7 +755,7 @@ const PatientProfileForm = () => {
                   type="tel"
                   name="phoneNumber"
                   placeholder="Phone"
-                  className="border rounded px-2 py-1 flex-1"
+                  className="border rounded px-2 py-1 w-full md:w-auto"
                   value={contact.phoneNumber}
                   onChange={(e) => handleEmergencyContactChange(idx, e)}
                   required
@@ -384,7 +764,7 @@ const PatientProfileForm = () => {
                   type="email"
                   name="email"
                   placeholder="Email"
-                  className="border rounded px-2 py-1 flex-1"
+                  className="border rounded px-2 py-1 w-full md:w-auto"
                   value={contact.email}
                   onChange={(e) => handleEmergencyContactChange(idx, e)}
                 />
@@ -393,6 +773,7 @@ const PatientProfileForm = () => {
                     type="button"
                     variant="destructive"
                     size="sm"
+                    className="md:col-span-4"
                     onClick={() => removeEmergencyContact(idx)}
                   >
                     Remove

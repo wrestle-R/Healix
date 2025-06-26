@@ -79,29 +79,8 @@ const medicationSchema = new mongoose.Schema({
   },
 });
 
-const insuranceSchema = new mongoose.Schema({
-  provider: {
-    type: String,
-  },
-  policyNumber: {
-    type: String,
-  },
-  groupNumber: {
-    type: String,
-    default: "",
-  },
-  validTill: {
-    type: Date,
-  },
-  copayAmount: {
-    type: Number,
-    default: 0,
-  },
-});
-
 const patientSchema = new mongoose.Schema(
   {
-    // Basic user info (linked to Firebase Auth)
     firebaseUid: {
       type: String,
       required: true,
@@ -135,61 +114,38 @@ const patientSchema = new mongoose.Schema(
       type: String,
       enum: ["single", "married", "divorced", "widowed"],
       default: "single",
+      required: false, // <-- Make optional
     },
-
-    // Contact Information
     phoneNumber: {
       type: String,
     },
-    alternatePhoneNumber: {
-      type: String,
-      default: "",
-    },
     address: {
-      street: { type: String },
-      city: { type: String },
-      state: { type: String },
-      zipCode: { type: String },
-      country: { type: String, default: "India" },
+      street: { type: String, required: false }, // <-- Make optional
+      city: { type: String, required: false },
+      state: { type: String, required: false },
+      zipCode: { type: String, required: false },
+      country: { type: String, default: "India", required: false },
     },
-
-    // Profile
     profilePicture: {
       type: String,
       default: "",
     },
-    occupation: {
-      type: String,
-      default: "",
-    },
-
-    // Emergency Contact
     emergencyContacts: [emergencyContactSchema],
-
-    // Medical Information
     height: {
-      value: { type: Number }, // in cm
+      value: { type: Number },
       unit: { type: String, default: "cm" },
     },
     weight: {
-      value: { type: Number }, // in kg
+      value: { type: Number },
       unit: { type: String, default: "kg" },
     },
     medicalHistory: [medicalHistorySchema],
-    allergies: [allergySchema],
+    allergies: {
+      type: [allergySchema],
+      required: false, // <-- Make optional
+      default: undefined,
+    },
     currentMedications: [medicationSchema],
-    surgicalHistory: [
-      {
-        procedure: { type: String },
-        date: { type: Date },
-        hospital: { type: String },
-        surgeon: { type: String, default: "" },
-        complications: { type: String, default: "" },
-        notes: { type: String, default: "" },
-      },
-    ],
-
-    // Lifestyle Information
     smokingStatus: {
       type: String,
       enum: ["never", "former", "current"],
@@ -210,53 +166,9 @@ const patientSchema = new mongoose.Schema(
       enum: ["vegetarian", "non-vegetarian", "vegan", "other"],
       default: "vegetarian",
     },
-
-    // Insurance Information
-    insurance: insuranceSchema,
-
-    // Family Medical History
-    familyHistory: [
-      {
-        relation: { type: String }, // father, mother, sibling, etc.
-        conditions: [{ type: String }],
-        ageOfDiagnosis: { type: Number },
-        notes: { type: String, default: "" },
-      },
-    ],
-
-    // Profile completion status
     profileCompleted: {
       type: Boolean,
       default: false,
-    },
-    completedSections: {
-      personalInfo: { type: Boolean, default: false },
-      contactInfo: { type: Boolean, default: false },
-      medicalInfo: { type: Boolean, default: false },
-      emergencyContact: { type: Boolean, default: false },
-      insurance: { type: Boolean, default: false },
-    },
-
-    // Account status
-    isActive: {
-      type: Boolean,
-      default: true,
-    },
-    isVerified: {
-      type: Boolean,
-      default: false,
-    },
-
-    // Preferences
-    preferredLanguage: {
-      type: String,
-      default: "English",
-    },
-    notificationPreferences: {
-      email: { type: Boolean, default: true },
-      sms: { type: Boolean, default: true },
-      appointmentReminders: { type: Boolean, default: true },
-      medicationReminders: { type: Boolean, default: true },
     },
     role: {
       type: String,
@@ -293,14 +205,12 @@ patientSchema.virtual("age").get(function () {
   return age;
 });
 
-// Virtual for BMI calculation
 patientSchema.virtual("bmi").get(function () {
   if (!this.height?.value || !this.weight?.value) return null;
   const heightInMeters = this.height.value / 100;
   return (this.weight.value / (heightInMeters * heightInMeters)).toFixed(1);
 });
 
-// Method to check if profile is complete
 patientSchema.methods.checkProfileCompletion = function () {
   const required = {
     personalInfo: !!(
@@ -310,16 +220,9 @@ patientSchema.methods.checkProfileCompletion = function () {
       this.gender &&
       this.bloodGroup
     ),
-    contactInfo: !!(
-      this.phoneNumber &&
-      this.address.street &&
-      this.address.city &&
-      this.address.state &&
-      this.address.zipCode
-    ),
+    contactInfo: !!this.phoneNumber, 
     medicalInfo: !!(this.height?.value && this.weight?.value),
     emergencyContact: this.emergencyContacts.length > 0,
-    insurance: false, // Optional for now
   };
 
   this.completedSections = required;
