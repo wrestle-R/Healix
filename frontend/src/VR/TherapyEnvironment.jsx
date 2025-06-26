@@ -3,61 +3,114 @@ import React from 'react';
 const TherapyEnvironment = () => {
   return (
     <>
-      {/* Walls */}
+      {/* Modern Therapy Room Setup */}
+      
+      {/* Clean White Walls */}
       <a-box 
-        position="-10 2.5 0" 
-        width="0.1" 
+        position="-8 2.5 0" 
+        width="0.2" 
         height="5" 
-        depth="20" 
-        color="#E0E0E0"
+        depth="16" 
+        color="#FFFFFF"
+        shadow="receive: true"
       ></a-box>
       <a-box 
-        position="10 2.5 0" 
-        width="0.1" 
+        position="8 2.5 0" 
+        width="0.2" 
         height="5" 
-        depth="20" 
-        color="#E0E0E0"
+        depth="16" 
+        color="#FFFFFF"
+        shadow="receive: true"
       ></a-box>
       <a-box 
-        position="0 2.5 -10" 
-        width="20" 
+        position="0 2.5 -8" 
+        width="16" 
         height="5" 
-        depth="0.1" 
-        color="#E0E0E0"
+        depth="0.2" 
+        color="#FFFFFF"
+        shadow="receive: true"
       ></a-box>
 
-      {/* Ceiling */}
+      {/* Modern Ceiling with Soft Lighting */}
       <a-plane 
         position="0 5 0" 
         rotation="90 0 0" 
-        width="20" 
-        height="20" 
-        color="#F5F5F5"
+        width="16" 
+        height="16" 
+        color="#F8F9FA"
+        shadow="receive: true"
       ></a-plane>
 
-      {/* Mirror on wall */}
-      <a-plane 
-        position="0 2 -9.9" 
-        width="6" 
-        height="3" 
-        color="#87CEEB"
-        opacity="0.7"
-      ></a-plane>
+      {/* Motivational Wall Graphics */}
+      <a-text 
+        position="0 3.5 -7.8" 
+        value="PHYSICAL THERAPY CENTER" 
+        align="center" 
+        color="#2E86AB"
+        scale="2 2 2"
+        font="roboto"
+      ></a-text>
+      
+      <a-text 
+        position="0 2.8 -7.8" 
+        value="Your Journey to Recovery" 
+        align="center" 
+        color="#A23B72"
+        scale="1.2 1.2 1.2"
+        font="roboto"
+      ></a-text>
 
-      {/* Exercise Equipment */}
+      {/* Professional Equipment Area */}
       <a-cylinder 
-        position="5 1 -5" 
-        radius="0.5" 
+        position="6 1 -5" 
+        radius="0.3" 
         height="2" 
-        color="#FF6B6B"
+        color="#4CAF50"
+        shadow="cast: true"
       ></a-cylinder>
+      
       <a-box 
-        position="-5 0.5 -5" 
-        width="2" 
+        position="-6 0.5 -5" 
+        width="1.5" 
         height="1" 
-        depth="1" 
-        color="#4ECDC4"
+        depth="0.8" 
+        color="#2196F3"
+        shadow="cast: true"
       ></a-box>
+
+      {/* Comfortable Therapy Mats */}
+      <a-plane 
+        position="3 0.02 2" 
+        rotation="-90 0 0" 
+        width="2" 
+        height="2" 
+        color="#E8F5E8"
+        opacity="0.8"
+      ></a-plane>
+      
+      <a-plane 
+        position="-3 0.02 2" 
+        rotation="-90 0 0" 
+        width="2" 
+        height="2" 
+        color="#E3F2FD"
+        opacity="0.8"
+      ></a-plane>
+
+      {/* Ambient Decorations */}
+      <a-sphere 
+        position="5 3 -6" 
+        radius="0.2" 
+        color="#FFC107"
+        animation="property: rotation; to: 0 360 0; dur: 20000; loop: true"
+      ></a-sphere>
+      
+      <a-sphere 
+        position="-5 3.5 -6" 
+        radius="0.15" 
+        color="#FF5722"
+        animation="property: rotation; to: 0 -360 0; dur: 15000; loop: true"
+      ></a-sphere>
     </>
   );
 };
