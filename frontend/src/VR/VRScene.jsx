@@ -29,74 +29,34 @@ const VRScene = ({ exercise, currentStep, isActive, onRepComplete }) => {
         <audio id="success-sound" src="/sounds/success.mp3" preload="auto"></audio>
       </a-assets>
 
-      {/* Professional Lighting Setup */}
-      <a-light type="ambient" color="#ffffff" intensity="0.4"></a-light>
-      <a-light 
-        type="directional" 
-        position="8 10 8" 
-        intensity="0.8"
-        color="#ffffff"
-        shadow="cast: true"
-      ></a-light>
-      <a-light 
-        type="point" 
-        position="0 4 0" 
-        intensity="0.3"
-        color="#87CEEB"
-      ></a-light>
+      {/* Simple Lighting */}
+      <a-light type="ambient" color="#ffffff" intensity="0.6"></a-light>
+      <a-light type="directional" position="5 10 5" intensity="0.8" shadow="cast: true"></a-light>
 
-      {/* Modern Therapy Environment */}
+      {/* Clean Environment */}
       <TherapyEnvironment />
 
-      {/* Professional Instructor */}
-      <ExerciseInstructor exercise={exercise} currentStep={currentStep} isActive={isActive} />
+      {/* Just the Model */}
+      <ExerciseInstructor exercise={exercise} currentStep={currentStep} isActive={true} />
 
-      {/* Exercise Area */}
-      <ExerciseArea exercise={exercise} isActive={isActive} onRepComplete={onRepComplete} />
+      {/* Clean Exercise Area */}
+      <ExerciseArea exercise={exercise} isActive={true} onRepComplete={onRepComplete} />
 
-      {/* Camera Setup */}
+      {/* Camera */}
       <a-entity id="cameraRig" position="0 1.6 3">
         <a-camera look-controls="enabled: true" wasd-controls="enabled: true" cursor="rayOrigin: mouse; fuse: false"></a-camera>
-        <a-entity id="leftHand" hand-controls="hand: left; handModelStyle: lowPoly; color: #4CAF50" laser-controls="maxDistance: 10; lineColor: #4CAF50" raycaster="objects: .clickable"></a-entity>
-        <a-entity id="rightHand" hand-controls="hand: right; handModelStyle: lowPoly; color: #2196F3" laser-controls="maxDistance: 10; lineColor: #2196F3" raycaster="objects: .clickable"></a-entity>
       </a-entity>
 
-      {/* Beautiful Wooden Floor */}
+      {/* Simple Floor */}
       <a-plane 
         id="floor" 
         position="0 0 0" 
         rotation="-90 0 0" 
-        width="16" 
-        height="16" 
+        width="20" 
+        height="20" 
         color="#F5E6D3"
         shadow="receive: true"
       ></a-plane>
-
-      {/* Subtle Grid Pattern */}
-      <a-entity>
-        {[...Array(4)].map((_, i) => (
-          <a-plane 
-            key={`grid-x-${i}`}
-            position={`${(i-2)*4} 0.01 0`} 
-            rotation="-90 0 0" 
-            width="0.05" 
-            height="16" 
-            color="#E0E0E0"
-            opacity="0.2"
-          ></a-plane>
-        ))}
-        {[...Array(4)].map((_, i) => (
-          <a-plane 
-            key={`grid-z-${i}`}
-            position={`0 0.01 ${(i-2)*4}`} 
-            rotation="-90 0 0" 
-            width="16" 
-            height="0.05" 
-            color="#E0E0E0"
-            opacity="0.2"
-          ></a-plane>
-        ))}
-      </a-entity>
     </a-scene>
   );
 };
