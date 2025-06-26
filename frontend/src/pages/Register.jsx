@@ -24,7 +24,6 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   FaGoogle,
   FaUser,
@@ -39,7 +38,6 @@ const Register = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [agreeTerms, setAgreeTerms] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
@@ -49,17 +47,17 @@ const Register = () => {
     try {
       const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
-      const response = await fetch(`${apiUrl}/api/auth/register`, {
+      const response = await fetch(`${apiUrl}/api/auth/create-user`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
           firebaseId: firebaseUser.uid,
+          name: userData.name || firebaseUser.displayName,
           email: firebaseUser.email,
-          displayName: userData.name || firebaseUser.displayName,
+          profilePicture: firebaseUser.photoURL || "",
           role: userData.role,
-          photoURL: firebaseUser.photoURL,
         }),
       });
 
@@ -98,12 +96,6 @@ const Register = () => {
       return;
     }
 
-    if (!agreeTerms) {
-      setError("Please agree to the terms and conditions");
-      toast.error("Please agree to the terms and conditions");
-      return;
-    }
-
     setLoading(true);
     setError("");
 
@@ -139,12 +131,6 @@ const Register = () => {
   };
 
   const handleGoogleRegister = async () => {
-    if (!agreeTerms) {
-      setError("Please agree to the terms and conditions");
-      toast.error("Please agree to the terms and conditions");
-      return;
-    }
-
     setLoading(true);
     setError("");
 
