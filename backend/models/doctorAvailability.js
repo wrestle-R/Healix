@@ -3,11 +3,11 @@ const mongoose = require("mongoose");
 const timeSlotSchema = new mongoose.Schema({
   startTime: {
     type: String,
-    required: true, // Format: "HH:MM" (24-hour format)
+    required: true, 
   },
   endTime: {
     type: String,
-    required: true, // Format: "HH:MM" (24-hour format)
+    required: true,
   },
   isBooked: {
     type: Boolean,
@@ -32,7 +32,7 @@ const dayAvailabilitySchema = new mongoose.Schema({
   slots: [timeSlotSchema],
   reason: {
     type: String,
-    default: "", // Reason for unavailability
+    default: "", 
   },
 });
 
@@ -52,7 +52,7 @@ const doctorAvailabilitySchema = new mongoose.Schema(
         endTime: { type: String, default: "17:00" },
         breakStartTime: { type: String, default: "13:00" },
         breakEndTime: { type: String, default: "14:00" },
-        slotDuration: { type: Number, default: 30 }, // in minutes
+        slotDuration: { type: Number, default: 30 }, 
       },
       tuesday: {
         isAvailable: { type: Boolean, default: true },
@@ -132,7 +132,7 @@ const doctorAvailabilitySchema = new mongoose.Schema(
 
 // Helper method to generate time slots for a specific day
 doctorAvailabilitySchema.methods.generateSlotsForDay = function (date) {
-  const dayOfWeek = date.toLocaleDateString("en-US", { weekday: "lowercase" });
+  const dayOfWeek = date.toLocaleDateString("en-US", { weekday: "long" }).toLowerCase();
   const daySchedule = this.weeklySchedule[dayOfWeek];
 
   if (!daySchedule.isAvailable) {
@@ -148,14 +148,13 @@ doctorAvailabilitySchema.methods.generateSlotsForDay = function (date) {
   const breakEnd = daySchedule.breakEndTime
     ? new Date(`1970-01-01T${daySchedule.breakEndTime}:00`)
     : null;
-  const slotDuration = daySchedule.slotDuration * 60 * 1000; // Convert to milliseconds
+  const slotDuration = daySchedule.slotDuration * 60 * 1000; 
 
   let currentTime = startTime;
 
   while (currentTime < endTime) {
     const slotEnd = new Date(currentTime.getTime() + slotDuration);
 
-    // Skip break time
     if (
       breakStart &&
       breakEnd &&

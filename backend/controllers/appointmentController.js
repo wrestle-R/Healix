@@ -338,9 +338,9 @@ class AppointmentController {
 
           if (availability) {
             const requestedDate = new Date(date);
-            const dayOfWeek = requestedDate.toLocaleDateString("en-US", {
-              weekday: "lowercase",
-            });
+            const dayOfWeek = requestedDate
+              .toLocaleDateString("en-US", { weekday: "long" })
+              .toLowerCase();
             const daySchedule = availability.weeklySchedule[dayOfWeek];
 
             if (daySchedule && daySchedule.isAvailable) {

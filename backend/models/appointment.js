@@ -18,15 +18,15 @@ const appointmentSchema = new mongoose.Schema(
     },
     startTime: {
       type: String,
-      required: true, // Format: "HH:MM" (24-hour format)
+      required: true, 
     },
     endTime: {
       type: String,
-      required: true, // Format: "HH:MM" (24-hour format)
+      required: true,
     },
     status: {
       type: String,
-      enum: ["pending", "confirmed", "completed", "cancelled"],
+      enum: ["pending", "completed", "cancelled"],
       default: "pending",
     },
     appointmentType: {

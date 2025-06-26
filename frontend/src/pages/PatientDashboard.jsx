@@ -392,7 +392,7 @@ const PatientDashboard = () => {
             {/* Book Appointment Quick Action */}
             {activeTab === "dashboard" && (
               <motion.div variants={itemVariants}>
-                <BookAppointment />
+                <BookAppointment user={contextUser} />
               </motion.div>
             )}
           </motion.div>
