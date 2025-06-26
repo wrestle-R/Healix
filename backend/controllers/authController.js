@@ -1,54 +1,60 @@
-const Patient = require('../models/patient');
-const Doctor = require('../models/doctor');
-const jwt = require('jsonwebtoken');
+const Patient = require("../models/patient");
+const Doctor = require("../models/doctor");
+const jwt = require("jsonwebtoken");
 
 // Generate JWT token
-const generateToken = (userId, firebaseId, role) => {
+const generateToken = (userId, firebaseUid, role) => {
   return jwt.sign(
-    { userId, firebaseId, role },
-    process.env.JWT_SECRET || 'your-secret-key',
-    { expiresIn: '7d' }
+    { userId, firebaseUid, role },
+    process.env.JWT_SECRET || "your-secret-key",
+    { expiresIn: "7d" }
   );
 };
 
 // Create user in MongoDB after Firebase registration
 const createUser = async (req, res) => {
   try {
-    console.log('Received create user request:', req.body);
-    
-    const { firebaseId, name, email, profilePicture, role } = req.body;
+    console.log("Received create user request:", req.body);
+
+    const { firebaseUid, name, email, profilePicture, role } = req.body;
 
     // Validate required fields
-    if (!firebaseId || !name || !email || !role) {
-      console.log('Missing required fields:', { firebaseId: !!firebaseId, name: !!name, email: !!email, role: !!role });
-      return res.status(400).json({ 
-        message: 'Missing required fields: firebaseId, name, email, and role are required' 
+    if (!firebaseUid || !name || !email || !role) {
+      console.log("Missing required fields:", {
+        firebaseUid: !!firebaseUid,
+        name: !!name,
+        email: !!email,
+        role: !!role,
+      });
+      return res.status(400).json({
+        message:
+          "Missing required fields: firebaseUid, name, email, and role are required",
       });
     }
 
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      return res.status(400).json({ 
-        message: 'Invalid email format' 
+      return res.status(400).json({
+        message: "Invalid email format",
       });
     }
 
     // Validate name (no empty or only whitespace)
     if (name.trim().length === 0) {
-      return res.status(400).json({ 
-        message: 'Name cannot be empty' 
+      return res.status(400).json({
+        message: "Name cannot be empty",
       });
     }
 
     // Check if user already exists
-    const existingPatient = await Patient.findOne({ firebaseId });
-    const existingDoctor = await Doctor.findOne({ firebaseId });
+    const existingPatient = await Patient.findOne({ firebaseUid });
+    const existingDoctor = await Doctor.findOne({ firebaseUid });
 
     if (existingPatient || existingDoctor) {
-      console.log('User already exists with Firebase ID:', firebaseId);
-      return res.status(409).json({ 
-        message: 'User already exists with this Firebase ID' 
+      console.log("User already exists with Firebase ID:", firebaseUid);
+      return res.status(409).json({
+        message: "User already exists with this Firebase ID",
       });
     }
 
@@ -57,78 +63,85 @@ const createUser = async (req, res) => {
     const existingEmailDoctor = await Doctor.findOne({ email });
 
     if (existingEmailPatient || existingEmailDoctor) {
-      console.log('User already exists with email:', email);
-      return res.status(409).json({ 
-        message: 'User already exists with this email address' 
+      console.log("User already exists with email:", email);
+      return res.status(409).json({
+        message: "User already exists with this email address",
       });
     }
 
     let user;
-    if (role === 'doctor') {
+    if (role === "doctor") {
       user = new Doctor({
-        firebaseId,
+        firebaseUid,
         name: name.trim(),
         email: email.toLowerCase(),
-        profilePicture: profilePicture || '',
-        role
+        profilePicture: profilePicture || "",
+        role,
       });
-    } else if (role === 'patient') {
+    } else if (role === "patient") {
       user = new Patient({
-        firebaseId,
+        firebaseUid,
         name: name.trim(),
         email: email.toLowerCase(),
-        profilePicture: profilePicture || '',
-        role
+        profilePicture: profilePicture || "",
+        role,
       });
     } else {
-      return res.status(400).json({ 
-        message: 'Invalid role. Must be either "doctor" or "patient"' 
+      return res.status(400).json({
+        message: 'Invalid role. Must be either "doctor" or "patient"',
       });
     }
 
-    console.log('Attempting to save user:', { firebaseId, name: name.trim(), email: email.toLowerCase(), role });
+    console.log("Attempting to save user:", {
+      firebaseUid: firebaseUid,
+      name: name.trim(),
+      email: email.toLowerCase(),
+      role,
+    });
     await user.save();
-    console.log('User saved successfully');
+    console.log("User saved successfully");
 
     // Generate JWT token
-    const token = generateToken(user._id, user.firebaseId, user.role);
+    const token = generateToken(user._id, user.firebaseUid, user.role);
 
+    // When sending user data in responses:
     res.status(201).json({
-      message: 'User created successfully',
       user: {
         id: user._id,
-        firebaseId: user.firebaseId,
+        firebaseUid: user.firebaseUid, // <-- this must match your schema
         name: user.name,
         email: user.email,
         profilePicture: user.profilePicture,
-        role: user.role
+        role: user.role,
+        // ...other fields
       },
-      token
+      token,
     });
-
   } catch (error) {
-    console.error('Error creating user:', error);
-    
+    console.error("Error creating user:", error);
+
     // Handle specific MongoDB errors
     if (error.code === 11000) {
       const field = Object.keys(error.keyPattern)[0];
-      console.log('Duplicate key error for field:', field);
-      return res.status(409).json({ 
-        message: `User with this ${field} already exists` 
+      console.log("Duplicate key error for field:", field);
+      return res.status(409).json({
+        message: `User with this ${field} already exists`,
       });
     }
-    
+
     // Handle validation errors
-    if (error.name === 'ValidationError') {
-      const validationErrors = Object.values(error.errors).map(err => err.message);
-      return res.status(400).json({ 
-        message: 'Validation failed: ' + validationErrors.join(', ')
+    if (error.name === "ValidationError") {
+      const validationErrors = Object.values(error.errors).map(
+        (err) => err.message
+      );
+      return res.status(400).json({
+        message: "Validation failed: " + validationErrors.join(", "),
       });
     }
-    
-    res.status(500).json({ 
-      message: 'Failed to create user account. Please try again later.',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+
+    res.status(500).json({
+      message: "Failed to create user account. Please try again later.",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
     });
   }
 };
@@ -136,98 +149,98 @@ const createUser = async (req, res) => {
 // Validate user role during login
 const validateRole = async (req, res) => {
   try {
-    const { firebaseId, role } = req.body;
+    const { firebaseUid, role } = req.body;
 
     // Validate required fields
-    if (!firebaseId || !role) {
-      return res.status(400).json({ 
-        message: 'Missing required fields: firebaseId and role are required' 
+    if (!firebaseUid || !role) {
+      return res.status(400).json({
+        message: "Missing required fields: firebaseUid and role are required",
       });
     }
 
     let user;
-    if (role === 'doctor') {
-      user = await Doctor.findOne({ firebaseId });
+    if (role === "doctor") {
+      user = await Doctor.findOne({ firebaseUid });
       if (!user) {
-        return res.status(403).json({ 
-          message: 'You are not registered as a doctor. Please register as a doctor first or login as a patient.' 
+        return res.status(403).json({
+          message:
+            "You are not registered as a doctor. Please register as a doctor first or login as a patient.",
         });
       }
-    } else if (role === 'patient') {
-      user = await Patient.findOne({ firebaseId });
+    } else if (role === "patient") {
+      user = await Patient.findOne({ firebaseUid });
       if (!user) {
-        return res.status(403).json({ 
-          message: 'You are not registered as a patient. Please register as a patient first or login as a doctor.' 
+        return res.status(403).json({
+          message:
+            "You are not registered as a patient. Please register as a patient first or login as a doctor.",
         });
       }
     } else {
-      return res.status(400).json({ 
-        message: 'Invalid role. Must be either "doctor" or "patient"' 
+      return res.status(400).json({
+        message: 'Invalid role. Must be either "doctor" or "patient"',
       });
     }
 
     // Generate JWT token
-    const token = generateToken(user._id, user.firebaseId, user.role);
+    const token = generateToken(user._id, user.firebaseUid, user.role);
 
     res.status(200).json({
-      message: 'Role validated successfully',
+      message: "Role validated successfully",
       user: {
         id: user._id,
-        firebaseId: user.firebaseId,
+        firebaseUid: user.firebaseUid,
         name: user.name,
         email: user.email,
         profilePicture: user.profilePicture,
-        role: user.role
+        role: user.role,
       },
-      token
+      token,
     });
-
   } catch (error) {
-    console.error('Error validating role:', error);
-    res.status(500).json({ 
-      message: 'Failed to validate user role. Please try again later.',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    console.error("Error validating role:", error);
+    res.status(500).json({
+      message: "Failed to validate user role. Please try again later.",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
     });
   }
 };
 
 // Get user by Firebase ID
-const getUserByFirebaseId = async (req, res) => {
+const getUserByFirebaseUid = async (req, res) => {
   try {
-    const { firebaseId } = req.params;
+    const { firebaseUid } = req.params;
 
-    let user = await Patient.findOne({ firebaseId });
+    let user = await Patient.findOne({ firebaseUid });
     if (!user) {
-      user = await Doctor.findOne({ firebaseId });
+      user = await Doctor.findOne({ firebaseUid });
     }
 
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ message: "User not found" });
     }
 
     // Generate JWT token
-    const token = generateToken(user._id, user.firebaseId, user.role);
+    const token = generateToken(user._id, user.firebaseUid, user.role);
 
     res.status(200).json({
       user: {
         id: user._id,
-        firebaseId: user.firebaseId,
+        firebaseUid: user.firebaseUid,
         name: user.name,
         email: user.email,
         profilePicture: user.profilePicture,
-        role: user.role
+        role: user.role,
       },
-      token
+      token,
     });
-
   } catch (error) {
-    console.error('Error fetching user:', error);
-    res.status(500).json({ message: 'Server error', error: error.message });
+    console.error("Error fetching user:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
 
 module.exports = {
   createUser,
   validateRole,
-  getUserByFirebaseId
+  getUserByFirebaseUid,
 };

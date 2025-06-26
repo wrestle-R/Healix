@@ -53,7 +53,7 @@ const Register = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          firebaseId: firebaseUser.uid,
+          firebaseUid: firebaseUser.uid, 
           name: userData.name || firebaseUser.displayName,
           email: firebaseUser.email,
           profilePicture: firebaseUser.photoURL || "",
@@ -119,9 +119,7 @@ const Register = () => {
       contextLogin(profileData.user, profileData.token);
 
       toast.success("Account created successfully!");
-      navigate(
-        userType === "doctor" ? "/doctor-dashboard" : "/patient-dashboard"
-      );
+      navigate(userType === "doctor" ? "/doctor-profile" : "/patient-profile");
     } catch (error) {
       console.error("Registration error:", error);
       await handleAuthError(error);
@@ -145,9 +143,7 @@ const Register = () => {
       contextLogin(profileData.user, profileData.token);
 
       toast.success("Account created successfully!");
-      navigate(
-        userType === "doctor" ? "/doctor-dashboard" : "/patient-dashboard"
-      );
+      navigate(userType === "doctor" ? "/doctor-profile" : "/patient-profile");
     } catch (error) {
       console.error("Google registration error:", error);
 

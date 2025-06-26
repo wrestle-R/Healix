@@ -40,7 +40,7 @@ const Login = () => {
   const navigate = useNavigate();
   const { login: contextLogin } = useUser();
 
-  const validateUserRole = async (firebaseId, selectedRole) => {
+  const validateUserRole = async (firebaseUid, selectedRole) => {
     try {
       const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -50,7 +50,7 @@ const Login = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          firebaseId: firebaseId,
+          firebaseUid: firebaseUid,
           role: selectedRole,
         }),
       });
@@ -99,9 +99,15 @@ const Login = () => {
       contextLogin(userData.user, userData.token);
 
       toast.success(`Welcome back!`);
-      navigate(
-        userType === "doctor" ? "/doctor-dashboard" : "/patient-dashboard"
-      );
+      if (!userData.user.profileCompleted) {
+        navigate(
+          userType === "doctor" ? "/doctor-profile" : "/patient-profile"
+        );
+      } else {
+        navigate(
+          userType === "doctor" ? "/doctor-dashboard" : "/patient-dashboard"
+        );
+      }
     } catch (error) {
       console.error("Login error:", error);
       setError(error.message);
@@ -124,9 +130,15 @@ const Login = () => {
       contextLogin(userData.user, userData.token);
 
       toast.success(`Welcome back!`);
-      navigate(
-        userType === "doctor" ? "/doctor-dashboard" : "/patient-dashboard"
-      );
+      if (!userData.user.profileCompleted) {
+        navigate(
+          userType === "doctor" ? "/doctor-profile" : "/patient-profile"
+        );
+      } else {
+        navigate(
+          userType === "doctor" ? "/doctor-dashboard" : "/patient-dashboard"
+        );
+      }
     } catch (error) {
       console.error("Google login error:", error);
 
