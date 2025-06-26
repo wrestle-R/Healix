@@ -61,7 +61,7 @@ class DoctorController {
     }
   }
 
-  // Get doctor profile
+  // Get doctor profile by ID
   static async getProfile(req, res) {
     try {
       const { doctorId } = req.params;
@@ -208,80 +208,6 @@ class DoctorController {
       };
 
       res.json({ success: true, doctor: doctorWithDetails });
-    } catch (error) {
-      res.status(500).json({ success: false, message: error.message });
-    }
-  }
-
-  // Update doctor's education
-  static async updateEducation(req, res) {
-    try {
-      const { doctorId } = req.params;
-      const { education } = req.body;
-
-      const doctor = await Doctor.findByIdAndUpdate(
-        doctorId,
-        { education },
-        { new: true }
-      );
-
-      if (!doctor) {
-        return res
-          .status(404)
-          .json({ success: false, message: "Doctor not found" });
-      }
-
-      doctor.checkProfileCompletion();
-      await doctor.save();
-
-      res.json({ success: true, doctor });
-    } catch (error) {
-      res.status(500).json({ success: false, message: error.message });
-    }
-  }
-
-  // Update doctor's experience
-  static async updateExperience(req, res) {
-    try {
-      const { doctorId } = req.params;
-      const { workExperience } = req.body;
-
-      const doctor = await Doctor.findByIdAndUpdate(
-        doctorId,
-        { workExperience },
-        { new: true }
-      );
-
-      if (!doctor) {
-        return res
-          .status(404)
-          .json({ success: false, message: "Doctor not found" });
-      }
-
-      res.json({ success: true, doctor });
-    } catch (error) {
-      res.status(500).json({ success: false, message: error.message });
-    }
-  }
-
-  // Add certification
-  static async addCertification(req, res) {
-    try {
-      const { doctorId } = req.params;
-      const certificationData = req.body;
-
-      const doctor = await Doctor.findById(doctorId);
-
-      if (!doctor) {
-        return res
-          .status(404)
-          .json({ success: false, message: "Doctor not found" });
-      }
-
-      doctor.certifications.push(certificationData);
-      await doctor.save();
-
-      res.json({ success: true, doctor });
     } catch (error) {
       res.status(500).json({ success: false, message: error.message });
     }

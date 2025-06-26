@@ -354,7 +354,9 @@ const PatientProfileForm = () => {
         <form onSubmit={handleSubmit} className="grid gap-4 overflow-x-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="min-w-0">
-              <label className="block text-sm mb-1">First Name</label>
+              <label className="block text-sm mb-1">
+                First Name <span className="text-red-500">*</span>
+              </label>
               <input
                 type="text"
                 name="firstName"
@@ -365,7 +367,9 @@ const PatientProfileForm = () => {
               />
             </div>
             <div className="min-w-0">
-              <label className="block text-sm mb-1">Last Name</label>
+              <label className="block text-sm mb-1">
+                Last Name <span className="text-red-500">*</span>
+              </label>
               <input
                 type="text"
                 name="lastName"
@@ -376,7 +380,9 @@ const PatientProfileForm = () => {
               />
             </div>
             <div className="min-w-0">
-              <label className="block text-sm mb-1">Email</label>
+              <label className="block text-sm mb-1">
+                Email <span className="text-red-500">*</span>
+              </label>
               <input
                 type="email"
                 name="email"
@@ -388,7 +394,9 @@ const PatientProfileForm = () => {
               />
             </div>
             <div className="min-w-0">
-              <label className="block text-sm mb-1">Phone Number</label>
+              <label className="block text-sm mb-1">
+                Phone Number <span className="text-red-500">*</span>
+              </label>
               <input
                 type="tel"
                 name="phoneNumber"
@@ -399,7 +407,9 @@ const PatientProfileForm = () => {
               />
             </div>
             <div className="min-w-0">
-              <label className="block text-sm mb-1">Date of Birth</label>
+              <label className="block text-sm mb-1">
+                Date of Birth <span className="text-red-500">*</span>
+              </label>
               <input
                 type="date"
                 name="dateOfBirth"
@@ -410,7 +420,9 @@ const PatientProfileForm = () => {
               />
             </div>
             <div className="min-w-0">
-              <label className="block text-sm mb-1">Gender</label>
+              <label className="block text-sm mb-1">
+                Gender <span className="text-red-500">*</span>
+              </label>
               <select
                 name="gender"
                 className="w-full border rounded px-2 py-1"
@@ -427,7 +439,9 @@ const PatientProfileForm = () => {
               </select>
             </div>
             <div className="min-w-0">
-              <label className="block text-sm mb-1">Blood Group</label>
+              <label className="block text-sm mb-1">
+                Blood Group <span className="text-red-500">*</span>
+              </label>
               <select
                 name="bloodGroup"
                 className="w-full border rounded px-2 py-1"
@@ -508,7 +522,9 @@ const PatientProfileForm = () => {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="min-w-0">
-              <label className="block text-sm mb-1">Height (cm)</label>
+              <label className="block text-sm mb-1">
+                Height (cm) <span className="text-red-500">*</span>
+              </label>
               <input
                 type="number"
                 name="height.value"
@@ -520,7 +536,9 @@ const PatientProfileForm = () => {
               />
             </div>
             <div className="min-w-0">
-              <label className="block text-sm mb-1">Weight (kg)</label>
+              <label className="block text-sm mb-1">
+                Weight (kg) <span className="text-red-500">*</span>
+              </label>
               <input
                 type="number"
                 name="weight.value"
@@ -727,7 +745,9 @@ const PatientProfileForm = () => {
 
           {/* Emergency Contacts */}
           <div>
-            <label className="block text-sm mb-1">Emergency Contacts</label>
+            <label className="block text-sm mb-1">
+              Emergency Contacts <span className="text-red-500">*</span>
+            </label>
             {profile.emergencyContacts.map((contact, idx) => (
               <div
                 key={idx}

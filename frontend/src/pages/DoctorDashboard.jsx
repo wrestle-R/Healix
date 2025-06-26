@@ -5,19 +5,12 @@ import { useNavigate } from "react-router-dom";
 import {
   Card,
   CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import {
-  FaUsers,
   FaCalendarCheck,
-  FaPrescriptionBottleAlt,
-  FaStar,
-  FaChartLine,
   FaSignOutAlt,
   FaUser,
   FaCog,
@@ -26,7 +19,6 @@ import {
   FaTimes,
   FaCalendarPlus,
   FaClock,
-  FaUserMd,
 } from "react-icons/fa";
 import { useUser } from "../context/UserContext.jsx";
 import { toast } from "sonner";
@@ -185,19 +177,10 @@ const DoctorDashboard = () => {
             </nav>
           </div>
 
-          <Separator className="mx-4" />
+          <Separator />
 
           {/* Settings & Logout */}
           <div className="p-4 space-y-2">
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => setActiveTab("profile")}
-              className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all duration-150"
-            >
-              <FaUser className="h-5 w-5" />
-              <span>Profile</span>
-            </motion.button>
 
             <motion.button
               whileHover={{ scale: 1.02 }}

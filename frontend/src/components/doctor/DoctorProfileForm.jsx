@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { Badge } from "@/components/ui/badge";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -170,6 +171,17 @@ const DoctorProfileForm = () => {
     const { _id, firebaseUid, createdAt, updatedAt, __v, ...safeProfile } =
       profile;
 
+    // Remove empty address if all fields are empty (optional, for consistency)
+    if (
+      !safeProfile.address?.street &&
+      !safeProfile.address?.city &&
+      !safeProfile.address?.state &&
+      !safeProfile.address?.zipCode &&
+      !safeProfile.address?.country
+    ) {
+      delete safeProfile.address;
+    }
+
     const res = await fetch(
       `${API_URL}/api/doctors/profile/${user.firebaseUid}`,
       {
@@ -194,11 +206,24 @@ const DoctorProfileForm = () => {
   return (
     <Card>
       <CardContent className="p-6">
-        <h2 className="text-2xl font-bold mb-4">My Profile</h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-2xl font-bold">My Profile</h2>
+          {isProfileComplete() ? (
+            <Badge className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">
+              Profile Completed
+            </Badge>
+          ) : (
+            <Badge className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800">
+              Complete Profile
+            </Badge>
+          )}
+        </div>
         <form onSubmit={handleSubmit} className="grid gap-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm mb-1">First Name</label>
+              <label className="block text-sm mb-1">
+                First Name <span className="text-red-500">*</span>
+              </label>
               <input
                 type="text"
                 name="firstName"
@@ -209,7 +234,9 @@ const DoctorProfileForm = () => {
               />
             </div>
             <div>
-              <label className="block text-sm mb-1">Last Name</label>
+              <label className="block text-sm mb-1">
+                Last Name <span className="text-red-500">*</span>
+              </label>
               <input
                 type="text"
                 name="lastName"
@@ -220,7 +247,9 @@ const DoctorProfileForm = () => {
               />
             </div>
             <div>
-              <label className="block text-sm mb-1">Email</label>
+              <label className="block text-sm mb-1">
+                Email <span className="text-red-500">*</span>
+              </label>
               <input
                 type="email"
                 name="email"
@@ -232,7 +261,9 @@ const DoctorProfileForm = () => {
               />
             </div>
             <div>
-              <label className="block text-sm mb-1">Phone Number</label>
+              <label className="block text-sm mb-1">
+                Phone Number <span className="text-red-500">*</span>
+              </label>
               <input
                 type="tel"
                 name="phoneNumber"
@@ -243,7 +274,9 @@ const DoctorProfileForm = () => {
               />
             </div>
             <div>
-              <label className="block text-sm mb-1">Date of Birth</label>
+              <label className="block text-sm mb-1">
+                Date of Birth <span className="text-red-500">*</span>
+              </label>
               <input
                 type="date"
                 name="dateOfBirth"
@@ -254,7 +287,9 @@ const DoctorProfileForm = () => {
               />
             </div>
             <div>
-              <label className="block text-sm mb-1">Gender</label>
+              <label className="block text-sm mb-1">
+                Gender <span className="text-red-500">*</span>
+              </label>
               <select
                 name="gender"
                 className="w-full border rounded px-2 py-1"
@@ -270,7 +305,7 @@ const DoctorProfileForm = () => {
             </div>
             <div>
               <label className="block text-sm mb-1">
-                Medical License Number
+                Medical License Number <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -282,7 +317,9 @@ const DoctorProfileForm = () => {
               />
             </div>
             <div>
-              <label className="block text-sm mb-1">Years of Experience</label>
+              <label className="block text-sm mb-1">
+                Years of Experience <span className="text-red-500">*</span>
+              </label>
               <input
                 type="number"
                 name="yearsOfExperience"
@@ -296,7 +333,9 @@ const DoctorProfileForm = () => {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
-              <label className="block text-sm mb-1">Street</label>
+              <label className="block text-sm mb-1">
+                Street <span className="text-red-500">*</span>
+              </label>
               <input
                 type="text"
                 name="address.street"
@@ -307,7 +346,9 @@ const DoctorProfileForm = () => {
               />
             </div>
             <div>
-              <label className="block text-sm mb-1">City</label>
+              <label className="block text-sm mb-1">
+                City <span className="text-red-500">*</span>
+              </label>
               <input
                 type="text"
                 name="address.city"
@@ -318,7 +359,9 @@ const DoctorProfileForm = () => {
               />
             </div>
             <div>
-              <label className="block text-sm mb-1">State</label>
+              <label className="block text-sm mb-1">
+                State <span className="text-red-500">*</span>
+              </label>
               <input
                 type="text"
                 name="address.state"
@@ -329,7 +372,9 @@ const DoctorProfileForm = () => {
               />
             </div>
             <div>
-              <label className="block text-sm mb-1">ZIP Code</label>
+              <label className="block text-sm mb-1">
+                ZIP Code <span className="text-red-500">*</span>
+              </label>
               <input
                 type="text"
                 name="address.zipCode"
@@ -341,7 +386,9 @@ const DoctorProfileForm = () => {
             </div>
           </div>
           <div>
-            <label className="block text-sm mb-1">Specializations</label>
+            <label className="block text-sm mb-1">
+              Specializations <span className="text-red-500">*</span>
+            </label>
             <div className="flex gap-2 mb-2">
               <input
                 type="text"
@@ -387,7 +434,9 @@ const DoctorProfileForm = () => {
             />
           </div>
           <div>
-            <label className="block text-sm mb-1">Education</label>
+            <label className="block text-sm mb-1">
+              Education <span className="text-red-500">*</span>
+            </label>
             {profile.education.map((edu, idx) => (
               <div
                 key={idx}
