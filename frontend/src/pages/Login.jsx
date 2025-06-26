@@ -1,115 +1,111 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { signInWithEmailAndPassword, signInWithPopup, provider, auth, signOut } from '../../firebase.config.js';
-import { useUser } from '../context/UserContext.jsx';
-import toast from 'react-hot-toast';
+import React, { useState } from "react";
+import { motion } from "framer-motion";
+import { useNavigate, Link } from "react-router-dom";
+import {
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  provider,
+  auth,
+  signOut,
+} from "../../firebase.config.js";
+import { useUser } from "../context/UserContext.jsx";
+import toast from "react-hot-toast";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  FaGoogle,
+  FaUser,
+  FaUserMd,
+  FaSignInAlt,
+  FaArrowLeft,
+} from "react-icons/fa";
 
 const Login = () => {
-  const [userType, setUserType] = useState('patient'); // 'patient' or 'doctor'
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [userType, setUserType] = useState("patient");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const navigate = useNavigate();
   const { login: contextLogin } = useUser();
 
   const validateUserRole = async (firebaseId, selectedRole) => {
     try {
-      // Use VITE_ prefix for Vite environment variables
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-      
+      const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
       const response = await fetch(`${apiUrl}/api/auth/validate-role`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify({ firebaseId, role: selectedRole }),
+        body: JSON.stringify({
+          firebaseId: firebaseId,
+          role: selectedRole,
+        }),
       });
-      
-      const data = await response.json();
-      
+
       if (!response.ok) {
-        // Handle specific error cases
-        if (response.status === 403) {
-          throw new Error(data.message || 'Role validation failed');
-        } else if (response.status === 404) {
-          throw new Error('User not found. Please register first.');
-        } else if (response.status >= 500) {
-          throw new Error('Server error. Please try again later.');
-        } else {
-          throw new Error(data.message || 'Role validation failed');
-        }
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Role validation failed");
       }
-      
-      return data;
+
+      return await response.json();
     } catch (error) {
-      console.error('Role validation error:', error);
-      
-      // Handle network errors
-      if (error instanceof TypeError && error.message.includes('fetch')) {
-        throw new Error('Unable to connect to server. Please check your internet connection.');
-      }
-      
+      console.error("Role validation error:", error);
       throw error;
     }
   };
 
   const handleAuthError = async (error) => {
     try {
-      // Sign out from Firebase
       await signOut(auth);
-      
-      // Clear any stored data (localStorage, sessionStorage, etc.)
       localStorage.clear();
       sessionStorage.clear();
-      
-      // Show error message
       setError(error.message);
       toast.error(error.message);
-      
-      console.error('Authentication error:', error);
+      console.error("Authentication error:", error);
     } catch (signOutError) {
-      console.error('Error during signout:', signOutError);
-      toast.error('An unexpected error occurred during cleanup');
+      console.error("Error during signout:", signOutError);
+      toast.error("An unexpected error occurred during cleanup");
     }
   };
 
   const handleEmailLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
+    setError("");
 
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
       const user = userCredential.user;
 
-      // Validate user role and get user data
       const userData = await validateUserRole(user.uid, userType);
-      
-      // Store user data in context
+
       contextLogin(userData.user, userData.token);
-      
+
       toast.success(`Welcome back!`);
-      navigate(userType === 'doctor' ? '/doctor-dashboard' : '/patient-dashboard');
+      navigate(
+        userType === "doctor" ? "/doctor-dashboard" : "/patient-dashboard"
+      );
     } catch (error) {
-      console.error('Login error:', error);
-      
-      // Handle specific Firebase auth errors
-      if (error.code === 'auth/user-not-found') {
-        const errorMsg = 'No account found with this email. Please register first.';
-        setError(errorMsg);
-        toast.error(errorMsg);
-      } else if (error.code === 'auth/wrong-password') {
-        const errorMsg = 'Incorrect password. Please try again.';
-        setError(errorMsg);
-        toast.error(errorMsg);
-      } else if (error.code === 'auth/invalid-email') {
-        const errorMsg = 'Invalid email address.';
-        setError(errorMsg);
-        toast.error(errorMsg);
-      } else {
-        await handleAuthError(error);
-      }
+      console.error("Login error:", error);
+      setError(error.message);
+      toast.error(error.message);
     } finally {
       setLoading(false);
     }
@@ -117,35 +113,29 @@ const Login = () => {
 
   const handleGoogleLogin = async () => {
     setLoading(true);
-    setError('');
+    setError("");
 
     try {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
 
-      // Check if user cancelled the popup
-      if (!user) {
-        throw new Error('Sign in was cancelled');
-      }
-
-      // Validate user role and get user data
       const userData = await validateUserRole(user.uid, userType);
-      
-      // Store user data in context
+
       contextLogin(userData.user, userData.token);
-      
+
       toast.success(`Welcome back!`);
-      navigate(userType === 'doctor' ? '/doctor-dashboard' : '/patient-dashboard');
+      navigate(
+        userType === "doctor" ? "/doctor-dashboard" : "/patient-dashboard"
+      );
     } catch (error) {
-      console.error('Google login error:', error);
-      
-      // Handle specific Google auth errors
-      if (error.code === 'auth/popup-closed-by-user') {
-        toast.error('Sign in was cancelled');
-        setError('Sign in was cancelled');
-      } else if (error.code === 'auth/popup-blocked') {
-        toast.error('Popup was blocked. Please allow popups and try again.');
-        setError('Popup was blocked. Please allow popups and try again.');
+      console.error("Google login error:", error);
+
+      if (error.code === "auth/popup-closed-by-user") {
+        toast.error("Sign in was cancelled");
+        setError("Sign in was cancelled");
+      } else if (error.code === "auth/popup-blocked") {
+        toast.error("Popup was blocked. Please allow popups and try again.");
+        setError("Popup was blocked. Please allow popups and try again.");
       } else {
         await handleAuthError(error);
       }
@@ -154,113 +144,176 @@ const Login = () => {
     }
   };
 
+  const pageVariants = {
+    initial: { opacity: 0, y: 50 },
+    in: { opacity: 1, y: 0 },
+    out: { opacity: 0, y: -50 },
+  };
+
+  const pageTransition = {
+    type: "tween",
+    ease: "anticipate",
+    duration: 0.5,
+  };
+
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center px-6">
-      <div className="max-w-md w-full bg-gray-900 rounded-lg shadow-lg p-8 border border-gray-800">
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold text-white">Welcome Back</h2>
-          <p className="text-gray-400 mt-2">Sign in to your account</p>
-        </div>
+    <motion.div
+      initial="initial"
+      animate="in"
+      exit="out"
+      variants={pageVariants}
+      transition={pageTransition}
+      className="min-h-screen bg-background flex items-center justify-center p-4"
+    >
+      <div className="w-full max-w-md">
+        <motion.div
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 0.2 }}
+        >
+          <Card className="shadow-xl border border-border/50">
+            <CardHeader className="space-y-1 text-center">
+              <CardTitle className="text-2xl font-bold text-foreground font-serif">
+                Welcome Back
+              </CardTitle>
+              <CardDescription className="text-muted-foreground">
+                Sign in to your Healix account
+              </CardDescription>
+            </CardHeader>
 
-        {/* User Type Selector */}
-        <div className="flex mb-6 bg-gray-800 rounded-lg p-1">
-          <button
-            onClick={() => setUserType('patient')}
-            className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-              userType === 'patient'
-                ? 'bg-green-600 text-white'
-                : 'text-gray-400 hover:text-white'
-            }`}
-          >
-            Patient
-          </button>
-          <button
-            onClick={() => setUserType('doctor')}
-            className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-              userType === 'doctor'
-                ? 'bg-green-600 text-white'
-                : 'text-gray-400 hover:text-white'
-            }`}
-          >
-            Doctor
-          </button>
-        </div>
+            <CardContent className="space-y-6">
+              <Tabs
+                value={userType}
+                onValueChange={setUserType}
+                className="w-full"
+              >
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="patient" className="flex items-center">
+                    <FaUser className="mr-2 h-4 w-4" />
+                    Patient
+                  </TabsTrigger>
+                  <TabsTrigger value="doctor" className="flex items-center">
+                    <FaUserMd className="mr-2 h-4 w-4" />
+                    Doctor
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
 
-        {error && (
-          <div className="mb-4 p-3 bg-red-900 border border-red-700 rounded-md">
-            <p className="text-red-300 text-sm">{error}</p>
-          </div>
-        )}
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                >
+                  <Alert variant="destructive">
+                    <AlertDescription>{error}</AlertDescription>
+                  </Alert>
+                </motion.div>
+              )}
 
-        <form onSubmit={handleEmailLogin} className="space-y-4">
-          <div>
-            <label className="block text-gray-300 text-sm font-medium mb-2">
-              Email
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-white focus:outline-none focus:border-green-500"
-              required
-            />
-          </div>
+              <form onSubmit={handleEmailLogin} className="space-y-4">
+                <motion.div
+                  initial={{ x: -20, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  transition={{ delay: 0.3 }}
+                >
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Enter your email"
+                    required
+                    className="mt-1"
+                  />
+                </motion.div>
 
-          <div>
-            <label className="block text-gray-300 text-sm font-medium mb-2">
-              Password
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-white focus:outline-none focus:border-green-500"
-              required
-            />
-          </div>
+                <motion.div
+                  initial={{ x: -20, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  transition={{ delay: 0.4 }}
+                >
+                  <Label htmlFor="password">Password</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Enter your password"
+                    required
+                    className="mt-1"
+                  />
+                </motion.div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-green-600 text-white py-2 px-4 rounded-md font-medium hover:bg-green-700 disabled:opacity-50 transition-colors"
-          >
-            {loading ? 'Signing In...' : 'Sign In'}
-          </button>
-        </form>
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <Button
+                    type="submit"
+                    className="w-full font-medium"
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{
+                          duration: 1,
+                          repeat: Infinity,
+                          ease: "linear",
+                        }}
+                        className="mr-2 h-4 w-4 border-2 border-primary-foreground border-t-transparent rounded-full"
+                      />
+                    ) : (
+                      <FaSignInAlt className="mr-2 h-4 w-4" />
+                    )}
+                    {loading ? "Signing In..." : "Sign In"}
+                  </Button>
+                </motion.div>
+              </form>
 
-        <div className="mt-4">
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-700"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-gray-900 text-gray-400">Or continue with</span>
-            </div>
-          </div>
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <Separator />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-background px-2 text-muted-foreground">
+                    Or continue with
+                  </span>
+                </div>
+              </div>
 
-          <button
-            onClick={handleGoogleLogin}
-            disabled={loading}
-            className="mt-4 w-full bg-white text-gray-900 py-2 px-4 rounded-md font-medium hover:bg-gray-100 disabled:opacity-50 transition-colors flex items-center justify-center"
-          >
-            <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
-              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-            </svg>
-            Continue with Google
-          </button>
-        </div>
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <Button
+                  variant="outline"
+                  onClick={handleGoogleLogin}
+                  disabled={loading}
+                  className="w-full font-medium"
+                >
+                  <FaGoogle className="mr-2 h-4 w-4" />
+                  Continue with Google
+                </Button>
+              </motion.div>
 
-        <p className="mt-6 text-center text-gray-400">
-          Don't have an account?{' '}
-          <Link to="/register" className="text-green-400 hover:text-green-300">
-            Sign up
-          </Link>
-        </p>
+              <div className="text-center text-sm">
+                <span className="text-muted-foreground">
+                  Don't have an account?{" "}
+                </span>
+                <Link
+                  to="/register"
+                  className="text-primary hover:text-primary/80 font-medium underline-offset-4 hover:underline"
+                >
+                  Sign up
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
