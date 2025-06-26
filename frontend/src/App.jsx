@@ -1,18 +1,14 @@
-import React from "react";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-} from "react-router-dom";
-import { UserProvider, useUser } from "./context/UserContext.jsx";
-import Landing from "./pages/Landing.jsx";
-import Login from "./pages/Login.jsx";
-import Register from "./pages/Register.jsx";
-import PatientDashboard from "./pages/PatientDashboard.jsx";
-import DoctorDashboard from "./pages/DoctorDashboard.jsx";
+import React from 'react'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { UserProvider, useUser } from './context/UserContext.jsx'
+import Landing from './pages/Landing.jsx'
+import Login from './pages/Login.jsx'
+import Register from './pages/Register.jsx'
+import PatientDashboard from './pages/PatientDashboard.jsx'
+import DoctorDashboard from './pages/DoctorDashboard.jsx'
+import VRTherapyApp from './VR/VRTherapyApp.jsx'
 import { Toaster } from "sonner";
-
+// Component to handle root route redirection
 const RootRedirect = () => {
   const { user, loading } = useUser();
 
@@ -45,6 +41,7 @@ const AppRoutes = () => {
         <Route path="/register" element={<Register />} />
         <Route path="/patient-dashboard" element={<PatientDashboard />} />
         <Route path="/doctor-dashboard" element={<DoctorDashboard />} />
+        <Route path="/vr-therapy" element={<VRTherapyApp />} />
       </Routes>
     </Router>
   );

@@ -171,3 +171,121 @@
 button {
   cursor: pointer;
 }
+/* VR Component Styles */
+.vr-therapy-app {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+}
+
+/* Ensure proper VR scene rendering */
+a-scene {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Custom scrollbar for VR UI */
+.ui-panel::-webkit-scrollbar {
+  width: 4px;
+}
+
+.ui-panel::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+}
+
+.ui-panel::-webkit-scrollbar-thumb {
+  background: rgba(76, 175, 80, 0.5);
+  border-radius: 2px;
+}
+
+.ui-panel::-webkit-scrollbar-thumb:hover {
+  background: rgba(76, 175, 80, 0.8);
+}
+
+/* VR Loading Animation */
+@keyframes vrLoad {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.vr-loading {
+  animation: vrLoad 2s linear infinite;
+}
+
+/* Glowing effects for VR elements */
+.glow-green {
+  box-shadow: 0 0 20px rgba(76, 175, 80, 0.3);
+}
+
+.glow-blue {
+  box-shadow: 0 0 20px rgba(33, 150, 243, 0.3);
+}
+
+.glow-red {
+  box-shadow: 0 0 20px rgba(244, 67, 54, 0.3);
+}
+
+/* Pulsing animation for active elements */
+@keyframes pulse-glow {
+  0%, 100% { 
+    box-shadow: 0 0 10px rgba(76, 175, 80, 0.4);
+    transform: scale(1);
+  }
+  50% { 
+    box-shadow: 0 0 25px rgba(76, 175, 80, 0.8);
+    transform: scale(1.05);
+  }
+}
+
+.pulse-active {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Responsive VR UI */
+@media (max-width: 768px) {
+  .vr-therapy-app .fixed {
+    position: fixed !important;
+    bottom: 1rem !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    top: auto !important;
+    max-width: 90% !important;
+  }
+  
+  .vr-therapy-app .max-w-sm {
+    max-width: 100% !important;
+  }
+}
+
+/* VR Button Hover Effects */
+.vr-button-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.vr-button-hover:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* Smooth transitions for VR elements */
+* {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Glass morphism effect for VR UI */
+.glass-effect {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* VR Performance optimizations */
+a-scene {
+  image-rendering: optimizeSpeed;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: optimize-contrast;
+}
