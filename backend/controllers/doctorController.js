@@ -291,8 +291,7 @@ class DoctorController {
   static async getSpecializations(req, res) {
     try {
       const specializations = await Doctor.distinct("specializations", {
-        isVerified: true,
-        accountStatus: "active",
+        profileCompleted: true,
       });
 
       res.json({ success: true, specializations: specializations.sort() });
@@ -305,8 +304,7 @@ class DoctorController {
   static async getAvailableCities(req, res) {
     try {
       const cities = await Doctor.distinct("address.city", {
-        isVerified: true,
-        accountStatus: "active",
+        profileCompleted: true,
       });
 
       res.json({ success: true, cities: cities.sort() });

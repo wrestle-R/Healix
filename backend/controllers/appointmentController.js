@@ -306,8 +306,7 @@ class AppointmentController {
       const { specialty, city, date, minRating } = req.query;
 
       let doctorQuery = {
-        isVerified: true,
-        accountStatus: "active",
+        profileCompleted: true,
       };
 
       if (specialty) {

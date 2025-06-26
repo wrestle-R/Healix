@@ -194,7 +194,6 @@ doctorSchema.methods.updateRating = function (newRating) {
 // Indexes
 doctorSchema.index({ specializations: 1 });
 doctorSchema.index({ "address.city": 1, "address.state": 1 });
-doctorSchema.index({ isVerified: 1, accountStatus: 1 });
 doctorSchema.index({ averageRating: -1 });
 
 module.exports = mongoose.model("Doctor", doctorSchema);
