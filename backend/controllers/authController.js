@@ -2,7 +2,6 @@ const Patient = require("../models/patient");
 const Doctor = require("../models/doctor");
 const jwt = require("jsonwebtoken");
 
-// Generate JWT token
 const generateToken = (userId, firebaseUid, role) => {
   return jwt.sign(
     { userId, firebaseUid, role },
@@ -11,14 +10,12 @@ const generateToken = (userId, firebaseUid, role) => {
   );
 };
 
-// Create user in MongoDB after Firebase registration
 const createUser = async (req, res) => {
   try {
     console.log("Received create user request:", req.body);
 
     const { firebaseUid, name, email, profilePicture, role } = req.body;
 
-    // Validate required fields
     if (!firebaseUid || !name || !email || !role) {
       console.log("Missing required fields:", {
         firebaseUid: !!firebaseUid,
@@ -32,7 +29,6 @@ const createUser = async (req, res) => {
       });
     }
 
-    // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return res.status(400).json({
@@ -40,14 +36,12 @@ const createUser = async (req, res) => {
       });
     }
 
-    // Validate name (no empty or only whitespace)
     if (name.trim().length === 0) {
       return res.status(400).json({
         message: "Name cannot be empty",
       });
     }
 
-    // Check if user already exists
     const existingPatient = await Patient.findOne({ firebaseUid });
     const existingDoctor = await Doctor.findOne({ firebaseUid });
 
@@ -58,7 +52,6 @@ const createUser = async (req, res) => {
       });
     }
 
-    // Check if email already exists
     const existingEmailPatient = await Patient.findOne({ email });
     const existingEmailDoctor = await Doctor.findOne({ email });
 
@@ -108,19 +101,17 @@ const createUser = async (req, res) => {
     res.status(201).json({
       user: {
         id: user._id,
-        firebaseUid: user.firebaseUid, // <-- this must match your schema
+        firebaseUid: user.firebaseUid, 
         name: user.name,
         email: user.email,
         profilePicture: user.profilePicture,
         role: user.role,
-        // ...other fields
       },
       token,
     });
   } catch (error) {
     console.error("Error creating user:", error);
 
-    // Handle specific MongoDB errors
     if (error.code === 11000) {
       const field = Object.keys(error.keyPattern)[0];
       console.log("Duplicate key error for field:", field);
@@ -129,7 +120,6 @@ const createUser = async (req, res) => {
       });
     }
 
-    // Handle validation errors
     if (error.name === "ValidationError") {
       const validationErrors = Object.values(error.errors).map(
         (err) => err.message

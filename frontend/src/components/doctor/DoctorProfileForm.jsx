@@ -132,8 +132,37 @@ const DoctorProfileForm = () => {
     });
   };
 
+  // Add a helper to check if all required fields are filled
+  const isProfileComplete = () => {
+    return (
+      profile.firstName &&
+      profile.lastName &&
+      profile.email &&
+      profile.phoneNumber &&
+      profile.dateOfBirth &&
+      profile.gender &&
+      profile.address.street &&
+      profile.address.city &&
+      profile.address.state &&
+      profile.address.zipCode &&
+      profile.medicalLicenseNumber &&
+      Array.isArray(profile.specializations) &&
+      profile.specializations.length > 0 &&
+      profile.yearsOfExperience !== "" &&
+      Array.isArray(profile.education) &&
+      profile.education.length > 0 &&
+      profile.education.every(
+        (edu) => edu.degree && edu.institution && edu.year
+      )
+    );
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!isProfileComplete()) {
+      toast.error("Please fill all required fields.");
+      return;
+    }
     setLoading(true);
     const token = localStorage.getItem("token");
 

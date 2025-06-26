@@ -16,51 +16,8 @@ const educationSchema = new mongoose.Schema({
   },
 });
 
-const experienceSchema = new mongoose.Schema({
-  hospital: {
-    type: String,
-  },
-  position: {
-    type: String,
-  },
-  startDate: {
-    type: Date,
-  },
-  endDate: {
-    type: Date,
-  },
-  isCurrent: {
-    type: Boolean,
-    default: false,
-  },
-  description: {
-    type: String,
-    default: "",
-  },
-});
-
-const certificationSchema = new mongoose.Schema({
-  name: {
-    type: String,
-  },
-  issuingBody: {
-    type: String,
-  },
-  issueDate: {
-    type: Date,
-  },
-  expiryDate: {
-    type: Date,
-  },
-  certificateNumber: {
-    type: String,
-    default: "",
-  },
-});
-
 const doctorSchema = new mongoose.Schema(
   {
-    // Basic user info (linked to Firebase Auth)
     firebaseUid: {
       type: String,
       required: true,
@@ -71,8 +28,6 @@ const doctorSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
-
-    // Personal Information
     firstName: {
       type: String,
     },
@@ -90,14 +45,8 @@ const doctorSchema = new mongoose.Schema(
       type: String,
       enum: ["male", "female", "other"],
     },
-
-    // Contact Information
     phoneNumber: {
       type: String,
-    },
-    alternatePhoneNumber: {
-      type: String,
-      default: "",
     },
     address: {
       street: { type: String },
@@ -127,12 +76,8 @@ const doctorSchema = new mongoose.Schema(
       min: 0,
     },
 
-    // Education & Certifications
     education: [educationSchema],
-    certifications: [certificationSchema],
-    workExperience: [experienceSchema],
 
-    // Practice Information
     hospitalAffiliations: [
       {
         name: { type: String },
@@ -149,56 +94,12 @@ const doctorSchema = new mongoose.Schema(
       zipCode: { type: String, default: "" },
       phone: { type: String, default: "" },
     },
-
-    // Languages spoken
-    languages: [
-      {
-        type: String,
-        default: ["English", "Hindi"],
-      },
-    ],
-
     // Professional Details
     bio: {
       type: String,
       default: "",
       maxlength: 1000,
     },
-    servicesOffered: [
-      {
-        type: String,
-      },
-    ],
-    consultationModes: [
-      {
-        type: String,
-        enum: ["in-person", "video-call", "phone-call"],
-        default: ["in-person", "video-call"],
-      },
-    ],
-
-    // Verification Status
-    isVerified: {
-      type: Boolean,
-      default: false,
-    },
-    verificationDocuments: [
-      {
-        documentType: {
-          type: String,
-          enum: ["license", "degree", "certificate", "id-proof"],
-        },
-        documentUrl: { type: String },
-        uploadedAt: { type: Date, default: Date.now },
-        verificationStatus: {
-          type: String,
-          enum: ["pending", "verified", "rejected"],
-          default: "pending",
-        },
-      },
-    ],
-
-    // Ratings & Reviews
     averageRating: {
       type: Number,
       default: 0,
@@ -209,32 +110,10 @@ const doctorSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
-
-    // Account Status
-    isActive: {
-      type: Boolean,
-      default: true,
-    },
-    accountStatus: {
-      type: String,
-      enum: ["pending", "active", "suspended", "deactivated"],
-      default: "pending",
-    },
-
-    // Profile completion
     profileCompleted: {
       type: Boolean,
       default: false,
     },
-    completedSections: {
-      personalInfo: { type: Boolean, default: false },
-      professionalInfo: { type: Boolean, default: false },
-      education: { type: Boolean, default: false },
-      verification: { type: Boolean, default: false },
-      availability: { type: Boolean, default: false },
-    },
-
-    // Statistics
     totalPatients: {
       type: Number,
       default: 0,
@@ -243,15 +122,6 @@ const doctorSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
-
-    // Preferences
-    notificationPreferences: {
-      email: { type: Boolean, default: true },
-      sms: { type: Boolean, default: true },
-      appointmentReminders: { type: Boolean, default: true },
-      newPatientAlerts: { type: Boolean, default: true },
-    },
-
     role: {
       type: String,
       enum: ["doctor"],
@@ -303,11 +173,11 @@ doctorSchema.methods.checkProfileCompletion = function () {
     ),
     education: this.education.length > 0,
     verification: this.verificationDocuments.length > 0,
-    availability: false, // Will be checked against DoctorAvailability model
+    availability: false, 
   };
 
   this.completedSections = required;
-  this.profileCompleted = Object.values(required).slice(0, 4).every(Boolean); // Exclude availability for now
+  this.profileCompleted = Object.values(required).slice(0, 4).every(Boolean);
 
   return this.profileCompleted;
 };

@@ -11,8 +11,6 @@ import Login from "./pages/Login.jsx";
 import Register from "./pages/Register.jsx";
 import PatientDashboard from "./pages/PatientDashboard.jsx";
 import DoctorDashboard from "./pages/DoctorDashboard.jsx";
-import PatientProfilePage from "./pages/PatientProfilePage";
-import DoctorProfilePage from "./pages/DoctorProfilePage";
 
 // Component to handle root route redirection
 const RootRedirect = () => {
@@ -47,8 +45,6 @@ const AppRoutes = () => {
         <Route path="/register" element={<Register />} />
         <Route path="/patient-dashboard" element={<PatientDashboard />} />
         <Route path="/doctor-dashboard" element={<DoctorDashboard />} />
-        <Route path="/patient-profile" element={<PatientProfilePage />} />
-        <Route path="/doctor-profile" element={<DoctorProfilePage />} />
       </Routes>
     </Router>
   );

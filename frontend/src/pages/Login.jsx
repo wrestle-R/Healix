@@ -99,15 +99,9 @@ const Login = () => {
       contextLogin(userData.user, userData.token);
 
       toast.success(`Welcome back!`);
-      if (!userData.user.profileCompleted) {
-        navigate(
-          userType === "doctor" ? "/doctor-profile" : "/patient-profile"
-        );
-      } else {
-        navigate(
-          userType === "doctor" ? "/doctor-dashboard" : "/patient-dashboard"
-        );
-      }
+      navigate(
+        userType === "doctor" ? "/doctor-dashboard" : "/patient-dashboard"
+      );
     } catch (error) {
       console.error("Login error:", error);
       setError(error.message);
@@ -130,15 +124,9 @@ const Login = () => {
       contextLogin(userData.user, userData.token);
 
       toast.success(`Welcome back!`);
-      if (!userData.user.profileCompleted) {
-        navigate(
-          userType === "doctor" ? "/doctor-profile" : "/patient-profile"
-        );
-      } else {
-        navigate(
-          userType === "doctor" ? "/doctor-dashboard" : "/patient-dashboard"
-        );
-      }
+      navigate(
+        userType === "doctor" ? "/doctor-dashboard" : "/patient-dashboard"
+      );
     } catch (error) {
       console.error("Google login error:", error);
 

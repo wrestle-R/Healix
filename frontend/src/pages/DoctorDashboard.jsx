@@ -48,13 +48,6 @@ const DoctorDashboard = () => {
     return () => unsubscribe();
   }, []);
 
-  // Block dashboard if profile is not complete
-  useEffect(() => {
-    if (contextUser && contextUser.profileCompleted === false) {
-      navigate("/doctor-profile");
-    }
-  }, [contextUser, navigate]);
-
   const handleLogout = async () => {
     try {
       await signOut(auth);

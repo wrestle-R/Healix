@@ -119,7 +119,7 @@ const Register = () => {
       contextLogin(profileData.user, profileData.token);
 
       toast.success("Account created successfully!");
-      navigate(userType === "doctor" ? "/doctor-profile" : "/patient-profile");
+      navigate(userType === "doctor" ? "/doctor-dashboard" : "/patient-dashboard");
     } catch (error) {
       console.error("Registration error:", error);
       await handleAuthError(error);
@@ -143,7 +143,7 @@ const Register = () => {
       contextLogin(profileData.user, profileData.token);
 
       toast.success("Account created successfully!");
-      navigate(userType === "doctor" ? "/doctor-profile" : "/patient-profile");
+      navigate(userType === "doctor" ? "/doctor-dashboard" : "/patient-dashboard");
     } catch (error) {
       console.error("Google registration error:", error);
 

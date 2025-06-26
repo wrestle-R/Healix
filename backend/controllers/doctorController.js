@@ -1,6 +1,29 @@
 const Doctor = require("../models/doctor");
 
 class DoctorController {
+  static isProfileComplete(doctor) {
+    return (
+      doctor.firstName &&
+      doctor.lastName &&
+      doctor.email &&
+      doctor.phoneNumber &&
+      doctor.dateOfBirth &&
+      doctor.gender &&
+      doctor.address &&
+      doctor.address.street &&
+      doctor.address.city &&
+      doctor.address.state &&
+      doctor.address.zipCode &&
+      doctor.medicalLicenseNumber &&
+      Array.isArray(doctor.specializations) &&
+      doctor.specializations.length > 0 &&
+      doctor.yearsOfExperience !== undefined &&
+      doctor.yearsOfExperience !== null &&
+      Array.isArray(doctor.education) &&
+      doctor.education.length > 0
+    );
+  }
+
   // Create or update doctor profile
   static async createOrUpdateProfile(req, res) {
     try {
@@ -14,38 +37,21 @@ class DoctorController {
       let doctor = await Doctor.findOne({ firebaseUid });
 
       if (doctor) {
-        // Assign all fields except arrays
         Object.assign(doctor, profileData);
 
-        // Replace arrays explicitly to avoid versioning errors
-        if (profileData.education) {
-          doctor.education = profileData.education;
-        }
-        if (profileData.verificationDocuments) {
-          doctor.verificationDocuments = profileData.verificationDocuments;
-        }
-        if (profileData.specializations) {
+        if (profileData.education) doctor.education = profileData.education;
+        if (profileData.specializations)
           doctor.specializations = profileData.specializations;
-        }
-        if (profileData.subSpecializations) {
-          doctor.subSpecializations = profileData.subSpecializations;
-        }
-        if (profileData.servicesOffered) {
-          doctor.servicesOffered = profileData.servicesOffered;
-        }
-        if (profileData.consultationModes) {
-          doctor.consultationModes = profileData.consultationModes;
-        }
-        // Add similar lines for any other array fields
 
-        doctor.checkProfileCompletion();
+        doctor.profileCompleted = DoctorController.isProfileComplete(doctor);
+
         await doctor.save();
       } else {
         doctor = new Doctor({
           firebaseUid,
           ...profileData,
         });
-        doctor.checkProfileCompletion();
+        doctor.profileCompleted = DoctorController.isProfileComplete(doctor);
         await doctor.save();
       }
 
@@ -93,7 +99,7 @@ class DoctorController {
     }
   }
 
-  // Search doctors
+  // Search doctors (only show profileCompleted: true)
   static async searchDoctors(req, res) {
     try {
       const {
@@ -108,27 +114,21 @@ class DoctorController {
       } = req.query;
 
       let query = {
-        isVerified: true,
-        accountStatus: "active",
         profileCompleted: true,
       };
 
       if (specialty) {
         query.specializations = { $in: [specialty] };
       }
-
       if (city) {
         query["address.city"] = new RegExp(city, "i");
       }
-
       if (state) {
         query["address.state"] = new RegExp(state, "i");
       }
-
       if (minRating) {
         query.averageRating = { $gte: parseFloat(minRating) };
       }
-
       if (search) {
         query.$or = [
           { firstName: { $regex: search, $options: "i" } },
