@@ -7,6 +7,7 @@ import Register from './pages/Register.jsx'
 import PatientDashboard from './pages/PatientDashboard.jsx'
 import DoctorDashboard from './pages/DoctorDashboard.jsx'
 import VRTherapyApp from './VR/VRTherapyApp.jsx'
+import TherapyRoutines from './VR/TherapyRoutines.jsx' // NEW IMPORT
 import { Toaster } from "sonner";
 // Component to handle root route redirection
 const RootRedirect = () => {
@@ -41,7 +42,8 @@ const AppRoutes = () => {
         <Route path="/register" element={<Register />} />
         <Route path="/patient-dashboard" element={<PatientDashboard />} />
         <Route path="/doctor-dashboard" element={<DoctorDashboard />} />
-        <Route path="/vr-therapy" element={<VRTherapyApp />} />
+        <Route path="/therapy-routines" element={<TherapyRoutines />} /> {/* NEW ROUTE */}
+        <Route path="/vr-therapy/:therapyId" element={<VRTherapyApp />} /> {/* UPDATED ROUTE */}
       </Routes>
     </Router>
   );
