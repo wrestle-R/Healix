@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import { signOut, onAuthStateChanged, auth } from "../../firebase.config.js";
 import { useNavigate } from "react-router-dom";
@@ -31,13 +32,40 @@ const PatientDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("dashboard");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [patientProfile, setPatientProfile] = useState(null);
   const navigate = useNavigate();
   const { user: contextUser, logout } = useUser();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, () => setLoading(false));
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (!firebaseUser) {
+        navigate("/login");
+        return;
+      }
+      try {
+        const token = localStorage.getItem("token");
+        const url = `${
+          import.meta.env.VITE_API_URL || "http://localhost:5000"
+        }/api/patients/firebase/${firebaseUser.uid}`;
+        const res = await axios.get(url, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setPatientProfile(res.data.patient);
+      } catch (err) {
+        console.error("Failed to fetch patient profile:", err);
+        toast.error("Failed to fetch patient profile");
+      }
+      setLoading(false);
+    });
     return () => unsubscribe();
-  }, []);
+  }, [navigate]);
+
+  const displayFirstName = patientProfile?.firstName;
+  const displayLastName = patientProfile?.lastName;
+  const displayProfilePicture = patientProfile?.profilePicture;
+  const displayEmail = patientProfile?.email;
 
   const handleLogout = async () => {
     try {
@@ -76,12 +104,6 @@ const PatientDashboard = () => {
     },
   };
 
-  // Block dashboard if profile is not complete
-  if (contextUser && contextUser.profileCompleted === false) {
-    navigate("/patient-profile");
-    return null;
-  }
-
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -101,14 +123,12 @@ const PatientDashboard = () => {
           <div className="flex items-center space-x-4">
             <Avatar className="h-8 w-8">
               <AvatarImage
-                src={contextUser?.profilePicture}
-                alt={contextUser?.name}
+                src={displayProfilePicture}
+                alt={`${displayFirstName} ${displayLastName}`}
               />
               <AvatarFallback className="text-sm font-semibold">
-                {contextUser?.name
-                  ?.split(" ")
-                  .map((n) => n[0])
-                  .join("") || "P"}
+                {(displayFirstName?.[0] || "") + (displayLastName?.[0] || "") ||
+                  "P"}
               </AvatarFallback>
             </Avatar>
             <Button
@@ -138,22 +158,22 @@ const PatientDashboard = () => {
             <div className="flex items-center space-x-3">
               <Avatar className="h-12 w-12">
                 <AvatarImage
-                  src={contextUser?.profilePicture}
-                  alt={contextUser?.name}
+                  src={displayProfilePicture}
+                  alt={`${displayFirstName} ${displayLastName}`}
                 />
                 <AvatarFallback className="font-semibold text-lg">
-                  {contextUser?.name
-                    ?.split(" ")
-                    .map((n) => n[0])
-                    .join("") || "P"}
+                  {(displayFirstName?.[0] || "") +
+                    (displayLastName?.[0] || "") || "P"}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-foreground truncate">
-                  {contextUser?.name || "Patient"}
+                  {displayFirstName && displayLastName
+                    ? `${displayFirstName} ${displayLastName}`
+                    : "Patient"}
                 </p>
                 <p className="text-xs text-muted-foreground truncate">
-                  {contextUser?.email}
+                  {displayEmail}
                 </p>
               </div>
             </div>
@@ -241,22 +261,22 @@ const PatientDashboard = () => {
                   <div className="flex items-center space-x-3">
                     <Avatar className="h-12 w-12">
                       <AvatarImage
-                        src={contextUser?.profilePicture}
-                        alt={contextUser?.name}
+                        src={displayProfilePicture}
+                        alt={`${displayFirstName} ${displayLastName}`}
                       />
                       <AvatarFallback className="font-semibold text-lg">
-                        {contextUser?.name
-                          ?.split(" ")
-                          .map((n) => n[0])
-                          .join("") || "P"}
+                        {(displayFirstName?.[0] || "") +
+                          (displayLastName?.[0] || "") || "P"}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-foreground truncate">
-                        {contextUser?.name || "Patient"}
+                        {displayFirstName && displayLastName
+                          ? `${displayFirstName} ${displayLastName}`
+                          : "Patient"}
                       </p>
                       <p className="text-xs text-muted-foreground truncate">
-                        {contextUser?.email}
+                        {displayEmail}
                       </p>
                     </div>
                   </div>
@@ -332,7 +352,7 @@ const PatientDashboard = () => {
             initial="hidden"
             animate="visible"
             transition={{ duration: 0.22, ease: "easeOut" }}
-            className="space-y-6 max-w-7xl w-full mx-auto" 
+            className="space-y-6 max-w-7xl w-full mx-auto"
           >
             {/* Tab Content */}
             {activeTab === "dashboard" && (
@@ -342,7 +362,11 @@ const PatientDashboard = () => {
                     <div className="flex items-center justify-between">
                       <div>
                         <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground mb-2 font-serif">
-                          Welcome back, {contextUser?.name || "Patient"}!
+                          Welcome back,{" "}
+                          {displayFirstName && displayLastName
+                            ? `${displayFirstName} ${displayLastName}`
+                            : "Patient"}
+                          !
                         </h1>
                         <p className="text-lg md:text-xl text-muted-foreground">
                           Take control of your health journey
@@ -355,21 +379,18 @@ const PatientDashboard = () => {
                       >
                         <Avatar className="h-12 w-12 md:h-16 md:w-16">
                           <AvatarImage
-                            src={contextUser?.profilePicture}
-                            alt={contextUser?.name}
+                            src={displayProfilePicture}
+                            alt={`${displayFirstName} ${displayLastName}`}
                           />
                           <AvatarFallback className="text-lg md:text-xl font-semibold">
-                            {contextUser?.name
-                              ?.split(" ")
-                              .map((n) => n[0])
-                              .join("") || "P"}
+                            {(displayFirstName?.[0] || "") +
+                              (displayLastName?.[0] || "") || "P"}
                           </AvatarFallback>
                         </Avatar>
                       </motion.div>
                     </div>
                   </CardContent>
                 </Card>
-                {/* You can add more dynamic stats or quick actions here if you want */}
               </motion.div>
             )}
 

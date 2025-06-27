@@ -19,6 +19,7 @@ import {
 } from "react-icons/fa";
 import { useUser } from "../context/UserContext.jsx";
 import { toast } from "sonner";
+import axios from "axios";
 
 import DoctorAppointmentsList from "@/components/doctor/appointments/DoctorAppointmentsList";
 import DoctorScheduleCalendar from "@/components/doctor/appointments/DoctorScheduleCalendar";
@@ -29,13 +30,40 @@ const DoctorDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("dashboard");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [doctorProfile, setDoctorProfile] = useState(null);
   const navigate = useNavigate();
-  const { user: contextUser, logout } = useUser();
+  const { logout } = useUser();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, () => setLoading(false));
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (!firebaseUser) {
+        navigate("/login");
+        return;
+      }
+      try {
+        const token = localStorage.getItem("token");
+        const url = `${
+          import.meta.env.VITE_API_URL || "http://localhost:5000"
+        }/api/doctors/firebase/${firebaseUser.uid}`;
+        const res = await axios.get(url, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setDoctorProfile(res.data.doctor);
+      } catch (err) {
+        console.error("Failed to fetch doctor profile:", err);
+        toast.error("Failed to fetch doctor profile");
+      }
+      setLoading(false);
+    });
     return () => unsubscribe();
-  }, []);
+  }, [navigate]);
+
+  const displayFirstName = doctorProfile?.firstName;
+  const displayLastName = doctorProfile?.lastName;
+  const displayProfilePicture = doctorProfile?.profilePicture;
+  const displayEmail = doctorProfile?.email;
 
   const handleLogout = async () => {
     try {
@@ -55,7 +83,6 @@ const DoctorDashboard = () => {
     { id: "calendar", label: "Calendar", icon: FaCalendarPlus },
     { id: "availability", label: "Availability", icon: FaClock },
     { id: "profile", label: "Profile", icon: FaUser },
-    // Add more as needed
   ];
 
   const containerVariants = {
@@ -93,14 +120,12 @@ const DoctorDashboard = () => {
           <div className="flex items-center space-x-4">
             <Avatar className="h-8 w-8">
               <AvatarImage
-                src={contextUser?.profilePicture}
-                alt={contextUser?.name}
+                src={displayProfilePicture}
+                alt={`${displayFirstName} ${displayLastName}`}
               />
               <AvatarFallback className="text-sm font-semibold">
-                {contextUser?.name
-                  ?.split(" ")
-                  .map((n) => n[0])
-                  .join("") || "D"}
+                {(displayFirstName?.[0] || "") + (displayLastName?.[0] || "") ||
+                  "D"}
               </AvatarFallback>
             </Avatar>
             <Button
@@ -119,7 +144,7 @@ const DoctorDashboard = () => {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.18, ease: "linear" }} 
+          transition={{ duration: 0.18, ease: "linear" }}
           className="hidden lg:flex w-64 bg-background rounded-xl shadow-lg border border-border/50 h-[95vh] sticky top-[2vh] flex-col z-30 m-4 ml-4"
         >
           {/* Header */}
@@ -130,22 +155,23 @@ const DoctorDashboard = () => {
             <div className="flex items-center space-x-3">
               <Avatar className="h-12 w-12">
                 <AvatarImage
-                  src={contextUser?.profilePicture}
-                  alt={contextUser?.name}
+                  src={displayProfilePicture}
+                  alt={`${displayFirstName} ${displayLastName}`}
                 />
                 <AvatarFallback className="font-semibold text-lg">
-                  {contextUser?.name
-                    ?.split(" ")
-                    .map((n) => n[0])
-                    .join("") || "D"}
+                  {(displayFirstName?.[0] || "") +
+                    (displayLastName?.[0] || "") || "D"}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-foreground truncate">
-                  Dr. {contextUser?.name || "Doctor"}
+                  Dr.{" "}
+                  {displayFirstName && displayLastName
+                    ? `${displayFirstName} ${displayLastName}`
+                    : "Doctor"}
                 </p>
                 <p className="text-xs text-muted-foreground truncate">
-                  {contextUser?.email}
+                  {displayEmail}
                 </p>
               </div>
             </div>
@@ -233,22 +259,23 @@ const DoctorDashboard = () => {
                   <div className="flex items-center space-x-3">
                     <Avatar className="h-12 w-12">
                       <AvatarImage
-                        src={contextUser?.profilePicture}
-                        alt={contextUser?.name}
+                        src={displayProfilePicture}
+                        alt={`${displayFirstName} ${displayLastName}`}
                       />
                       <AvatarFallback className="font-semibold text-lg">
-                        {contextUser?.name
-                          ?.split(" ")
-                          .map((n) => n[0])
-                          .join("") || "D"}
+                        {(displayFirstName?.[0] || "") +
+                          (displayLastName?.[0] || "") || "D"}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-foreground truncate">
-                        Dr. {contextUser?.name || "Doctor"}
+                        Dr.{" "}
+                        {displayFirstName && displayLastName
+                          ? `${displayFirstName} ${displayLastName}`
+                          : "Doctor"}
                       </p>
                       <p className="text-xs text-muted-foreground truncate">
-                        {contextUser?.email}
+                        {displayEmail}
                       </p>
                     </div>
                   </div>
@@ -334,7 +361,11 @@ const DoctorDashboard = () => {
                     <div className="flex items-center justify-between">
                       <div>
                         <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground mb-2 font-serif">
-                          Welcome back, Dr. {contextUser?.name || "Doctor"}!
+                          Welcome back, Dr.{" "}
+                          {displayFirstName && displayLastName
+                            ? `${displayFirstName} ${displayLastName}`
+                            : "Doctor"}
+                          !
                         </h1>
                         <p className="text-lg md:text-xl text-muted-foreground">
                           Manage your patients and appointments with ease
@@ -347,14 +378,12 @@ const DoctorDashboard = () => {
                       >
                         <Avatar className="h-12 w-12 md:h-16 md:w-16">
                           <AvatarImage
-                            src={contextUser?.profilePicture}
-                            alt={contextUser?.name}
+                            src={displayProfilePicture}
+                            alt={`${displayFirstName} ${displayLastName}`}
                           />
                           <AvatarFallback className="text-lg md:text-xl font-semibold">
-                            {contextUser?.name
-                              ?.split(" ")
-                              .map((n) => n[0])
-                              .join("") || "D"}
+                            {(displayFirstName?.[0] || "") +
+                              (displayLastName?.[0] || "") || "D"}
                           </AvatarFallback>
                         </Avatar>
                       </motion.div>
