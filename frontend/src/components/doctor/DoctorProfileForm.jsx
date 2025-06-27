@@ -35,6 +35,28 @@ const initialState = {
     },
   ],
   verificationDocuments: [],
+  subSpecializations: [],
+  hospitalAffiliations: [
+    {
+      name: "",
+      position: "",
+      address: "",
+      phone: "",
+    },
+  ],
+  clinicAddress: {
+    name: "",
+    street: "",
+    city: "",
+    state: "",
+    zipCode: "",
+    phone: "",
+  },
+  averageRating: 0,
+  totalReviews: 0,
+  profileCompleted: false,
+  totalPatients: 0,
+  totalAppointments: 0,
 };
 
 const DoctorProfileForm = () => {
@@ -42,6 +64,13 @@ const DoctorProfileForm = () => {
   const [profile, setProfile] = useState(initialState);
   const [loading, setLoading] = useState(false);
   const [specializationInput, setSpecializationInput] = useState("");
+  const [subSpecializationInput, setSubSpecializationInput] = useState("");
+  const [hospitalAffiliations, setHospitalAffiliations] = useState(
+    initialState.hospitalAffiliations
+  );
+  const [clinicAddress, setClinicAddress] = useState(
+    initialState.clinicAddress
+  );
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -67,6 +96,16 @@ const DoctorProfileForm = () => {
               : initialState.education,
           verificationDocuments: data.doctor.verificationDocuments || [],
         });
+        setHospitalAffiliations(
+          data.doctor.hospitalAffiliations?.length > 0
+            ? data.doctor.hospitalAffiliations
+            : initialState.hospitalAffiliations
+        );
+        setClinicAddress(
+          data.doctor.clinicAddress
+            ? { ...initialState.clinicAddress, ...data.doctor.clinicAddress }
+            : initialState.clinicAddress
+        );
       }
       setLoading(false);
     };
@@ -106,6 +145,29 @@ const DoctorProfileForm = () => {
     }));
   };
 
+  const handleSubSpecializationAdd = () => {
+    if (
+      subSpecializationInput &&
+      !profile.subSpecializations.includes(subSpecializationInput)
+    ) {
+      setProfile((prev) => ({
+        ...prev,
+        subSpecializations: [
+          ...prev.subSpecializations,
+          subSpecializationInput,
+        ],
+      }));
+      setSubSpecializationInput("");
+    }
+  };
+
+  const handleSubSpecializationRemove = (spec) => {
+    setProfile((prev) => ({
+      ...prev,
+      subSpecializations: prev.subSpecializations.filter((s) => s !== spec),
+    }));
+  };
+
   const handleEducationChange = (idx, e) => {
     const { name, value } = e.target;
     setProfile((prev) => {
@@ -131,6 +193,38 @@ const DoctorProfileForm = () => {
       education.splice(idx, 1);
       return { ...prev, education };
     });
+  };
+
+  const handleHospitalAffiliationChange = (idx, e) => {
+    const { name, value } = e.target;
+    setHospitalAffiliations((prev) => {
+      const updated = [...prev];
+      updated[idx][name] = value;
+      return updated;
+    });
+  };
+
+  const addHospitalAffiliation = () => {
+    setHospitalAffiliations((prev) => [
+      ...prev,
+      { name: "", position: "", address: "", phone: "" },
+    ]);
+  };
+
+  const removeHospitalAffiliation = (idx) => {
+    setHospitalAffiliations((prev) => {
+      const updated = [...prev];
+      updated.splice(idx, 1);
+      return updated;
+    });
+  };
+
+  const handleClinicAddressChange = (e) => {
+    const { name, value } = e.target;
+    setClinicAddress((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   // Add a helper to check if all required fields are filled
@@ -170,6 +264,10 @@ const DoctorProfileForm = () => {
     // Remove fields that should not be sent to backend
     const { _id, firebaseUid, createdAt, updatedAt, __v, ...safeProfile } =
       profile;
+
+    // Attach new fields
+    safeProfile.hospitalAffiliations = hospitalAffiliations;
+    safeProfile.clinicAddress = clinicAddress;
 
     // Remove empty address if all fields are empty (optional, for consistency)
     if (
@@ -424,6 +522,42 @@ const DoctorProfileForm = () => {
             </div>
           </div>
           <div>
+            <label className="block text-sm mb-1">Sub-Specializations</label>
+            <div className="flex gap-2 mb-2">
+              <input
+                type="text"
+                className="border rounded px-2 py-1 flex-1"
+                value={subSpecializationInput}
+                onChange={(e) => setSubSpecializationInput(e.target.value)}
+                placeholder="Add sub-specialization"
+              />
+              <Button
+                type="button"
+                onClick={handleSubSpecializationAdd}
+                disabled={!subSpecializationInput}
+              >
+                Add
+              </Button>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {profile.subSpecializations?.map((spec) => (
+                <span
+                  key={spec}
+                  className="bg-blue-50 text-blue-700 px-2 py-1 rounded text-xs flex items-center"
+                >
+                  {spec}
+                  <button
+                    type="button"
+                    className="ml-1 text-red-500"
+                    onClick={() => handleSubSpecializationRemove(spec)}
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+          </div>
+          <div>
             <label className="block text-sm mb-1">Bio</label>
             <textarea
               name="bio"
@@ -498,6 +632,120 @@ const DoctorProfileForm = () => {
             >
               Add Education
             </Button>
+          </div>
+          <div>
+            <label className="block text-sm mb-1">Hospital Affiliations</label>
+            {hospitalAffiliations.map((aff, idx) => (
+              <div
+                key={idx}
+                className="flex flex-col md:flex-row gap-2 mb-2 items-center"
+              >
+                <input
+                  type="text"
+                  name="name"
+                  placeholder="Hospital Name"
+                  className="border rounded px-2 py-1 flex-1"
+                  value={aff.name}
+                  onChange={(e) => handleHospitalAffiliationChange(idx, e)}
+                />
+                <input
+                  type="text"
+                  name="position"
+                  placeholder="Position"
+                  className="border rounded px-2 py-1 flex-1"
+                  value={aff.position}
+                  onChange={(e) => handleHospitalAffiliationChange(idx, e)}
+                />
+                <input
+                  type="text"
+                  name="address"
+                  placeholder="Address"
+                  className="border rounded px-2 py-1 flex-1"
+                  value={aff.address}
+                  onChange={(e) => handleHospitalAffiliationChange(idx, e)}
+                />
+                <input
+                  type="text"
+                  name="phone"
+                  placeholder="Phone"
+                  className="border rounded px-2 py-1 flex-1"
+                  value={aff.phone}
+                  onChange={(e) => handleHospitalAffiliationChange(idx, e)}
+                />
+                {hospitalAffiliations.length > 1 && (
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => removeHospitalAffiliation(idx)}
+                  >
+                    Remove
+                  </Button>
+                )}
+              </div>
+            ))}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={addHospitalAffiliation}
+              className="mt-2"
+            >
+              Add Hospital Affiliation
+            </Button>
+          </div>
+          <div>
+            <label className="block text-sm mb-1">Clinic Address</label>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+              <input
+                type="text"
+                name="name"
+                placeholder="Clinic Name"
+                className="border rounded px-2 py-1"
+                value={clinicAddress.name}
+                onChange={handleClinicAddressChange}
+              />
+              <input
+                type="text"
+                name="street"
+                placeholder="Street"
+                className="border rounded px-2 py-1"
+                value={clinicAddress.street}
+                onChange={handleClinicAddressChange}
+              />
+              <input
+                type="text"
+                name="city"
+                placeholder="City"
+                className="border rounded px-2 py-1"
+                value={clinicAddress.city}
+                onChange={handleClinicAddressChange}
+              />
+              <input
+                type="text"
+                name="state"
+                placeholder="State"
+                className="border rounded px-2 py-1"
+                value={clinicAddress.state}
+                onChange={handleClinicAddressChange}
+              />
+              <input
+                type="text"
+                name="zipCode"
+                placeholder="ZIP Code"
+                className="border rounded px-2 py-1"
+                value={clinicAddress.zipCode}
+                onChange={handleClinicAddressChange}
+              />
+              <input
+                type="text"
+                name="phone"
+                placeholder="Phone"
+                className="border rounded px-2 py-1"
+                value={clinicAddress.phone}
+                onChange={handleClinicAddressChange}
+              />
+            </div>
           </div>
           <Button type="submit" className="mt-4" disabled={loading}>
             {loading ? "Saving..." : "Save Profile"}

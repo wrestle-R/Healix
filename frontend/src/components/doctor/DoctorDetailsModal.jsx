@@ -13,6 +13,9 @@ import {
   Phone,
   Star,
   User,
+  Shield,
+  Layers,
+  Building2,
 } from "lucide-react";
 
 const InfoRow = ({ icon: Icon, label, value }) => (
@@ -25,6 +28,13 @@ const InfoRow = ({ icon: Icon, label, value }) => (
 
 const DoctorDetailsModal = ({ open, onClose, doctor, onBook }) => {
   if (!doctor) return null;
+
+  const validHospitalAffiliations = Array.isArray(doctor.hospitalAffiliations)
+    ? doctor.hospitalAffiliations.filter(
+        (hosp) =>
+          hosp && (hosp.name || hosp.position || hosp.address || hosp.phone)
+      )
+    : [];
 
   return (
     <Dialog open={open} onClose={onClose} className="relative z-50">
@@ -49,9 +59,17 @@ const DoctorDetailsModal = ({ open, onClose, doctor, onBook }) => {
                 {/* Left: Avatar & Basic Info */}
                 <div className="flex flex-col items-center md:items-start md:w-1/3 gap-2">
                   <Avatar className="w-24 h-24 mb-2">
-                    <AvatarFallback>
-                      <User className="w-12 h-12 text-primary" />
-                    </AvatarFallback>
+                    {doctor.profilePicture ? (
+                      <img
+                        src={doctor.profilePicture}
+                        alt="Doctor"
+                        className="w-24 h-24 rounded-full object-cover"
+                      />
+                    ) : (
+                      <AvatarFallback>
+                        <User className="w-12 h-12 text-primary" />
+                      </AvatarFallback>
+                    )}
                   </Avatar>
                   <h2 className="text-2xl font-bold text-center md:text-left">
                     Dr. {doctor.firstName} {doctor.lastName}
@@ -62,6 +80,31 @@ const DoctorDetailsModal = ({ open, onClose, doctor, onBook }) => {
                         {spec}
                       </Badge>
                     ))}
+                  </div>
+                  {/* Sub-Specializations */}
+                  {doctor.subSpecializations?.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {doctor.subSpecializations.map((sub, i) => (
+                        <Badge
+                          key={i}
+                          variant="outline"
+                          className="text-xs border-blue-400 text-blue-700"
+                        >
+                          <Layers className="w-3 h-3 mr-1 inline" /> {sub}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                  {/* Total Patients & Appointments */}
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <Shield className="w-4 h-4" /> Patients:{" "}
+                      {doctor.totalPatients || 0}
+                    </span>
+                    <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <Building2 className="w-4 h-4" /> Appointments:{" "}
+                      {doctor.totalAppointments || 0}
+                    </span>
                   </div>
                   <div className="flex items-center gap-1 mt-2">
                     <Star className="w-4 h-4 text-yellow-400" />
@@ -99,10 +142,13 @@ const DoctorDetailsModal = ({ open, onClose, doctor, onBook }) => {
                         .filter(Boolean)
                         .join(", ")}
                     />
-                    <InfoRow
-                      label="Consultation Fee"
-                      value={`₹${doctor.consultationFee}`}
-                    />
+                    {/* Show consultation fee only if present */}
+                    {doctor.consultationFee && (
+                      <InfoRow
+                        label="Consultation Fee"
+                        value={`₹${doctor.consultationFee}`}
+                      />
+                    )}
                     <InfoRow
                       label="Medical License"
                       value={doctor.medicalLicenseNumber}
@@ -131,16 +177,22 @@ const DoctorDetailsModal = ({ open, onClose, doctor, onBook }) => {
                       </ul>
                     </section>
                   )}
-                  {doctor.hospitalAffiliations?.length > 0 && (
+                  {validHospitalAffiliations.length > 0 && (
                     <section className="mt-4">
                       <h3 className="font-semibold flex items-center gap-1 mb-1">
                         <Hospital className="w-4 h-4" /> Hospital Affiliations
                       </h3>
                       <ul className="list-disc ml-6 text-sm text-muted-foreground">
-                        {doctor.hospitalAffiliations.map((hosp, idx) => (
+                        {validHospitalAffiliations.map((hosp, idx) => (
                           <li key={idx}>
-                            {hosp.name} {hosp.position && `- ${hosp.position}`}
+                            {hosp.name}
+                            {hosp.position && ` - ${hosp.position}`}
                             {hosp.address && `, ${hosp.address}`}
+                            {hosp.phone && (
+                              <span className="ml-2 text-xs text-muted-foreground">
+                                ({hosp.phone})
+                              </span>
+                            )}
                           </li>
                         ))}
                       </ul>
@@ -150,10 +202,18 @@ const DoctorDetailsModal = ({ open, onClose, doctor, onBook }) => {
                     <section className="mt-4">
                       <h3 className="font-semibold mb-1">Clinic</h3>
                       <p className="text-sm text-muted-foreground">
-                        {doctor.clinicAddress.name},{" "}
-                        {doctor.clinicAddress.street},{" "}
-                        {doctor.clinicAddress.city},{" "}
-                        {doctor.clinicAddress.state}
+                        {doctor.clinicAddress.name}
+                        {doctor.clinicAddress.street &&
+                          `, ${doctor.clinicAddress.street}`}
+                        {doctor.clinicAddress.city &&
+                          `, ${doctor.clinicAddress.city}`}
+                        {doctor.clinicAddress.state &&
+                          `, ${doctor.clinicAddress.state}`}
+                        {doctor.clinicAddress.phone && (
+                          <span className="ml-2 text-xs text-muted-foreground">
+                            ({doctor.clinicAddress.phone})
+                          </span>
+                        )}
                       </p>
                     </section>
                   )}
