@@ -56,7 +56,7 @@ const PatientDashboard = () => {
     { id: "appointments", label: "Appointments", icon: FaCalendarCheck },
     { id: "calendar", label: "Calendar", icon: FaCalendarPlus },
     { id: "profile", label: "Profile", icon: FaUser },
-     { id: "chat", label: "Chat", icon: FaComments },
+    { id: "chat", label: "Chat", icon: FaComments },
     // Add more as needed
   ];
 
@@ -64,16 +64,15 @@ const PatientDashboard = () => {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: { staggerChildren: 0.1 },
+      transition: { staggerChildren: 0.08 },
     },
   };
 
   const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
+    hidden: { opacity: 0 },
     visible: {
-      y: 0,
       opacity: 1,
-      transition: { type: "spring", stiffness: 100 },
+      transition: { duration: 0.22, ease: "easeOut" },
     },
   };
 
@@ -126,9 +125,9 @@ const PatientDashboard = () => {
       <div className="flex">
         {/* Desktop Sidebar */}
         <motion.div
-          initial={{ x: -100, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          transition={{ type: "spring", stiffness: 100 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.18, ease: "linear" }}
           className="hidden lg:flex w-64 bg-background rounded-xl shadow-lg border border-border/50 h-[95vh] sticky top-[2vh] flex-col z-30 m-4 ml-4"
         >
           {/* Header */}
@@ -332,13 +331,13 @@ const PatientDashboard = () => {
             variants={containerVariants}
             initial="hidden"
             animate="visible"
-            className="space-y-6 max-w-7xl mx-auto"
+            transition={{ duration: 0.22, ease: "easeOut" }}
+            className="space-y-6 max-w-7xl w-full mx-auto" 
           >
             {/* Tab Content */}
             {activeTab === "dashboard" && (
               <motion.div variants={itemVariants}>
-                {/* You can keep your welcome and stats here, but remove hardcoded appointment/doctor names */}
-                <Card className="bg-background/50 backdrop-blur-sm border-border/50 mb-6">
+                <Card className="bg-background/50 backdrop-blur-sm border-border/50 mb-6 mx-4">
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                       <div>
@@ -394,14 +393,16 @@ const PatientDashboard = () => {
 
             {activeTab === "chat" && (
               <motion.div variants={itemVariants}>
-                <TalkingDoctorChatbot/>
+                <TalkingDoctorChatbot />
               </motion.div>
             )}
 
             {/* Book Appointment Quick Action */}
             {activeTab === "dashboard" && (
               <motion.div variants={itemVariants}>
-                <BookAppointment user={contextUser} />
+                <div className="max-w-7xl w-full mx-auto">
+                  <BookAppointment user={contextUser} />
+                </div>
               </motion.div>
             )}
           </motion.div>

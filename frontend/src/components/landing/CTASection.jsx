@@ -11,9 +11,9 @@ const CTASection = () => {
     <section className="py-20">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.8 }}
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          transition={{ duration: 0.35, ease: "easeOut" }}
           viewport={{ once: true }}
         >
           <Card className="bg-primary text-primary-foreground">

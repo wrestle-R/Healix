@@ -2,10 +2,7 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { signOut, onAuthStateChanged, auth } from "../../firebase.config.js";
 import { useNavigate } from "react-router-dom";
-import {
-  Card,
-  CardContent,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
@@ -65,16 +62,15 @@ const DoctorDashboard = () => {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: { staggerChildren: 0.1 },
+      transition: { staggerChildren: 0.08 },
     },
   };
 
   const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
+    hidden: { opacity: 0 },
     visible: {
-      y: 0,
       opacity: 1,
-      transition: { type: "spring", stiffness: 100 },
+      transition: { duration: 0.22, ease: "easeOut" },
     },
   };
 
@@ -121,9 +117,9 @@ const DoctorDashboard = () => {
       <div className="flex">
         {/* Desktop Sidebar */}
         <motion.div
-          initial={{ x: -100, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          transition={{ type: "spring", stiffness: 100 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.18, ease: "linear" }} 
           className="hidden lg:flex w-64 bg-background rounded-xl shadow-lg border border-border/50 h-[95vh] sticky top-[2vh] flex-col z-30 m-4 ml-4"
         >
           {/* Header */}
@@ -181,7 +177,6 @@ const DoctorDashboard = () => {
 
           {/* Settings & Logout */}
           <div className="p-4 space-y-2">
-
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
@@ -328,6 +323,7 @@ const DoctorDashboard = () => {
             variants={containerVariants}
             initial="hidden"
             animate="visible"
+            transition={{ duration: 0.22, ease: "easeOut" }}
             className="space-y-6 max-w-7xl mx-auto"
           >
             {/* Tab Content */}

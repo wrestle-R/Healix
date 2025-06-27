@@ -21,9 +21,9 @@ const ServicesSection = () => {
     <section id="services" className="py-20 bg-muted/30">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          transition={{ duration: 0.35, ease: "easeOut" }}
           viewport={{ once: true }}
           className="text-center mb-16"
         >
@@ -39,14 +39,13 @@ const ServicesSection = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 auto-rows-auto">
           {/* Large card - spans 2 columns */}
           <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            whileHover={{ y: -10, transition: { duration: 0.3 } }}
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
             viewport={{ once: true }}
             className="lg:col-span-2"
           >
-            <Card className="h-full hover:shadow-lg transition-all duration-300 border-border/40">
+            <Card className="text-center border border-border/40 hover:border-primary hover:shadow-lg transition-all duration-150 bg-background">
               <CardHeader className="text-center">
                 <div className="inline-flex p-4 rounded-full bg-blue-100 mb-4 text-blue-600 mx-auto">
                   <FaStethoscope className="h-8 w-8" />
@@ -67,13 +66,12 @@ const ServicesSection = () => {
 
           {/* Regular card */}
           <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            whileHover={{ y: -10, transition: { duration: 0.3 } }}
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
             viewport={{ once: true }}
           >
-            <Card className="h-full hover:shadow-lg transition-all duration-300 border-border/40">
+            <Card className="text-center border border-border/40 hover:border-primary hover:shadow-lg transition-all duration-150 bg-background">
               <CardHeader className="text-center">
                 <div className="inline-flex p-4 rounded-full bg-red-100 mb-4 text-red-600 mx-auto">
                   <FaAmbulance className="h-8 w-8" />
@@ -92,13 +90,12 @@ const ServicesSection = () => {
 
           {/* Regular card */}
           <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            whileHover={{ y: -10, transition: { duration: 0.3 } }}
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
             viewport={{ once: true }}
           >
-            <Card className="h-full hover:shadow-lg transition-all duration-300 border-border/40">
+            <Card className="text-center border border-border/40 hover:border-primary hover:shadow-lg transition-all duration-150 bg-background">
               <CardHeader className="text-center">
                 <div className="inline-flex p-4 rounded-full bg-green-100 mb-4 text-green-600 mx-auto">
                   <FaPills className="h-8 w-8" />
@@ -117,13 +114,12 @@ const ServicesSection = () => {
 
           {/* Regular card */}
           <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            whileHover={{ y: -10, transition: { duration: 0.3 } }}
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
             viewport={{ once: true }}
           >
-            <Card className="h-full hover:shadow-lg transition-all duration-300 border-border/40">
+            <Card className="text-center border border-border/40 hover:border-primary hover:shadow-lg transition-all duration-150 bg-background">
               <CardHeader className="text-center">
                 <div className="inline-flex p-4 rounded-full bg-purple-100 mb-4 text-purple-600 mx-auto">
                   <FaChartLine className="h-8 w-8" />
@@ -142,13 +138,12 @@ const ServicesSection = () => {
 
           {/* Regular card */}
           <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            whileHover={{ y: -10, transition: { duration: 0.3 } }}
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
             viewport={{ once: true }}
           >
-            <Card className="h-full hover:shadow-lg transition-all duration-300 border-border/40">
+            <Card className="text-center border border-border/40 hover:border-primary hover:shadow-lg transition-all duration-150 bg-background">
               <CardHeader className="text-center">
                 <div className="inline-flex p-4 rounded-full bg-orange-100 mb-4 text-orange-600 mx-auto">
                   <FaShieldAlt className="h-8 w-8" />
@@ -167,14 +162,13 @@ const ServicesSection = () => {
 
           {/* Wide card - spans 2 columns */}
           <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.5 }}
-            whileHover={{ y: -10, transition: { duration: 0.3 } }}
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
             viewport={{ once: true }}
             className="lg:col-span-2"
           >
-            <Card className="h-full hover:shadow-lg transition-all duration-300 border-border/40">
+            <Card className="text-center border border-border/40 hover:border-primary hover:shadow-lg transition-all duration-150 bg-background">
               <CardHeader className="text-center">
                 <div className="inline-flex p-4 rounded-full bg-indigo-100 mb-4 text-indigo-600 mx-auto">
                   <FaClock className="h-8 w-8" />
