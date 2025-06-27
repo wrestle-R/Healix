@@ -279,6 +279,10 @@ const PatientProfileForm = () => {
       profile.emergencyContacts.length > 0 &&
       profile.emergencyContacts.every(
         (c) => c.name && c.relationship && c.phoneNumber
+      ) &&
+      // Validate that all filled allergies have severity selected
+      profile.allergies.every(
+        (allergy) => !allergy.allergen || (allergy.allergen && allergy.severity)
       )
       // maritalStatus, address, and allergens are NOT required for completion
     );
@@ -696,7 +700,7 @@ const PatientProfileForm = () => {
                   value={al.severity}
                   onChange={(e) => handleAllergyChange(idx, e)}
                 >
-                  <option value="">Severity</option>
+                  <option value="" disabled>Severity</option>
                   {allergySeverities.map((s) => (
                     <option key={s} value={s}>
                       {s.charAt(0).toUpperCase() + s.slice(1)}
