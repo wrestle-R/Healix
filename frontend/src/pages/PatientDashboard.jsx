@@ -15,6 +15,7 @@ import {
   FaTachometerAlt,
   FaBars,
   FaTimes,
+  FaComments,
 } from "react-icons/fa";
 import { useUser } from "../context/UserContext.jsx";
 import { toast } from "sonner";
@@ -24,6 +25,7 @@ import BookAppointment from "@/components/patient/appointments/BookAppointment";
 import PatientAppointmentsList from "@/components/patient/appointments/PatientAppointmentsList";
 import PatientProfileForm from "@/components/patient/PatientProfileForm";
 import PatientScheduleCalendar from "@/components/patient/appointments/PatientScheduleCalendar";
+import TalkingDoctorChatbot from "@/components/ChatBot/DoctorModel.jsx";
 
 const PatientDashboard = () => {
   const [loading, setLoading] = useState(true);
@@ -54,6 +56,7 @@ const PatientDashboard = () => {
     { id: "appointments", label: "Appointments", icon: FaCalendarCheck },
     { id: "calendar", label: "Calendar", icon: FaCalendarPlus },
     { id: "profile", label: "Profile", icon: FaUser },
+     { id: "chat", label: "Chat", icon: FaComments },
     // Add more as needed
   ];
 
@@ -386,6 +389,12 @@ const PatientDashboard = () => {
             {activeTab === "profile" && (
               <motion.div variants={itemVariants}>
                 <PatientProfileForm />
+              </motion.div>
+            )}
+
+            {activeTab === "chat" && (
+              <motion.div variants={itemVariants}>
+                <TalkingDoctorChatbot/>
               </motion.div>
             )}
 
