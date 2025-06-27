@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Calendar, Clock, MapPin, Star, Search, User, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -29,13 +29,8 @@ const BookAppointment = ({ user }) => {
   const [profileChecked, setProfileChecked] = useState(false);
   const [profileComplete, setProfileComplete] = useState(true);
 
+  const debounceTimeout = useRef(null);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    fetchSpecializations();
-    fetchCities();
-    searchDoctors();
-  }, []);
 
   useEffect(() => {
     // Check patient profile completion before allowing booking
@@ -59,6 +54,24 @@ const BookAppointment = ({ user }) => {
     };
     checkProfile();
   }, [user]);
+
+  useEffect(() => {
+    if (!profileChecked || !profileComplete) return;
+    if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
+    debounceTimeout.current = setTimeout(() => {
+      searchDoctors();
+    }, 400);
+    return () => clearTimeout(debounceTimeout.current);
+    // eslint-disable-next-line
+  }, [
+    filters.specialty,
+    filters.city,
+    filters.date,
+    filters.minRating,
+    filters.search,
+    profileChecked,
+    profileComplete,
+  ]);
 
   const fetchSpecializations = async () => {
     try {
@@ -104,7 +117,8 @@ const BookAppointment = ({ user }) => {
   };
 
   const handleSearch = () => {
-    searchDoctors();
+    // Optionally, you can force an immediate search here if needed:
+    // searchDoctors();
   };
 
   const handleBookAppointment = (doctor) => {
