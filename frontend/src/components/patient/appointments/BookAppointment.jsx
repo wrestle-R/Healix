@@ -4,9 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
-import moment from "moment";
 import DoctorDetailsModal from "@/components/doctor/DoctorDetailsModal";
 import BookAppointmentModal from "./BookAppointmentModal";
+import { useNavigate } from "react-router-dom";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -26,12 +26,39 @@ const BookAppointment = ({ user }) => {
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [showDoctorModal, setShowDoctorModal] = useState(false);
   const [doctorDetails, setDoctorDetails] = useState(null);
+  const [profileChecked, setProfileChecked] = useState(false);
+  const [profileComplete, setProfileComplete] = useState(true);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchSpecializations();
     fetchCities();
     searchDoctors();
   }, []);
+
+  useEffect(() => {
+    // Check patient profile completion before allowing booking
+    const checkProfile = async () => {
+      if (!user) return;
+      try {
+        const token = localStorage.getItem("token");
+        const res = await fetch(`${API_URL}/api/patients/${user.id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        if (data.success && data.patient) {
+          setProfileComplete(!!data.patient.profileCompleted);
+        } else {
+          setProfileComplete(false);
+        }
+      } catch {
+        setProfileComplete(false);
+      }
+      setProfileChecked(true);
+    };
+    checkProfile();
+  }, [user]);
 
   const fetchSpecializations = async () => {
     try {
@@ -98,6 +125,27 @@ const BookAppointment = ({ user }) => {
       setShowDoctorModal(false);
     }
   };
+
+  if (!profileChecked) {
+    return (
+      <div className="flex items-center justify-center min-h-[40vh]">
+        <div className="text-muted-foreground">Checking profile...</div>
+      </div>
+    );
+  }
+
+  if (!profileComplete) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[40vh]">
+        <div className="text-xl font-semibold mb-2 text-destructive">
+          Please complete your profile to book an appointment.
+        </div>
+        <Button onClick={() => navigate("/profile")} className="mt-2">
+          Go to Profile
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto p-6">
