@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Dialog } from "@headlessui/react";
 import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
+import { X, CalendarPlus, CalendarCheck } from "lucide-react";
 import CalendarSlotPicker from "./CalendarSlotPicker";
 import { toast } from "sonner";
 
@@ -15,9 +15,34 @@ const BookAppointmentModal = ({ open, onClose, doctor, user }) => {
   });
   const [loading, setLoading] = useState(false);
   const [symptomsInput, setSymptomsInput] = useState("");
+  const [googleConnected, setGoogleConnected] = useState(false);
+  const [checkingGoogleStatus, setCheckingGoogleStatus] = useState(false);
+
+  // Check Google Calendar connection status
+  useEffect(() => {
+    const checkGoogleConnection = async () => {
+      if (!user?.id) return;
+      setCheckingGoogleStatus(true);
+      try {
+        const res = await fetch(`${API_URL}/api/patients/${user.id}`, {
+          headers: { Authorization: `Bearer ${user.token || localStorage.getItem("token")}` },
+        });
+        const data = await res.json();
+        setGoogleConnected(!!data.patient?.googleCalendarId);
+      } catch (error) {
+        console.error("Error checking Google connection:", error);
+      } finally {
+        setCheckingGoogleStatus(false);
+      }
+    };
+
+    if (open) {
+      checkGoogleConnection();
+    }
+  }, [open, user]);
 
   // Reset state when modal is closed or doctor changes
-  React.useEffect(() => {
+  useEffect(() => {
     if (!open) {
       setSelectedSlot(null);
       setBookingData({ reasonForVisit: "", symptoms: [] });
@@ -27,7 +52,32 @@ const BookAppointmentModal = ({ open, onClose, doctor, user }) => {
     }
   }, [open, doctor]);
 
-  const token = user?.token || localStorage.getItem("token");
+  const handleConnectGoogle = async () => {
+    try {
+      const response = await fetch(`${API_URL}/google/auth-url`, {
+        headers: { Authorization: `Bearer ${user.token || localStorage.getItem("token")}` },
+      });
+      const data = await response.json();
+      
+      if (data.success) {
+        // Open auth URL in a popup window
+        const popup = window.open(data.url, '_blank', 'width=600,height=600');
+        
+        // Polling to check when the popup closes
+        const checkPopup = setInterval(() => {
+          if (popup.closed) {
+            clearInterval(checkPopup);
+            // Re-check connection status after popup closes
+            checkGoogleConnection();
+          }
+        }, 500);
+      } else {
+        toast.error("Failed to connect Google Calendar");
+      }
+    } catch (error) {
+      toast.error("Error connecting Google Calendar");
+    }
+  };
 
   const handleBookingSubmit = async () => {
     if (!selectedSlot || !bookingData.reasonForVisit) return;
@@ -37,7 +87,7 @@ const BookAppointmentModal = ({ open, onClose, doctor, user }) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${user.token || localStorage.getItem("token")}`,
         },
         body: JSON.stringify({
           doctorId: doctor._id,
@@ -51,7 +101,10 @@ const BookAppointmentModal = ({ open, onClose, doctor, user }) => {
       });
       const data = await res.json();
       if (data.success) {
-        toast.success("Appointment booked!");
+        toast.success("Appointment booked successfully!");
+        if (googleConnected) {
+          toast.info("The appointment has been added to your Google Calendar");
+        }
         setSelectedSlot(null);
         setBookingData({ reasonForVisit: "", symptoms: [] });
         setSymptomsInput("");
@@ -100,6 +153,34 @@ const BookAppointmentModal = ({ open, onClose, doctor, user }) => {
                   ? ` with Dr. ${doctor.firstName} ${doctor.lastName}`
                   : ""}
               </Dialog.Title>
+
+              {/* Google Calendar Connection Status */}
+              {!checkingGoogleStatus && (
+                <div className={`mb-6 p-3 rounded-md flex items-center justify-between ${googleConnected ? "bg-green-50 text-green-800" : "bg-blue-50 text-blue-800"}`}>
+                  <div className="flex items-center gap-2 text-sm">
+                    {googleConnected ? (
+                      <>
+                        <CalendarCheck className="w-4 h-4" />
+                        <span>Appointments will sync to Google Calendar</span>
+                      </>
+                    ) : (
+                      <>
+                        <CalendarPlus className="w-4 h-4" />
+                        <span>Connect Google Calendar to sync appointments</span>
+                      </>
+                    )}
+                  </div>
+                  <Button
+                    variant={googleConnected ? "outline" : "default"}
+                    size="sm"
+                    onClick={handleConnectGoogle}
+                    className={googleConnected ? "text-green-800 border-green-300 hover:bg-green-100" : ""}
+                  >
+                    {googleConnected ? "Reconnect" : "Connect"}
+                  </Button>
+                </div>
+              )}
+
               {/* Calendar and slot picker */}
               {!selectedSlot && doctor && (
                 <CalendarSlotPicker
@@ -108,6 +189,7 @@ const BookAppointmentModal = ({ open, onClose, doctor, user }) => {
                   onChange={setSelectedSlot}
                 />
               )}
+
               {/* Show booking details form if slot is selected */}
               {selectedSlot && (
                 <div className="mt-6">
@@ -175,6 +257,12 @@ const BookAppointmentModal = ({ open, onClose, doctor, user }) => {
                     <p className="text-sm font-medium text-green-600 mb-1">
                       Fee: ₹{doctor?.consultationFee}
                     </p>
+                    {googleConnected && (
+                      <p className="text-sm text-blue-600 mt-2 flex items-center gap-1">
+                        <CalendarCheck className="w-4 h-4" />
+                        This appointment will be added to your Google Calendar
+                      </p>
+                    )}
                   </div>
                   <div className="flex justify-end space-x-3">
                     <Button

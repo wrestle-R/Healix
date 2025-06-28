@@ -2,7 +2,11 @@ const Appointment = require("../models/appointment");
 const DoctorAvailability = require("../models/doctorAvailability");
 const Doctor = require("../models/doctor");
 const Patient = require("../models/patient");
-
+const { 
+  handleAppointmentCreated,
+  handleAppointmentUpdated,
+  handleAppointmentDeleted 
+} = require('../middleware/appointmentEvents');
 class AppointmentController {
   // Get all appointments for a doctor
   static async getDoctorAppointments(req, res) {
@@ -198,6 +202,11 @@ class AppointmentController {
         { path: "patientId", select: "firstName lastName phoneNumber" },
       ]);
 
+      await appointment.save();
+    
+    // Trigger Google Calendar event creation (async)
+    handleAppointmentCreated(appointment._id);
+
       res.status(201).json({
         success: true,
         message: "Appointment booked successfully",
@@ -235,6 +244,10 @@ class AppointmentController {
         });
       }
 
+       handleAppointmentUpdated(appointment._id);
+    
+    res.json({ success: true, appointment });
+
       res.json({ success: true, appointment });
     } catch (error) {
       res.status(500).json({ success: false, message: error.message });
@@ -262,6 +275,7 @@ class AppointmentController {
           message: "Appointment not found",
         });
       }
+       handleAppointmentUpdated(appointment._id);
 
       res.json({
         success: true,
