@@ -29,15 +29,7 @@ app.use('/api/patients', patientRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/availability', doctorAvailabilityRoutes);
 app.use('/', googleAuthRoutes);
-
-
-
-// Routes
 app.use('/api/auth', authRoutes);
-app.use('/api/doctors', doctorRoutes);
-app.use('/api/patients', patientRoutes);
-app.use('/api/appointments', appointmentRoutes);
-app.use('/api/availability', doctorAvailabilityRoutes);
 app.use('/api/therapies', therapyRoutes);
 
 app.listen(PORT, () => {
