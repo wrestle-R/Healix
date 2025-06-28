@@ -23,7 +23,7 @@ app.use(cors({
 }));
 app.use(express.json());
 
-
+//routes
 app.use('/api/doctors', doctorRoutes);
 app.use('/api/patients', patientRoutes);
 app.use('/api/appointments', appointmentRoutes);
@@ -31,6 +31,8 @@ app.use('/api/availability', doctorAvailabilityRoutes);
 app.use('/', googleAuthRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/therapies', therapyRoutes);
+
+
 
 app.listen(PORT, () => {
   console.log(`Server listening on http://localhost:${PORT}`);
