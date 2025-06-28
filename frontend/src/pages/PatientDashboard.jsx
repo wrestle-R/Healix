@@ -414,7 +414,9 @@ const PatientDashboard = () => {
 
             {activeTab === "chat" && (
               <motion.div variants={itemVariants}>
-                <TalkingDoctorChatbot />
+                <div className="max-w-7xl w-full mx-auto">
+                  <TalkingDoctorChatbot />
+                </div>
               </motion.div>
             )}
 

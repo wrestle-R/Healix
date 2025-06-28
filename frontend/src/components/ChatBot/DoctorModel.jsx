@@ -1,8 +1,8 @@
-import React, { useState, useRef, useEffect, Suspense } from 'react';
-import { Canvas, useFrame, useLoader } from '@react-three/fiber';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
-import * as THREE from 'three';
-import { Mic, MicOff, Send, Volume2, VolumeX } from 'lucide-react';
+import React, { useState, useRef, useEffect, Suspense } from "react";
+import { Canvas, useFrame, useLoader } from "@react-three/fiber";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+import * as THREE from "three";
+import { Mic, MicOff, Send, Volume2, VolumeX } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
@@ -10,21 +10,21 @@ import { Button } from "@/components/ui/button";
 function DoctorGLBModel({ isListening, isSpeaking }) {
   const meshRef = useRef();
   const mixerRef = useRef();
-  
+
   // Load the GLB file
-  const gltf = useLoader(GLTFLoader, '/doc.glb');
-  
+  const gltf = useLoader(GLTFLoader, "/doc.glb");
+
   useEffect(() => {
     if (gltf.animations && gltf.animations.length > 0) {
       mixerRef.current = new THREE.AnimationMixer(gltf.scene);
       const idleAction = mixerRef.current.clipAction(gltf.animations[0]);
       idleAction.play();
     }
-    
+
     // Adjust scale and position for better visibility
     gltf.scene.scale.setScalar(1.8);
     gltf.scene.position.set(0, -0.5, 0);
-    
+
     gltf.scene.traverse((child) => {
       if (child.isMesh) {
         child.castShadow = true;
@@ -35,32 +35,38 @@ function DoctorGLBModel({ isListening, isSpeaking }) {
       }
     });
   }, [gltf]);
-  
+
   useFrame((state, delta) => {
     if (mixerRef.current) mixerRef.current.update(delta);
-    
+
     if (meshRef.current) {
-      meshRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.5) * 0.05;
+      meshRef.current.position.y =
+        Math.sin(state.clock.elapsedTime * 0.5) * 0.05;
       if (isSpeaking) {
-        meshRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 2) * 0.02;
+        meshRef.current.rotation.y =
+          Math.sin(state.clock.elapsedTime * 2) * 0.02;
       }
     }
   });
-  
+
   return (
     <group ref={meshRef}>
       <primitive object={gltf.scene} />
       {isListening && (
         <mesh position={[0, 3, 0]}>
           <sphereGeometry args={[0.1, 16, 16]} />
-          <meshStandardMaterial color="#00FF00" emissive="#00AA00" emissiveIntensity={0.8} />
+          <meshStandardMaterial
+            color="#00FF00"
+            emissive="#00AA00"
+            emissiveIntensity={0.8}
+          />
         </mesh>
       )}
       {isSpeaking && (
         <mesh position={[0, 1, 0]} rotation={[Math.PI / 2, 0, 0]}>
           <ringGeometry args={[1.5, 1.8, 32]} />
-          <meshStandardMaterial 
-            color="#0066FF" 
+          <meshStandardMaterial
+            color="#0066FF"
             emissive="#0044BB"
             emissiveIntensity={0.6}
             transparent
@@ -102,7 +108,11 @@ function FallbackDoctor({ isListening, isSpeaking }) {
       {isListening && (
         <mesh position={[0, 2.5, 0]}>
           <sphereGeometry args={[0.1, 8, 8]} />
-          <meshStandardMaterial color="#00FF00" emissive="#00AA00" emissiveIntensity={0.5} />
+          <meshStandardMaterial
+            color="#00FF00"
+            emissive="#00AA00"
+            emissiveIntensity={0.5}
+          />
         </mesh>
       )}
     </group>
@@ -112,14 +122,18 @@ function FallbackDoctor({ isListening, isSpeaking }) {
 // Scene component
 function Scene({ isListening, isSpeaking }) {
   const [modelError, setModelError] = useState(false);
-  
+
   return (
     <>
       <ambientLight intensity={0.6} />
       <directionalLight position={[5, 5, 5]} intensity={0.8} castShadow />
       <pointLight position={[-5, 3, -5]} intensity={0.3} />
-      
-      <Suspense fallback={<FallbackDoctor isListening={isListening} isSpeaking={isSpeaking} />}>
+
+      <Suspense
+        fallback={
+          <FallbackDoctor isListening={isListening} isSpeaking={isSpeaking} />
+        }
+      >
         {!modelError ? (
           <ErrorBoundary onError={() => setModelError(true)}>
             <DoctorGLBModel isListening={isListening} isSpeaking={isSpeaking} />
@@ -141,7 +155,7 @@ class ErrorBoundary extends React.Component {
   }
 
   componentDidCatch(error, errorInfo) {
-    console.error('GLB Model Error:', error, errorInfo);
+    console.error("GLB Model Error:", error, errorInfo);
     if (this.props.onError) this.props.onError();
   }
 
@@ -156,15 +170,15 @@ export default function TalkingDoctorChatbot() {
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [voiceEnabled, setVoiceEnabled] = useState(true);
-  const [textInput, setTextInput] = useState('');
+  const [textInput, setTextInput] = useState("");
   const [conversation, setConversation] = useState([]);
   const [browserSupported, setBrowserSupported] = useState(true);
-  
+
   const patientData = useRef({
-    symptoms: '',
-    patient_history: '',
-    current_medications: '',
-    num_recommendations: 3
+    symptoms: "",
+    patient_history: "",
+    current_medications: "",
+    num_recommendations: 3,
   });
 
   const recognitionRef = useRef(null);
@@ -173,26 +187,33 @@ export default function TalkingDoctorChatbot() {
 
   const questions = [
     {
-      key: 'symptoms',
-      question: "Hello! I'm Dr. AI. What symptoms are you experiencing today? Please describe them in detail.",
-      followUp: "Thank you for sharing your symptoms. "
+      key: "symptoms",
+      question:
+        "Hello! I'm Dr. AI. What symptoms are you experiencing today? Please describe them in detail.",
+      followUp: "Thank you for sharing your symptoms. ",
     },
     {
-      key: 'patient_history',
-      question: "Do you have any medical history I should know about? Any previous conditions, surgeries, or ongoing health issues?",
-      followUp: "I've noted your medical history. "
+      key: "patient_history",
+      question:
+        "Do you have any medical history I should know about? Any previous conditions, surgeries, or ongoing health issues?",
+      followUp: "I've noted your medical history. ",
     },
     {
-      key: 'current_medications',
-      question: "Are you currently taking any medications, supplements, or treatments?",
-      followUp: "Got it. Let me analyze your information and provide some recommendations."
-    }
+      key: "current_medications",
+      question:
+        "Are you currently taking any medications, supplements, or treatments?",
+      followUp:
+        "Got it. Let me analyze your information and provide some recommendations.",
+    },
   ];
 
   // Initialize speech recognition and synthesis
   useEffect(() => {
     // Check for browser support
-    if (!('webkitSpeechRecognition' in window) || !('speechSynthesis' in window)) {
+    if (
+      !("webkitSpeechRecognition" in window) ||
+      !("speechSynthesis" in window)
+    ) {
       setBrowserSupported(false);
       return;
     }
@@ -204,25 +225,28 @@ export default function TalkingDoctorChatbot() {
     recognitionRef.current = new window.webkitSpeechRecognition();
     recognitionRef.current.continuous = false;
     recognitionRef.current.interimResults = false;
-    recognitionRef.current.lang = 'en-US';
+    recognitionRef.current.lang = "en-US";
 
     recognitionRef.current.onresult = (event) => {
       const transcript = event.results[0][0].transcript;
-      console.log('Speech recognized:', transcript);
+      console.log("Speech recognized:", transcript);
       handleUserInput(transcript);
       setIsListening(false);
     };
 
     recognitionRef.current.onerror = (event) => {
-      console.error('Speech recognition error:', event.error);
+      console.error("Speech recognition error:", event.error);
       setIsListening(false);
-      if (event.error === 'not-allowed') {
-        alert('Microphone access was denied. Please enable microphone permissions.');
+      if (event.error === "not-allowed") {
+        alert(
+          "Microphone access was denied. Please enable microphone permissions."
+        );
       }
     };
 
     recognitionRef.current.onend = () => {
-      if (isListening) { // Only restart if we're still supposed to be listening
+      if (isListening) {
+        // Only restart if we're still supposed to be listening
         recognitionRef.current.start();
       }
     };
@@ -239,7 +263,7 @@ export default function TalkingDoctorChatbot() {
 
   // Auto-scroll conversation
   useEffect(() => {
-    conversationEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    conversationEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [conversation]);
 
   // Start conversation
@@ -251,13 +275,13 @@ export default function TalkingDoctorChatbot() {
 
   const speak = (text) => {
     if (!voiceEnabled || !synthRef.current) return;
-    
+
     setIsSpeaking(true);
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.rate = 0.9;
     utterance.pitch = 1;
     utterance.volume = 0.8;
-    
+
     utterance.onend = () => {
       setIsSpeaking(false);
       // If we were listening before the bot spoke, restart listening
@@ -265,83 +289,104 @@ export default function TalkingDoctorChatbot() {
         startListening();
       }
     };
-    
+
     synthRef.current.speak(utterance);
   };
 
   const askQuestion = (stepIndex) => {
     const question = questions[stepIndex];
     if (question) {
-      setConversation(prev => [...prev, { type: 'doctor', text: question.question }]);
+      setConversation((prev) => [
+        ...prev,
+        { type: "doctor", text: question.question },
+      ]);
       speak(question.question);
     }
   };
 
   const handleUserInput = (input) => {
     if (!input.trim()) return;
-    
-    setConversation(prev => [...prev, { type: 'patient', text: input }]);
-    
+
+    setConversation((prev) => [...prev, { type: "patient", text: input }]);
+
     if (currentStep < questions.length) {
       const currentQuestion = questions[currentStep];
       patientData.current = {
         ...patientData.current,
-        [currentQuestion.key]: input
+        [currentQuestion.key]: input,
       };
-      
+
       if (currentStep < questions.length - 1) {
         const nextStep = currentStep + 1;
         setCurrentStep(nextStep);
         setTimeout(() => {
-          const followUp = currentQuestion.followUp + questions[nextStep].question;
-          setConversation(prev => [...prev, { type: 'doctor', text: followUp }]);
+          const followUp =
+            currentQuestion.followUp + questions[nextStep].question;
+          setConversation((prev) => [
+            ...prev,
+            { type: "doctor", text: followUp },
+          ]);
           speak(followUp);
         }, 1000);
       } else {
         getMedicalAdvice();
       }
     }
-    
-    setTextInput('');
+
+    setTextInput("");
   };
 
   const getMedicalAdvice = async () => {
     try {
-      const response = await fetch('http://localhost:8000/get_medical_advice', {
-        method: 'POST',
+      const response = await fetch("http://localhost:8000/get_medical_advice", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(patientData.current)
+        body: JSON.stringify(patientData.current),
       });
-      
+
       const data = await response.json();
-      
-      let responseText = data.advice || "Based on your symptoms, here are my recommendations:";
-      
+
+      let responseText =
+        data.advice || "Based on your symptoms, here are my recommendations:";
+
       if (data.recommendations?.length > 0) {
-        responseText += "\n\nRecommendations:\n" + data.recommendations.map((rec, i) => `${i + 1}. ${rec}`).join('\n');
+        responseText +=
+          "\n\nRecommendations:\n" +
+          data.recommendations.map((rec, i) => `${i + 1}. ${rec}`).join("\n");
       }
-      
+
       if (data.precautions?.length > 0) {
-        responseText += "\n\nPrecautions:\n" + data.precautions.map((prec, i) => `${i + 1}. ${prec}`).join('\n');
+        responseText +=
+          "\n\nPrecautions:\n" +
+          data.precautions.map((prec, i) => `${i + 1}. ${prec}`).join("\n");
       }
-      
-      responseText += "\n\nRemember, this is general advice. Please consult with a healthcare professional for proper diagnosis and treatment.";
-      
-      setConversation(prev => [...prev, { type: 'doctor', text: responseText }]);
+
+      responseText +=
+        "\n\nRemember, this is general advice. Please consult with a healthcare professional for proper diagnosis and treatment.";
+
+      setConversation((prev) => [
+        ...prev,
+        { type: "doctor", text: responseText },
+      ]);
       speak(responseText);
-      
     } catch (error) {
-      const errorMessage = "I'm sorry, I'm having trouble accessing my medical database right now. Please try again later or consult with a healthcare professional.";
-      setConversation(prev => [...prev, { type: 'doctor', text: errorMessage }]);
+      const errorMessage =
+        "I'm sorry, I'm having trouble accessing my medical database right now. Please try again later or consult with a healthcare professional.";
+      setConversation((prev) => [
+        ...prev,
+        { type: "doctor", text: errorMessage },
+      ]);
       speak(errorMessage);
     }
   };
 
   const startListening = () => {
     if (!browserSupported) {
-      alert("Your browser doesn't support speech recognition. Please use Chrome or Edge.");
+      alert(
+        "Your browser doesn't support speech recognition. Please use Chrome or Edge."
+      );
       return;
     }
 
@@ -350,7 +395,7 @@ export default function TalkingDoctorChatbot() {
       try {
         recognitionRef.current.start();
       } catch (error) {
-        console.error('Speech recognition error:', error);
+        console.error("Speech recognition error:", error);
         setIsListening(false);
         alert("Error accessing microphone. Please check permissions.");
       }
@@ -375,10 +420,10 @@ export default function TalkingDoctorChatbot() {
     setCurrentStep(0);
     setConversation([]);
     patientData.current = {
-      symptoms: '',
-      patient_history: '',
-      current_medications: '',
-      num_recommendations: 3
+      symptoms: "",
+      patient_history: "",
+      current_medications: "",
+      num_recommendations: 3,
     };
     stopSpeaking();
     stopListening();
@@ -386,14 +431,14 @@ export default function TalkingDoctorChatbot() {
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center p-2 sm:p-4 bg-background/50 backdrop-blur-sm overflow-hidden">
-      <Card className="w-full max-w-6xl h-full sm:h-[90vh] flex flex-col bg-background/80 backdrop-blur-sm border-border/50">
+    <div className="w-full h-[93vh] flex flex-col">
+      <Card className="w-full h-full flex flex-col bg-background/80 backdrop-blur-sm border-border/50">
         <CardContent className="p-0 h-full flex flex-col">
           <div className="flex flex-col lg:flex-row h-full">
-            {/* 3D Doctor - Adjusted for better visibility */}
+            {/* 3D Doctor */}
             <div className="w-full lg:w-1/2 h-[40vh] sm:h-[45vh] lg:h-full relative bg-muted/20 rounded-t-lg lg:rounded-l-lg lg:rounded-r-none overflow-hidden">
-              <Canvas 
-                camera={{ position: [0, 1, 5], fov: 45 }} // Adjusted camera position
+              <Canvas
+                camera={{ position: [0, 1, 5], fov: 45 }}
                 shadows
                 className="w-full h-full"
               >
@@ -401,7 +446,7 @@ export default function TalkingDoctorChatbot() {
                   <Scene isListening={isListening} isSpeaking={isSpeaking} />
                 </Suspense>
               </Canvas>
-              
+
               <div className="absolute top-4 right-4 flex gap-2">
                 <Button
                   variant={voiceEnabled ? "default" : "secondary"}
@@ -411,7 +456,7 @@ export default function TalkingDoctorChatbot() {
                 >
                   {voiceEnabled ? <Volume2 size={20} /> : <VolumeX size={20} />}
                 </Button>
-                
+
                 {isSpeaking && (
                   <Button
                     variant="destructive"
@@ -422,14 +467,23 @@ export default function TalkingDoctorChatbot() {
                   </Button>
                 )}
               </div>
-              
+
               <div className="absolute bottom-4 left-4">
                 <div className="text-sm bg-background/80 px-3 py-1.5 rounded-full flex items-center gap-2">
-                  <span className={`w-2 h-2 rounded-full ${
-                    isListening ? 'bg-green-500' : 
-                    isSpeaking ? 'bg-blue-500' : 'bg-muted-foreground'
-                  }`}></span>
-                  {isListening ? 'Listening...' : isSpeaking ? 'Speaking...' : 'Ready'}
+                  <span
+                    className={`w-2 h-2 rounded-full ${
+                      isListening
+                        ? "bg-green-500"
+                        : isSpeaking
+                        ? "bg-blue-500"
+                        : "bg-muted-foreground"
+                    }`}
+                  ></span>
+                  {isListening
+                    ? "Listening..."
+                    : isSpeaking
+                    ? "Speaking..."
+                    : "Ready"}
                 </div>
               </div>
             </div>
@@ -437,21 +491,29 @@ export default function TalkingDoctorChatbot() {
             {/* Chat Interface */}
             <div className="w-full lg:w-1/2 flex flex-col bg-background rounded-b-lg lg:rounded-r-lg lg:rounded-l-none border-t lg:border-t-0 lg:border-l border-border/50">
               <div className="bg-primary/10 p-4 border-b border-border/50">
-                <h1 className="text-xl font-bold text-foreground">Dr. AI Consultation</h1>
-                <p className="text-sm text-muted-foreground">Your AI Medical Assistant</p>
+                <h1 className="text-xl font-bold text-foreground">
+                  Dr. AI Consultation
+                </h1>
+                <p className="text-sm text-muted-foreground">
+                  Your AI Medical Assistant
+                </p>
               </div>
 
               <div className="flex-1 overflow-y-auto p-4 space-y-4">
                 {conversation.map((message, index) => (
                   <div
                     key={index}
-                    className={`flex ${message.type === 'patient' ? 'justify-end' : 'justify-start'}`}
+                    className={`flex ${
+                      message.type === "patient"
+                        ? "justify-end"
+                        : "justify-start"
+                    }`}
                   >
                     <div
                       className={`max-w-xs sm:max-w-md px-4 py-2 rounded-lg whitespace-pre-line ${
-                        message.type === 'patient'
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-muted text-foreground'
+                        message.type === "patient"
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted text-foreground"
                       }`}
                     >
                       {message.text}
@@ -474,7 +536,9 @@ export default function TalkingDoctorChatbot() {
                     type="text"
                     value={textInput}
                     onChange={(e) => setTextInput(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && handleUserInput(textInput)}
+                    onKeyPress={(e) =>
+                      e.key === "Enter" && handleUserInput(textInput)
+                    }
                     placeholder="Type your response or use voice..."
                     className="flex-1 px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 bg-background text-foreground"
                   />
@@ -486,7 +550,7 @@ export default function TalkingDoctorChatbot() {
                     <Send size={20} />
                   </Button>
                 </div>
-                
+
                 <div className="flex gap-2">
                   <Button
                     onClick={isListening ? stopListening : startListening}
@@ -506,17 +570,15 @@ export default function TalkingDoctorChatbot() {
                       </>
                     )}
                   </Button>
-                  
-                  <Button
-                    onClick={resetConversation}
-                    variant="outline"
-                  >
+
+                  <Button onClick={resetConversation} variant="outline">
                     Reset
                   </Button>
                 </div>
                 {!browserSupported && (
                   <p className="text-xs text-red-500 mt-2">
-                    Voice features not supported in this browser. Please use Chrome or Edge.
+                    Voice features not supported in this browser. Please use
+                    Chrome or Edge.
                   </p>
                 )}
               </div>
