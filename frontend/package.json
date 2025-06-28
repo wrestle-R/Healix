@@ -30,7 +30,7 @@
     "aframe-environment-component": "^1.5.0",
     "aframe-extras": "^7.5.4",
     "aframe-react": "^4.4.0",
-    "axios": "^1.7.2",
+    "axios": "^1.10.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",

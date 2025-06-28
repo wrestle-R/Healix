@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Calendar, Clock, MapPin, Star, Search, User, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -29,13 +29,8 @@ const BookAppointment = ({ user }) => {
   const [profileChecked, setProfileChecked] = useState(false);
   const [profileComplete, setProfileComplete] = useState(true);
 
+  const debounceTimeout = useRef(null);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    fetchSpecializations();
-    fetchCities();
-    searchDoctors();
-  }, []);
 
   useEffect(() => {
     // Check patient profile completion before allowing booking
@@ -59,6 +54,24 @@ const BookAppointment = ({ user }) => {
     };
     checkProfile();
   }, [user]);
+
+  useEffect(() => {
+    if (!profileChecked || !profileComplete) return;
+    if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
+    debounceTimeout.current = setTimeout(() => {
+      searchDoctors();
+    }, 400);
+    return () => clearTimeout(debounceTimeout.current);
+    // eslint-disable-next-line
+  }, [
+    filters.specialty,
+    filters.city,
+    filters.date,
+    filters.minRating,
+    filters.search,
+    profileChecked,
+    profileComplete,
+  ]);
 
   const fetchSpecializations = async () => {
     try {
@@ -104,7 +117,8 @@ const BookAppointment = ({ user }) => {
   };
 
   const handleSearch = () => {
-    searchDoctors();
+    // Optionally, you can force an immediate search here if needed:
+    // searchDoctors();
   };
 
   const handleBookAppointment = (doctor) => {
@@ -148,13 +162,16 @@ const BookAppointment = ({ user }) => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto p-6">
-      <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-8 font-serif">
-        Find & Book Doctors
-      </h1>
+    <div className="max-w-7xl w-full mx-auto px-4 py-8">
+      {/* Welcome/Title */}
+      <div className="mb-8">
+        <h1 className="text-3xl md:text-4xl font-bold text-foreground font-serif">
+          Find & Book Doctors
+        </h1>
+      </div>
 
       {/* Search Filters */}
-      <Card className="bg-background/50 backdrop-blur-sm border-border/50 mb-8">
+      <Card className="bg-background/50 backdrop-blur-sm border-border/50 mb-8 w-full">
         <CardContent className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
             <div>
@@ -251,14 +268,14 @@ const BookAppointment = ({ user }) => {
           <p className="mt-4 text-muted-foreground">Searching doctors...</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
           {doctors.map((doctor) => (
             <Card
               key={doctor._id}
-              className="hover:shadow-lg transition-shadow bg-background/80 cursor-pointer"
+              className="hover:shadow-lg transition-shadow bg-background/80 cursor-pointer h-full"
               onClick={() => handleDoctorCardClick(doctor._id)}
             >
-              <CardContent className="p-6">
+              <CardContent className="p-6 flex flex-col h-full">
                 <div className="flex items-center mb-4">
                   <Avatar className="w-16 h-16">
                     {doctor.profilePicture ? (
@@ -340,7 +357,6 @@ const BookAppointment = ({ user }) => {
         }}
       />
 
-      {/* Only use the new modal below */}
       <BookAppointmentModal
         open={showBookingModal}
         onClose={() => setShowBookingModal(false)}

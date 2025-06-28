@@ -7,6 +7,8 @@ const doctorRoutes = require('./routes/doctorRoutes.js');
 const patientRoutes = require('./routes/patientRoutes.js');
 const appointmentRoutes = require('./routes/appointmentRoutes.js');
 const doctorAvailabilityRoutes = require('./routes/doctorAvailabilityRoutes.js');
+const therapyRoutes = require('./routes/therapyRoutes.js');
+
 const googleAuthRoutes = require('./routes/googleAuth');
 
 const PORT = process.env.PORT || 5000;
@@ -21,6 +23,7 @@ app.use(cors({
 }));
 app.use(express.json());
 
+
 app.use('/api/doctors', doctorRoutes);
 app.use('/api/patients', patientRoutes);
 app.use('/api/appointments', appointmentRoutes);
@@ -31,6 +34,11 @@ app.use('/', googleAuthRoutes);
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/doctors', doctorRoutes);
+app.use('/api/patients', patientRoutes);
+app.use('/api/appointments', appointmentRoutes);
+app.use('/api/availability', doctorAvailabilityRoutes);
+app.use('/api/therapies', therapyRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server listening on http://localhost:${PORT}`);

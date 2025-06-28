@@ -30,9 +30,9 @@ const TestimonialsSection = () => {
     <section className="py-20 bg-muted/30">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          transition={{ duration: 0.35, ease: "easeOut" }}
           viewport={{ once: true }}
           className="text-center mb-16"
         >
@@ -40,17 +40,13 @@ const TestimonialsSection = () => {
             What Our Patients Say
           </h2>
         </motion.div>
-
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {testimonials.map((testimonial, index) => (
             <motion.div
               key={index}
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{
-                duration: 0.5,
-                delay: index * 0.1,
-              }}
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              transition={{ duration: 0.3 }}
               viewport={{ once: true }}
             >
               <Card className="h-full">
