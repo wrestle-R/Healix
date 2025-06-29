@@ -60,6 +60,42 @@ const generateRoomId = () => {
   return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 };
 
+// Helper function to check and update appointment status based on time
+const checkAndUpdateAppointmentStatus = async (appointment) => {
+  const now = new Date();
+  const today = now.toISOString().split('T')[0];
+  const currentTime = now.toTimeString().slice(0, 5); // HH:MM format
+  
+  const appointmentDate = appointment.appointmentDate.toISOString().split('T')[0];
+  
+  // Only process appointments for today
+  if (appointmentDate === today) {
+    let newStatus = appointment.status;
+    
+    // If appointment is pending and current time >= start time, make it ongoing
+    if (appointment.status === 'pending' && currentTime >= appointment.startTime) {
+      newStatus = 'ongoing';
+    }
+    // If appointment is ongoing and current time >= end time, make it completed
+    else if (appointment.status === 'ongoing' && currentTime >= appointment.endTime) {
+      newStatus = 'completed';
+    }
+    
+    // Update status if it changed
+    if (newStatus !== appointment.status) {
+      await Appointment.findByIdAndUpdate(appointment._id, { status: newStatus });
+      appointment.status = newStatus;
+    }
+  }
+  // If appointment date is in the past and not completed/cancelled, mark as completed
+  else if (appointmentDate < today && !['completed', 'cancelled'].includes(appointment.status)) {
+    await Appointment.findByIdAndUpdate(appointment._id, { status: 'completed' });
+    appointment.status = 'completed';
+  }
+  
+  return appointment;
+};
+
 class AppointmentController {
   // Get all appointments for a doctor
   static async getDoctorAppointments(req, res) {
@@ -81,10 +117,17 @@ class AppointmentController {
       }
 
       const appointments = await Appointment.find(query)
-        .populate("patientId", "firstName lastName profilePicture phoneNumber")
+        .populate("patientId", "firstName lastName profilePicture phoneNumber dateOfBirth gender bloodGroup address")
         .sort({ appointmentDate: 1, startTime: 1 });
 
-      res.json({ success: true, appointments });
+      // Check and update status for each appointment
+      const updatedAppointments = [];
+      for (const appointment of appointments) {
+        const updatedAppointment = await checkAndUpdateAppointmentStatus(appointment);
+        updatedAppointments.push(updatedAppointment);
+      }
+
+      res.json({ success: true, appointments: updatedAppointments });
     } catch (error) {
       res.status(500).json({ success: false, message: error.message });
     }
@@ -105,11 +148,18 @@ class AppointmentController {
       const appointments = await Appointment.find(query)
         .populate(
           "doctorId",
-          "firstName lastName specializations profilePicture"
+            "firstName lastName specializations profilePicture address"
         )
         .sort({ appointmentDate: 1, startTime: 1 });
 
-      res.json({ success: true, appointments });
+      // Check and update status for each appointment
+      const updatedAppointments = [];
+      for (const appointment of appointments) {
+        const updatedAppointment = await checkAndUpdateAppointmentStatus(appointment);
+        updatedAppointments.push(updatedAppointment);
+      }
+
+      res.json({ success: true, appointments: updatedAppointments });
     } catch (error) {
       res.status(500).json({ success: false, message: error.message });
     }
@@ -169,7 +219,7 @@ class AppointmentController {
               $gte: dayStart,
               $lt: dayEnd,
             },
-            status: { $in: ["confirmed", "pending"] },
+            status: { $in: ["pending", "ongoing"] },
           });
 
           // Filter out booked slots
@@ -215,7 +265,7 @@ class AppointmentController {
         appointmentDate: new Date(appointmentDate),
         startTime,
         endTime,
-        status: { $in: ["confirmed", "pending"] },
+        status: { $in: ["pending", "ongoing"] },
       });
 
       if (existingAppointment) {
@@ -351,6 +401,51 @@ class AppointmentController {
       const { appointmentId } = req.params;
       const { status, doctorNotes, prescription } = req.body;
 
+      // Get the current appointment
+      const currentAppointment = await Appointment.findById(appointmentId);
+      if (!currentAppointment) {
+        return res.status(404).json({
+          success: false,
+          message: "Appointment not found",
+        });
+      }
+
+      // Validate status transition based on time
+      const now = new Date();
+      const today = now.toISOString().split('T')[0];
+      const currentTime = now.toTimeString().slice(0, 5);
+      const appointmentDate = currentAppointment.appointmentDate.toISOString().split('T')[0];
+
+      // If trying to set status to ongoing, validate time window
+      if (status === 'ongoing') {
+        if (appointmentDate !== today) {
+          return res.status(400).json({
+            success: false,
+            message: "Cannot set appointment to ongoing - not scheduled for today",
+          });
+        }
+        if (currentTime < currentAppointment.startTime) {
+          return res.status(400).json({
+            success: false,
+            message: "Cannot set appointment to ongoing - appointment hasn't started yet",
+          });
+        }
+        if (currentTime >= currentAppointment.endTime) {
+          return res.status(400).json({
+            success: false,
+            message: "Cannot set appointment to ongoing - appointment time has passed",
+          });
+        }
+      }
+
+      // If trying to set any status other than completed/cancelled for a past appointment
+      if (appointmentDate < today && !['completed', 'cancelled'].includes(status)) {
+        return res.status(400).json({
+          success: false,
+          message: "Cannot change status for past appointments except to completed or cancelled",
+        });
+      }
+
       const updateData = { status };
 
       if (doctorNotes) updateData.doctorNotes = doctorNotes;
@@ -364,13 +459,6 @@ class AppointmentController {
         { path: "doctorId", select: "firstName lastName specializations" },
         { path: "patientId", select: "firstName lastName phoneNumber" },
       ]);
-
-      if (!appointment) {
-        return res.status(404).json({
-          success: false,
-          message: "Appointment not found",
-        });
-      }
 
       handleAppointmentUpdated(appointment._id);
     
@@ -434,7 +522,10 @@ class AppointmentController {
         });
       }
 
-      res.json({ success: true, appointment });
+      // Check and update status before returning
+      const updatedAppointment = await checkAndUpdateAppointmentStatus(appointment);
+
+      res.json({ success: true, appointment: updatedAppointment });
     } catch (error) {
       res.status(500).json({ success: false, message: error.message });
     }
@@ -489,7 +580,7 @@ class AppointmentController {
               const existingAppointments = await Appointment.find({
                 doctorId: doctor._id,
                 appointmentDate: requestedDate,
-                status: { $in: ["confirmed", "pending"] },
+                status: { $in: ["pending", "ongoing"] },
               });
 
               const availableSlots = slots.filter((slot) => {
