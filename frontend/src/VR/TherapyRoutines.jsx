@@ -17,7 +17,8 @@ import {
   Play,
   Users,
   Award,
-  Sparkles
+  Sparkles,
+  Camera
 } from 'lucide-react';
 import { toast } from "sonner";
 
@@ -95,9 +96,13 @@ const TherapyRoutines = () => {
     }
   };
 
-  const startTherapy = (therapy) => {
+  const startTherapy = (therapy, mode = 'vr') => {
+  if (mode === 'ar') {
+    navigate(`/ar-therapy/${therapy._id}`);
+  } else {
     navigate(`/vr-therapy/${therapy._id}`);
-  };
+  }
+};
 
   const getDifficultyColor = (difficulty) => {
     switch (difficulty) {
@@ -355,13 +360,24 @@ const TherapyRoutines = () => {
 
                       {/* 🚀 PREMIUM START BUTTON */}
                       <Button
-                        onClick={() => startTherapy(therapy)}
+                        onClick={() => startTherapy(therapy,'vr')}
                         className="w-full group bg-gradient-to-r from-primary via-primary/90 to-primary hover:from-primary/90 hover:via-primary hover:to-primary/90 text-white py-6 px-6 rounded-2xl font-bold text-lg transition-all duration-300 transform hover:scale-105 hover:shadow-2xl relative overflow-hidden"
                       >
                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
                         <div className="flex items-center justify-center relative z-10">
                           <Play className="w-6 h-6 mr-3" />
                           <span>Start VR Therapy</span>
+                          <ArrowRight className="w-5 h-5 ml-3 group-hover:translate-x-1 transition-transform" />
+                        </div>
+                      </Button>
+                      <Button
+                        onClick={() => startTherapy(therapy,'ar')}
+                        className="mt-2 w-full group bg-gradient-to-r from-emerald-600 via-emerald-500 to-green-600 hover:from-emerald-500 hover:via-emerald-600 hover:to-green-500 text-white py-6 px-6 rounded-2xl font-bold text-lg transition-all duration-300 transform hover:scale-105 hover:shadow-2xl relative overflow-hidden"
+                      >
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+                        <div className="flex items-center justify-center relative z-10">
+                          <Camera className="w-6 h-6 mr-3" />
+                          <span>Start AR Therapy</span>
                           <ArrowRight className="w-5 h-5 ml-3 group-hover:translate-x-1 transition-transform" />
                         </div>
                       </Button>

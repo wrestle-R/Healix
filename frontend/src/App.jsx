@@ -9,6 +9,7 @@ import DoctorDashboard from './pages/DoctorDashboard.jsx'
 import VRTherapyApp from './VR/VRTherapyApp.jsx'
 import TherapyRoutines from './VR/TherapyRoutines.jsx' // NEW IMPORT
 import { Toaster } from "sonner";
+import ARTherapyApp from './pages/ARTherapyApp.jsx' // UPDATED IMPORT
 // Component to handle root route redirection
 const RootRedirect = () => {
   const { user, loading } = useUser();
@@ -44,6 +45,7 @@ const AppRoutes = () => {
         <Route path="/doctor-dashboard" element={<DoctorDashboard />} />
         <Route path="/therapy-routines" element={<TherapyRoutines />} /> {/* NEW ROUTE */}
         <Route path="/vr-therapy/:therapyId" element={<VRTherapyApp />} /> {/* UPDATED ROUTE */}
+        <Route path="/ar-therapy/:therapyId" element={<ARTherapyApp />} /> {/* UPDATED ROUTE */}
       </Routes>
     </Router>
   );
