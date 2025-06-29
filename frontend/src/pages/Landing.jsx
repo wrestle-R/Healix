@@ -36,9 +36,9 @@ const Landing = () => {
     <div className="min-h-screen bg-background">
       {/* Navigation */}
       <motion.nav
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
-        transition={{ type: "spring", stiffness: 100 }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3, ease: "easeOut" }}
         className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border"
       >
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">

@@ -176,6 +176,10 @@ const patientSchema = new mongoose.Schema(
       default: "patient",
       required: true,
     },
+    googleAccessToken: String,
+googleRefreshToken: String,
+googleCalendarId: String,
+googleTokenExpiry: Number
   },
   {
     timestamps: true,
@@ -220,7 +224,7 @@ patientSchema.methods.checkProfileCompletion = function () {
       this.gender &&
       this.bloodGroup
     ),
-    contactInfo: !!this.phoneNumber, 
+    contactInfo: !!this.phoneNumber,
     medicalInfo: !!(this.height?.value && this.weight?.value),
     emergencyContact: this.emergencyContacts.length > 0,
   };

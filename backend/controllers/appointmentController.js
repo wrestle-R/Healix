@@ -1,7 +1,64 @@
+require('dotenv').config();
+
 const Appointment = require("../models/appointment");
 const DoctorAvailability = require("../models/doctorAvailability");
 const Doctor = require("../models/doctor");
 const Patient = require("../models/patient");
+const { 
+  handleAppointmentCreated,
+  handleAppointmentUpdated,
+  handleAppointmentDeleted 
+} = require('../middleware/appointmentEvents');
+const axios = require('axios');
+const jwt = require('jsonwebtoken');
+
+// Digital Samba Configuration
+const DIGITAL_SAMBA_BASE_URL = process.env.DIGITAL_SAMBA_BASE_URL ;
+const TEAM_ID = process.env.TEAM_ID;
+const SUBDOMAIN = process.env.SUBDOMAIN ;
+const DEVELOPER_KEY = process.env.DEVELOPER_KEY;
+
+// Add debug logging
+console.log('Environment variables loaded:', {
+  DIGITAL_SAMBA_BASE_URL,
+  TEAM_ID: !!TEAM_ID,
+  SUBDOMAIN,
+  DEVELOPER_KEY: !!DEVELOPER_KEY
+});
+
+// Helper function to make authenticated requests to Digital Samba
+const makeDigitalSambaRequest = async (method, endpoint, data = null) => {
+  try {
+    const config = {
+      method,
+      url: `${DIGITAL_SAMBA_BASE_URL}${endpoint}`,
+      headers: {
+        'Authorization': `Bearer ${DEVELOPER_KEY}`,
+        'Content-Type': 'application/json'
+      }
+    };
+
+    if (data) {
+      config.data = data;
+    }
+
+    const response = await axios(config);
+    return response.data;
+  } catch (error) {
+    console.error('Digital Samba API Error:', {
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      message: error.message
+    });
+    throw error;
+  }
+};
+
+// Generate unique room ID
+const generateRoomId = () => {
+  return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+};
 
 class AppointmentController {
   // Get all appointments for a doctor
@@ -177,7 +234,75 @@ class AppointmentController {
         });
       }
 
-      // Create new appointment
+      // Get doctor and patient details for room creation
+      const doctor = await Doctor.findById(doctorId);
+      const patient = await Patient.findById(patientId);
+
+      if (!doctor || !patient) {
+        return res.status(404).json({
+          success: false,
+          message: "Doctor or patient not found",
+        });
+      }
+
+      // Generate room ID first
+      const roomId = generateRoomId();
+      let roomUrl = `https://${SUBDOMAIN}/${roomId}`;
+      
+      // Create Digital Samba room
+      try {
+        console.log('Creating Digital Samba room...');
+        console.log('Team ID:', TEAM_ID);
+        console.log('Full Subdomain:', SUBDOMAIN);
+        console.log('Developer Key exists:', !!DEVELOPER_KEY);
+        console.log('Generated Room ID:', roomId);
+        
+        const doctorName = `Dr. ${doctor.firstName} ${doctor.lastName}`;
+        
+        // Calculate expires_at time (1 hour after appointment ends)
+        const appointmentDateTime = new Date(appointmentDate);
+        const [endHour, endMinute] = endTime.split(':');
+        appointmentDateTime.setHours(parseInt(endHour), parseInt(endMinute), 0, 0);
+        
+        // Add 1 hour to the appointment end time
+        const expiresAt = new Date(appointmentDateTime.getTime() + (60 * 60 * 1000));
+        const expiresAtString = expiresAt.toISOString().slice(0, 19).replace('T', ' ');
+        
+        console.log('Appointment end time:', appointmentDateTime);
+        console.log('Room expires at:', expiresAtString);
+        
+        const roomData = {
+          team_id: TEAM_ID,
+          friendly_url: roomId,
+          privacy: 'public',
+          name: `Appointment Room - ${doctorName}`,
+          description: `Video consultation room for appointment between ${doctorName} and ${patient.firstName} ${patient.lastName}`,
+          expires_at: expiresAtString,
+          features: {
+            chat: true,
+            screen_sharing: true,
+            recording: true,
+            whiteboard: true
+          }
+        };
+
+        console.log('Room data:', JSON.stringify(roomData, null, 2));
+        const roomResponse = await makeDigitalSambaRequest('POST', '/rooms', roomData);
+        console.log('Room created successfully:', roomResponse);
+        console.log('Final room URL:', roomUrl);
+      } catch (error) {
+        console.error('Failed to create Digital Samba room:', error);
+        console.error('Error details:', {
+          message: error.message,
+          status: error.response?.status,
+          data: error.response?.data
+        });
+        // Keep the room URL even if API call fails - room might still be accessible
+        console.log('Continuing with room URL despite API error:', roomUrl);
+      }
+
+      // Create new appointment with room URL
+      console.log('Creating appointment with room URL:', roomUrl);
       const appointment = new Appointment({
         doctorId,
         patientId,
@@ -187,10 +312,18 @@ class AppointmentController {
         reasonForVisit,
         symptoms: symptoms || [],
         fee: availability.consultationFee,
-        status: "pending", // Will be confirmed after payment
+        status: "pending",
+        roomUrl: roomUrl, // Ensure this is always set
+      });
+
+      console.log('Appointment data before save:', {
+        roomUrl: appointment.roomUrl,
+        doctorId: appointment.doctorId,
+        patientId: appointment.patientId
       });
 
       await appointment.save();
+      console.log('Appointment saved with room URL:', appointment.roomUrl);
 
       // Populate the appointment with doctor and patient details
       await appointment.populate([
@@ -198,12 +331,16 @@ class AppointmentController {
         { path: "patientId", select: "firstName lastName phoneNumber" },
       ]);
 
+      // Trigger Google Calendar event creation (async)
+      handleAppointmentCreated(appointment._id);
+
       res.status(201).json({
         success: true,
         message: "Appointment booked successfully",
         appointment,
       });
     } catch (error) {
+      console.error('Appointment booking error:', error);
       res.status(500).json({ success: false, message: error.message });
     }
   }
@@ -235,6 +372,8 @@ class AppointmentController {
         });
       }
 
+      handleAppointmentUpdated(appointment._id);
+    
       res.json({ success: true, appointment });
     } catch (error) {
       res.status(500).json({ success: false, message: error.message });
@@ -262,6 +401,7 @@ class AppointmentController {
           message: "Appointment not found",
         });
       }
+       handleAppointmentUpdated(appointment._id);
 
       res.json({
         success: true,

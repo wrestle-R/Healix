@@ -53,7 +53,7 @@ const Register = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          firebaseUid: firebaseUser.uid, 
+          firebaseUid: firebaseUser.uid,
           name: userData.name || firebaseUser.displayName,
           email: firebaseUser.email,
           profilePicture: firebaseUser.photoURL || "",
@@ -119,7 +119,9 @@ const Register = () => {
       contextLogin(profileData.user, profileData.token);
 
       toast.success("Account created successfully!");
-      navigate(userType === "doctor" ? "/doctor-dashboard" : "/patient-dashboard");
+      navigate(
+        userType === "doctor" ? "/doctor-dashboard" : "/patient-dashboard"
+      );
     } catch (error) {
       console.error("Registration error:", error);
       await handleAuthError(error);
@@ -143,7 +145,9 @@ const Register = () => {
       contextLogin(profileData.user, profileData.token);
 
       toast.success("Account created successfully!");
-      navigate(userType === "doctor" ? "/doctor-dashboard" : "/patient-dashboard");
+      navigate(
+        userType === "doctor" ? "/doctor-dashboard" : "/patient-dashboard"
+      );
     } catch (error) {
       console.error("Google registration error:", error);
 
@@ -175,194 +179,153 @@ const Register = () => {
 
   return (
     <motion.div
-      initial="initial"
-      animate="in"
-      exit="out"
-      variants={pageVariants}
-      transition={pageTransition}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.18, ease: "linear" }}
       className="min-h-screen bg-background flex items-center justify-center p-4"
     >
       <div className="w-full max-w-md">
-        <motion.div
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 0.2 }}
-        >
-          <Card className="shadow-xl border border-border/50">
-            <CardHeader className="space-y-1 text-center">
-              <CardTitle className="text-2xl font-bold text-foreground font-serif">
-                Create Account
-              </CardTitle>
-              <CardDescription className="text-muted-foreground">
-                Join Healix and start your healthcare journey
-              </CardDescription>
-            </CardHeader>
+        <Card className="shadow-xl border border-border/50">
+          <CardHeader className="space-y-1 text-center">
+            <CardTitle className="text-2xl font-bold text-foreground font-serif">
+              Create Account
+            </CardTitle>
+            <CardDescription className="text-muted-foreground">
+              Join Healix and start your healthcare journey
+            </CardDescription>
+          </CardHeader>
 
-            <CardContent className="space-y-6">
-              <Tabs
-                value={userType}
-                onValueChange={setUserType}
-                className="w-full"
-              >
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="patient" className="flex items-center">
-                    <FaUser className="mr-2 h-4 w-4" />
-                    Patient
-                  </TabsTrigger>
-                  <TabsTrigger value="doctor" className="flex items-center">
-                    <FaUserMd className="mr-2 h-4 w-4" />
-                    Doctor
-                  </TabsTrigger>
-                </TabsList>
-              </Tabs>
+          <CardContent className="space-y-6">
+            <Tabs
+              value={userType}
+              onValueChange={setUserType}
+              className="w-full"
+            >
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="patient" className="flex items-center">
+                  <FaUser className="mr-2 h-4 w-4" />
+                  Patient
+                </TabsTrigger>
+                <TabsTrigger value="doctor" className="flex items-center">
+                  <FaUserMd className="mr-2 h-4 w-4" />
+                  Doctor
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
 
-              {error && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                >
-                  <Alert variant="destructive">
-                    <AlertDescription>{error}</AlertDescription>
-                  </Alert>
-                </motion.div>
-              )}
-
-              <form onSubmit={handleEmailRegister} className="space-y-4">
-                <motion.div
-                  initial={{ x: -20, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  transition={{ delay: 0.3 }}
-                >
-                  <Label htmlFor="name">Full Name</Label>
-                  <Input
-                    id="name"
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Enter your full name"
-                    required
-                    className="mt-1"
-                  />
-                </motion.div>
-
-                <motion.div
-                  initial={{ x: -20, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  transition={{ delay: 0.4 }}
-                >
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Enter your email"
-                    required
-                    className="mt-1"
-                  />
-                </motion.div>
-
-                <motion.div
-                  initial={{ x: -20, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  transition={{ delay: 0.5 }}
-                >
-                  <Label htmlFor="password">Password</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Create a password"
-                    required
-                    className="mt-1"
-                  />
-                </motion.div>
-
-                <motion.div
-                  initial={{ x: -20, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  transition={{ delay: 0.6 }}
-                >
-                  <Label htmlFor="confirmPassword">Confirm Password</Label>
-                  <Input
-                    id="confirmPassword"
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Confirm your password"
-                    required
-                    className="mt-1"
-                  />
-                </motion.div>
-
-                <motion.div
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <Button
-                    type="submit"
-                    className="w-full font-medium"
-                    disabled={loading}
-                  >
-                    {loading ? (
-                      <motion.div
-                        animate={{ rotate: 360 }}
-                        transition={{
-                          duration: 1,
-                          repeat: Infinity,
-                          ease: "linear",
-                        }}
-                        className="mr-2 h-4 w-4 border-2 border-primary-foreground border-t-transparent rounded-full"
-                      />
-                    ) : (
-                      <FaUserPlus className="mr-2 h-4 w-4" />
-                    )}
-                    {loading ? "Creating Account..." : "Create Account"}
-                  </Button>
-                </motion.div>
-              </form>
-
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <Separator />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-background px-2 text-muted-foreground">
-                    Or continue with
-                  </span>
-                </div>
-              </div>
-
+            {error && (
               <motion.div
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.15 }}
               >
-                <Button
-                  variant="outline"
-                  onClick={handleGoogleRegister}
-                  disabled={loading}
-                  className="w-full font-medium"
-                >
-                  <FaGoogle className="mr-2 h-4 w-4" />
-                  Continue with Google
-                </Button>
+                <Alert variant="destructive">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
               </motion.div>
+            )}
 
-              <div className="text-center text-sm">
-                <span className="text-muted-foreground">
-                  Already have an account?{" "}
-                </span>
-                <Link
-                  to="/login"
-                  className="text-primary hover:text-primary/80 font-medium underline-offset-4 hover:underline"
-                >
-                  Sign in
-                </Link>
+            <form onSubmit={handleEmailRegister} className="space-y-4">
+              <div>
+                <Label htmlFor="name">Full Name</Label>
+                <Input
+                  id="name"
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Enter your full name"
+                  required
+                  className="mt-1"
+                />
               </div>
-            </CardContent>
-          </Card>
-        </motion.div>
+
+              <div>
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email"
+                  required
+                  className="mt-1"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Create a password"
+                  required
+                  className="mt-1"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Confirm your password"
+                  required
+                  className="mt-1"
+                />
+              </div>
+
+              <Button
+                type="submit"
+                className="w-full font-medium"
+                disabled={loading}
+              >
+                {loading ? (
+                  <span className="mr-2 h-4 w-4 animate-spin border-2 border-primary-foreground border-t-transparent rounded-full inline-block" />
+                ) : (
+                  <FaUserPlus className="mr-2 h-4 w-4" />
+                )}
+                {loading ? "Creating Account..." : "Create Account"}
+              </Button>
+            </form>
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <Separator />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">
+                  Or continue with
+                </span>
+              </div>
+            </div>
+
+            <Button
+              variant="outline"
+              onClick={handleGoogleRegister}
+              disabled={loading}
+              className="w-full font-medium"
+            >
+              <FaGoogle className="mr-2 h-4 w-4" />
+              Continue with Google
+            </Button>
+
+            <div className="text-center text-sm">
+              <span className="text-muted-foreground">
+                Already have an account?{" "}
+              </span>
+              <Link
+                to="/login"
+                className="text-primary hover:text-primary/80 font-medium underline-offset-4 hover:underline"
+              >
+                Sign in
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </motion.div>
   );

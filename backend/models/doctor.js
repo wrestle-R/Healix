@@ -128,6 +128,10 @@ const doctorSchema = new mongoose.Schema(
       default: "doctor",
       required: true,
     },
+    googleAccessToken: String,
+    googleRefreshToken: String,
+    googleCalendarId: String,
+    googleTokenExpiry: Number,
   },
   {
     timestamps: true,
@@ -173,7 +177,7 @@ doctorSchema.methods.checkProfileCompletion = function () {
     ),
     education: this.education.length > 0,
     verification: this.verificationDocuments.length > 0,
-    availability: false, 
+    availability: false,
   };
 
   this.completedSections = required;

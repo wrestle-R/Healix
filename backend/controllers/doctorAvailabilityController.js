@@ -184,6 +184,18 @@ class DoctorAvailabilityController {
       const { doctorId } = req.params;
       const { date } = req.query;
 
+      // Validate that the requested date is not in the past
+      const requestedDate = new Date(date);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      if (requestedDate < today) {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Cannot book appointments for past dates" 
+        });
+      }
+
       const availability = await DoctorAvailability.findOne({ doctorId });
 
       if (!availability) {
@@ -191,8 +203,6 @@ class DoctorAvailabilityController {
           .status(404)
           .json({ success: false, message: "Doctor availability not found" });
       }
-
-      const requestedDate = new Date(date);
 
       const dayOfWeek = requestedDate
         .toLocaleDateString("en-US", { weekday: "long" })
@@ -215,6 +225,17 @@ class DoctorAvailabilityController {
       // Generate time slots
       const slots = availability.generateSlotsForDay(requestedDate);
 
+      // Filter out past time slots if it's today
+      const now = new Date();
+      const isToday = requestedDate.toDateString() === now.toDateString();
+      const currentTime = now.getHours() * 60 + now.getMinutes();
+
+      const futureSlots = isToday ? slots.filter(slot => {
+        const [hours, minutes] = slot.startTime.split(':').map(Number);
+        const slotTime = hours * 60 + minutes;
+        return slotTime > currentTime;
+      }) : slots;
+
       // Get existing appointments for this date
       const Appointment = require("../models/appointment");
       const existingAppointments = await Appointment.find({
@@ -227,7 +248,7 @@ class DoctorAvailabilityController {
       });
 
       // Filter out booked slots
-      const availableSlots = slots.filter((slot) => {
+      const availableSlots = futureSlots.filter((slot) => {
         return !existingAppointments.some(
           (apt) => apt.startTime === slot.startTime
         );

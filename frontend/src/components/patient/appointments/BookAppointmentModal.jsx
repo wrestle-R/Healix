@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Dialog } from "@headlessui/react";
 import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
+import { X, CalendarPlus } from "lucide-react";
 import CalendarSlotPicker from "./CalendarSlotPicker";
 import { toast } from "sonner";
 
@@ -17,7 +17,7 @@ const BookAppointmentModal = ({ open, onClose, doctor, user }) => {
   const [symptomsInput, setSymptomsInput] = useState("");
 
   // Reset state when modal is closed or doctor changes
-  React.useEffect(() => {
+  useEffect(() => {
     if (!open) {
       setSelectedSlot(null);
       setBookingData({ reasonForVisit: "", symptoms: [] });
@@ -27,17 +27,26 @@ const BookAppointmentModal = ({ open, onClose, doctor, user }) => {
     }
   }, [open, doctor]);
 
-  const token = user?.token || localStorage.getItem("token");
-
   const handleBookingSubmit = async () => {
     if (!selectedSlot || !bookingData.reasonForVisit) return;
+    
+    // Validate that the selected slot is not in the past
+    const slotDateTime = new Date(`${selectedSlot.date}T${selectedSlot.startTime}`);
+    const now = new Date();
+    
+    if (slotDateTime <= now) {
+      toast.error("Cannot book appointments for past dates or times");
+      setSelectedSlot(null);
+      return;
+    }
+    
     try {
       setLoading(true);
       const res = await fetch(`${API_URL}/api/appointments/book`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${user.token || localStorage.getItem("token")}`,
         },
         body: JSON.stringify({
           doctorId: doctor._id,
@@ -51,11 +60,14 @@ const BookAppointmentModal = ({ open, onClose, doctor, user }) => {
       });
       const data = await res.json();
       if (data.success) {
-        toast.success("Appointment booked!");
+        toast.success("Appointment booked successfully!");
         setSelectedSlot(null);
         setBookingData({ reasonForVisit: "", symptoms: [] });
         setSymptomsInput("");
         onClose();
+        
+        // Add to Google Calendar after successful booking
+        addToGoogleCalendar();
       } else {
         toast.error(data.message || "Booking failed");
       }
@@ -64,6 +76,37 @@ const BookAppointmentModal = ({ open, onClose, doctor, user }) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const addToGoogleCalendar = () => {
+    if (!selectedSlot) return;
+
+    // Format the date and time for Google Calendar
+    const formatDateTime = (dateStr, timeStr) => {
+      const [year, month, day] = dateStr.split('-');
+      const [hours, minutes] = timeStr.split(':');
+      const date = new Date(year, month - 1, day, hours, minutes);
+      return date.toISOString().replace(/-|:|\.\d{3}/g, '');
+    };
+
+    const startDateTime = formatDateTime(selectedSlot.date, selectedSlot.startTime);
+    const endDateTime = formatDateTime(selectedSlot.date, selectedSlot.endTime);
+
+    const eventDetails = {
+      title: `Appointment with Dr. ${doctor.firstName} ${doctor.lastName}`,
+      location: doctor.clinicAddress || "Clinic",
+      details: `Reason: ${bookingData.reasonForVisit}\nSymptoms: ${bookingData.symptoms.join(', ') || 'None'}`,
+      start: startDateTime,
+      end: endDateTime
+    };
+
+    const url = `https://www.google.com/calendar/render?action=TEMPLATE` +
+      `&text=${encodeURIComponent(eventDetails.title)}` +
+      `&dates=${eventDetails.start}/${eventDetails.end}` +
+      `&details=${encodeURIComponent(eventDetails.details)}` +
+      `&location=${encodeURIComponent(eventDetails.location)}`;
+
+    window.open(url, '_blank');
   };
 
   // Format time for summary
@@ -100,6 +143,7 @@ const BookAppointmentModal = ({ open, onClose, doctor, user }) => {
                   ? ` with Dr. ${doctor.firstName} ${doctor.lastName}`
                   : ""}
               </Dialog.Title>
+
               {/* Calendar and slot picker */}
               {!selectedSlot && doctor && (
                 <CalendarSlotPicker
@@ -108,6 +152,7 @@ const BookAppointmentModal = ({ open, onClose, doctor, user }) => {
                   onChange={setSelectedSlot}
                 />
               )}
+
               {/* Show booking details form if slot is selected */}
               {selectedSlot && (
                 <div className="mt-6">
@@ -174,6 +219,10 @@ const BookAppointmentModal = ({ open, onClose, doctor, user }) => {
                     </p>
                     <p className="text-sm font-medium text-green-600 mb-1">
                       Fee: ₹{doctor?.consultationFee}
+                    </p>
+                    <p className="text-sm text-blue-600 mt-2 flex items-center gap-1">
+                      <CalendarPlus className="w-4 h-4" />
+                      You'll have the option to add this to Google Calendar after booking
                     </p>
                   </div>
                   <div className="flex justify-end space-x-3">
