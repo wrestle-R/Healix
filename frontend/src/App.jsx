@@ -31,7 +31,7 @@ const RootRedirect = () => {
     );
   }
 
-  return <Navigate to="/landing" replace />;
+  return <Landing />;
 };
 
 const AppRoutes = () => {
@@ -40,7 +40,6 @@ const AppRoutes = () => {
     <Router>
       <Routes>
         <Route path="/" element={<RootRedirect />} />
-        <Route path="/landing" element={<Landing />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/patient-dashboard" element={<PatientDashboard />} />
