@@ -63,6 +63,10 @@ const appointmentSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    roomUrl: {
+      type: String,
+      default: "",
+    },
     symptoms: {
       type: [String],
       default: [],
@@ -89,4 +93,5 @@ appointmentSchema.index({ doctorId: 1, appointmentDate: 1 });
 appointmentSchema.index({ patientId: 1, appointmentDate: 1 });
 appointmentSchema.index({ status: 1 });
 
+module.exports = mongoose.model("Appointment", appointmentSchema);
 module.exports = mongoose.model("Appointment", appointmentSchema);
