@@ -173,7 +173,6 @@ export default function TalkingDoctorChatbot() {
   const [textInput, setTextInput] = useState("");
   const [conversation, setConversation] = useState([]);
   const [browserSupported, setBrowserSupported] = useState(true);
-  const [conversationStarted, setConversationStarted] = useState(false);
 
   const patientData = useRef({
     symptoms: "",
@@ -264,21 +263,19 @@ export default function TalkingDoctorChatbot() {
     conversationEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [conversation]);
 
-  // Start conversation only once
+  // Start conversation
   useEffect(() => {
-    if (!conversationStarted) {
-      setConversationStarted(true);
-      setTimeout(() => askQuestion(0), 1000);
-    }
+    setTimeout(() => askQuestion(0), 1000);
+    // eslint-disable-next-line
   }, []);
 
   // Function to clean markdown formatting from text
   const cleanMarkdownText = (text) => {
     return text
-      .replace(/\*\*(.*?)\*\*/g, '$1') // Remove **bold** formatting
-      .replace(/\*(.*?)\*/g, '$1')     // Remove *italic* formatting
-      .replace(/__(.*?)__/g, '$1')     // Remove __underline__ formatting
-      .replace(/_(.*?)_/g, '$1')       // Remove _italic_ formatting
+      .replace(/\*\*(.*?)\*\*/g, "$1") // Remove **bold** formatting
+      .replace(/\*(.*?)\*/g, "$1") // Remove *italic* formatting
+      .replace(/__(.*?)__/g, "$1") // Remove __underline__ formatting
+      .replace(/_(.*?)_/g, "$1") // Remove _italic_ formatting
       .trim();
   };
 
@@ -287,7 +284,7 @@ export default function TalkingDoctorChatbot() {
 
     // Clean the text before speaking
     const cleanText = cleanMarkdownText(text);
-    
+
     setIsSpeaking(true);
     const utterance = new SpeechSynthesisUtterance(cleanText);
     utterance.rate = 0.9;
@@ -352,13 +349,18 @@ export default function TalkingDoctorChatbot() {
 
   const getMedicalAdvice = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/medical/get-medical-advice", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(patientData.current),
-      });
+      const response = await fetch(
+        `${
+          import.meta.env.VITE_API_URL || "http://localhost:5000"
+        }/api/medical/get-medical-advice`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(patientData.current),
+        }
+      );
 
       const data = await response.json();
 
