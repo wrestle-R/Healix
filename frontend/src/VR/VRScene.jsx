@@ -56,6 +56,7 @@ const VRScene = ({ exercise, isActive, therapy, currentExerciseIndex, repsComple
         <a-asset-item id="mirror" src="/models/room/mirror.glb"></a-asset-item>
         <a-asset-item id="therapy-ball" src="/models/room/therapy-ball.glb"></a-asset-item>
         <a-asset-item id="window" src="/models/room/window.glb"></a-asset-item>
+        <a-asset-item id="ceiling-light" src="/models/room/ceiling-light.glb"></a-asset-item>
       </a-assets>
 
       {/* 🌟 PROPER LIGHTING */}
@@ -102,6 +103,15 @@ const VRScene = ({ exercise, isActive, therapy, currentExerciseIndex, repsComple
   rotation="0 0 0"
   shadow="cast: true; receive: true"
 ></a-gltf-model>
+{/* 🌌 SIMPLE OUTSIDE DARKNESS */}
+<a-box 
+  position="5.8 3.3 1.5" 
+  width="0.1" 
+  height="3.5" 
+  depth="2" 
+  material="color: #000000; opacity: 0.95; transparent: true"
+  shadow="receive: false"
+></a-box>
 
 {/* 🧱 BACK WALL - TALLER */}
 <a-box 
