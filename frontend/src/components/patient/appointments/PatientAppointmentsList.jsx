@@ -110,92 +110,99 @@ const PatientAppointmentsList = () => {
           : 'border-border hover:border-primary/30 hover:shadow-md'
       }`}
     >
-      <CardContent className="p-6 flex flex-col md:flex-row md:items-center md:justify-between">
-        <div className="flex items-center gap-4">
-          {apt.doctorId?.profilePicture ? (
-            <img
-              src={apt.doctorId.profilePicture}
-              alt="Doctor"
-              className={`w-16 h-16 rounded-full object-cover border-2 ${
-                isCompleted ? 'border-gray-300' : 'border-primary/20'
-              }`}
-            />
-          ) : (
-            <div className={`w-16 h-16 rounded-full flex items-center justify-center border-2 ${
-              isCompleted 
-                ? 'bg-gray-100 border-gray-300' 
-                : 'bg-primary/10 border-primary/20'
-            }`}>
-              <User className={`w-8 h-8 ${isCompleted ? 'text-gray-500' : 'text-primary'}`} />
-            </div>
-          )}
-          <div>
-            <div className="font-semibold text-lg flex items-center gap-2">
-              Dr. {apt.doctorId?.firstName} {apt.doctorId?.lastName}
-              {isCompleted && (
-                <CheckCircle className="w-4 h-4 text-green-600" />
-              )}
-            </div>
-            <div className="text-sm text-muted-foreground">
-              {apt.doctorId?.specializations?.slice(0, 2).join(", ")}
-            </div>
-            {apt.doctorId?.address?.city && (
-              <div className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
-                <MapPin className="w-3 h-3" />
-                {apt.doctorId.address.city}
+      <CardContent className="p-6">
+        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+          <div className="flex items-center gap-4 flex-1">
+            {apt.doctorId?.profilePicture ? (
+              <img
+                src={apt.doctorId.profilePicture}
+                alt="Doctor"
+                className={`w-16 h-16 rounded-full object-cover border-2 flex-shrink-0 ${
+                  isCompleted ? 'border-gray-300' : 'border-primary/20'
+                }`}
+              />
+            ) : (
+              <div className={`w-16 h-16 rounded-full flex items-center justify-center border-2 flex-shrink-0 ${
+                isCompleted 
+                  ? 'bg-gray-100 border-gray-300' 
+                  : 'bg-primary/10 border-primary/20'
+              }`}>
+                <User className={`w-8 h-8 ${isCompleted ? 'text-gray-500' : 'text-primary'}`} />
               </div>
             )}
+            <div className="flex-1 min-w-0">
+              <div className="font-semibold text-lg flex items-center gap-2">
+                Dr. {apt.doctorId?.firstName} {apt.doctorId?.lastName}
+                {isCompleted && (
+                  <CheckCircle className="w-4 h-4 text-green-600" />
+                )}
+              </div>
+              <div className="text-sm text-muted-foreground">
+                {apt.doctorId?.specializations?.slice(0, 2).join(", ")}
+              </div>
+              {apt.doctorId?.address?.city && (
+                <div className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                  <MapPin className="w-3 h-3" />
+                  {apt.doctorId.address.city}
+                </div>
+              )}
+            </div>
+          </div>
+          
+          <div className="flex flex-col md:items-end gap-3 md:min-w-[200px]">
+            <div className="flex items-center text-sm text-muted-foreground">
+              <Calendar className="w-4 h-4 mr-1" />
+              {apt.appointmentDate?.slice(0, 10)}
+            </div>
+            <div className="flex items-center text-sm text-muted-foreground">
+              <Clock className="w-4 h-4 mr-1" />
+              {apt.startTime} - {apt.endTime}
+            </div>
+            
+            {apt.reasonForVisit && (
+              <div className="text-sm">
+                <span className="font-medium">Reason:</span>{" "}
+                <span className="text-muted-foreground">{apt.reasonForVisit}</span>
+              </div>
+            )}
+            
+            <div className="flex items-center justify-between w-full md:justify-end">
+              <span
+                className={`px-3 py-1 rounded-full text-xs font-medium ${
+                  apt.status === "ongoing"
+                    ? "bg-green-100 text-green-700 border border-green-300"
+                    : apt.status === "completed"
+                    ? "bg-gray-100 text-gray-600 border border-gray-200"
+                    : apt.status === "pending"
+                    ? "bg-yellow-100 text-yellow-700 border border-yellow-300"
+                    : "bg-gray-100 text-gray-700"
+                }`}
+              >
+                {apt.status}
+              </span>
+            </div>
           </div>
         </div>
         
-        <div className="flex flex-col md:items-end gap-2 mt-4 md:mt-0 flex-1">
-          <div className="flex items-center text-sm text-muted-foreground">
-            <Calendar className="w-4 h-4 mr-1" />
-            {apt.appointmentDate?.slice(0, 10)}
-          </div>
-          <div className="flex items-center text-sm text-muted-foreground">
-            <Clock className="w-4 h-4 mr-1" />
-            {apt.startTime} - {apt.endTime}
-          </div>
-          
-          {apt.reasonForVisit && (
-            <div className="text-sm mt-1">
-              <span className="font-medium">Reason:</span>{" "}
-              {apt.reasonForVisit}
-            </div>
-          )}
-          
-          <div>
-            <span
-              className={`px-3 py-1 rounded-full text-xs font-medium ${
-                apt.status === "ongoing"
-                  ? "bg-green-100 text-green-700 border border-green-300"
-                  : apt.status === "completed"
-                  ? "bg-gray-100 text-gray-600 border border-gray-200"
-                  : apt.status === "pending"
-                  ? "bg-yellow-100 text-yellow-700 border border-yellow-300"
-                  : "bg-gray-100 text-gray-700"
-              }`}
-            >
-              {apt.status}
-            </span>
-          </div>
-          
-          {/* Video Call Room URL - Show only when ongoing */}
+        {/* Video Call Section - Fixed height container to prevent layout shift */}
+        <div className="mt-4 h-auto">
           {apt.status === 'ongoing' && apt.roomUrl && (
-            <div className="mt-3 p-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg text-white w-full md:w-auto">
-              <div className="flex items-center gap-2 mb-2">
-                <Video className="w-5 h-5" />
-                <span className="font-semibold">Join Consultation</span>
+            <div className="p-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Video className="w-5 h-5" />
+                  <span className="font-semibold">Consultation Ready</span>
+                </div>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="bg-white text-blue-600 hover:bg-gray-100 font-medium"
+                  onClick={() => window.open(apt.roomUrl, '_blank')}
+                >
+                  <ExternalLink className="w-4 h-4 mr-2" />
+                  Join Video Call
+                </Button>
               </div>
-              <Button
-                variant="secondary"
-                className="w-full bg-white text-blue-600 hover:bg-gray-100 font-medium"
-                onClick={() => window.open(apt.roomUrl, '_blank')}
-              >
-                <ExternalLink className="w-4 h-4 mr-2" />
-                Join Video Call
-              </Button>
             </div>
           )}
         </div>

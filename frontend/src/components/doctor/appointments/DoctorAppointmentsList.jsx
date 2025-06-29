@@ -122,130 +122,137 @@ const DoctorAppointmentsList = () => {
             : 'border-border hover:border-primary/30 hover:shadow-md'
         }`}
       >
-        <CardContent className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 p-6">
-          {/* Patient Info */}
-          <div className="flex items-center gap-5 min-w-[220px] flex-1">
-            {patient?.profilePicture ? (
-              <img
-                src={patient.profilePicture}
-                alt="Patient"
-                className={`w-16 h-16 rounded-full object-cover border-2 ${
-                  isCompleted ? 'border-gray-300' : 'border-primary/20'
-                }`}
-              />
-            ) : (
-              <div className={`w-16 h-16 rounded-full flex items-center justify-center border-2 ${
-                isCompleted 
-                  ? 'bg-gray-100 border-gray-300' 
-                  : 'bg-primary/10 border-primary/20'
-              }`}>
-                <User className={`w-8 h-8 ${isCompleted ? 'text-gray-500' : 'text-primary'}`} />
-              </div>
-            )}
-            <div>
-              <div className="font-semibold text-lg flex items-center gap-2">
-                {patient?.firstName} {patient?.lastName}
-                {patient?.gender && (
-                  <span title="Gender">
-                    <Venus className="inline w-4 h-4 text-pink-500" />
-                  </span>
-                )}
-                {isCompleted && (
-                  <CheckCircle className="w-4 h-4 text-green-600" />
-                )}
-              </div>
-              {/* Slot timings under name only for laptops */}
-              <div className="hidden md:flex items-center gap-2 text-sm text-muted-foreground mt-1">
-                <Calendar className="w-4 h-4 mr-1" />
-                {apt.appointmentDate?.slice(0, 10)}
-                {/* Vertical separator for desktop */}
-                <span className="h-5 border-l border-muted-foreground mx-3" />
-                <Clock className="w-4 h-4 mr-1" />
-                {apt.startTime} - {apt.endTime}
-              </div>
-              <div className="flex items-center gap-3 text-sm text-muted-foreground mt-1">
-                {patient?.dateOfBirth && (
-                  <span className="flex items-center gap-1">
-                    <Cake className="w-4 h-4" />{" "}
-                    {getAge(patient.dateOfBirth)} yrs
-                  </span>
-                )}
-                {patient?.bloodGroup && (
-                  <span className="flex items-center gap-1">
-                    <Droplet className="w-4 h-4" /> {patient.bloodGroup}
-                  </span>
-                )}
-              </div>
-              {patient?.address?.city && (
-                <div className="text-xs text-muted-foreground mt-1">
-                  {patient.address.city}, {patient.address.state}
+        <CardContent className="p-6">
+          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
+            {/* Patient Info */}
+            <div className="flex items-center gap-5 min-w-[220px] flex-1">
+              {patient?.profilePicture ? (
+                <img
+                  src={patient.profilePicture}
+                  alt="Patient"
+                  className={`w-16 h-16 rounded-full object-cover border-2 flex-shrink-0 ${
+                    isCompleted ? 'border-gray-300' : 'border-primary/20'
+                  }`}
+                />
+              ) : (
+                <div className={`w-16 h-16 rounded-full flex items-center justify-center border-2 flex-shrink-0 ${
+                  isCompleted 
+                    ? 'bg-gray-100 border-gray-300' 
+                    : 'bg-primary/10 border-primary/20'
+                }`}>
+                  <User className={`w-8 h-8 ${isCompleted ? 'text-gray-500' : 'text-primary'}`} />
                 </div>
               )}
-            </div>
-          </div>
-          
-          {/* Appointment Info */}
-          <div className="flex flex-col md:items-end gap-2 flex-1">
-            {/* Hide slot timings here on desktop */}
-            <div className="flex items-center text-sm text-muted-foreground md:hidden">
-              <Calendar className="w-4 h-4 mr-1" />
-              {apt.appointmentDate?.slice(0, 10)}
-              <Clock className="w-4 h-4 ml-4 mr-1" />
-              {apt.startTime} - {apt.endTime}
-            </div>
-            <div className="text-sm mt-1">
-              <span className="font-medium">Reason:</span>{" "}
-              {apt.reasonForVisit || (
-                <span className="text-muted-foreground">N/A</span>
-              )}
-            </div>
-            <div>
-              <span
-                className={`px-3 py-1 rounded-full text-xs font-medium ${
-                  apt.status === "ongoing"
-                    ? "bg-green-100 text-green-700 border border-green-300"
-                    : apt.status === "completed"
-                    ? "bg-gray-100 text-gray-600 border border-gray-200"
-                    : apt.status === "pending"
-                    ? "bg-yellow-100 text-yellow-700 border border-yellow-300"
-                    : "bg-gray-100 text-gray-700"
-                }`}
-              >
-                {apt.status}
-              </span>
+              <div className="flex-1 min-w-0">
+                <div className="font-semibold text-lg flex items-center gap-2">
+                  {patient?.firstName} {patient?.lastName}
+                  {patient?.gender && (
+                    <span title="Gender">
+                      <Venus className="inline w-4 h-4 text-pink-500" />
+                    </span>
+                  )}
+                  {isCompleted && (
+                    <CheckCircle className="w-4 h-4 text-green-600" />
+                  )}
+                </div>
+                {/* Slot timings under name only for laptops */}
+                <div className="hidden md:flex items-center gap-2 text-sm text-muted-foreground mt-1">
+                  <Calendar className="w-4 h-4 mr-1" />
+                  {apt.appointmentDate?.slice(0, 10)}
+                  {/* Vertical separator for desktop */}
+                  <span className="h-5 border-l border-muted-foreground mx-3" />
+                  <Clock className="w-4 h-4 mr-1" />
+                  {apt.startTime} - {apt.endTime}
+                </div>
+                <div className="flex items-center gap-3 text-sm text-muted-foreground mt-1">
+                  {patient?.dateOfBirth && (
+                    <span className="flex items-center gap-1">
+                      <Cake className="w-4 h-4" />{" "}
+                      {getAge(patient.dateOfBirth)} yrs
+                    </span>
+                  )}
+                  {patient?.bloodGroup && (
+                    <span className="flex items-center gap-1">
+                      <Droplet className="w-4 h-4" /> {patient.bloodGroup}
+                    </span>
+                  )}
+                </div>
+                {patient?.address?.city && (
+                  <div className="text-xs text-muted-foreground mt-1">
+                    {patient.address.city}, {patient.address.state}
+                  </div>
+                )}
+              </div>
             </div>
             
-            {/* Video Call Room URL - Show only when ongoing */}
-            {apt.status === 'ongoing' && apt.roomUrl && (
-              <div className="mt-3 p-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg text-white">
-                <div className="flex items-center gap-2 mb-2">
-                  <Video className="w-5 h-5" />
-                  <span className="font-semibold">Consultation Room</span>
-                </div>
-                <Button
-                  variant="secondary"
-                  className="w-full bg-white text-blue-600 hover:bg-gray-100 font-medium"
-                  onClick={() => window.open(apt.roomUrl, '_blank')}
+            {/* Appointment Info */}
+            <div className="flex flex-col md:items-end gap-2 md:min-w-[200px]">
+              {/* Hide slot timings here on desktop */}
+              <div className="flex items-center text-sm text-muted-foreground md:hidden">
+                <Calendar className="w-4 h-4 mr-1" />
+                {apt.appointmentDate?.slice(0, 10)}
+                <Clock className="w-4 h-4 ml-4 mr-1" />
+                {apt.startTime} - {apt.endTime}
+              </div>
+              <div className="text-sm mt-1">
+                <span className="font-medium">Reason:</span>{" "}
+                {apt.reasonForVisit || (
+                  <span className="text-muted-foreground">N/A</span>
+                )}
+              </div>
+              <div className="flex items-center justify-between w-full md:justify-end">
+                <span
+                  className={`px-3 py-1 rounded-full text-xs font-medium ${
+                    apt.status === "ongoing"
+                      ? "bg-green-100 text-green-700 border border-green-300"
+                      : apt.status === "completed"
+                      ? "bg-gray-100 text-gray-600 border border-gray-200"
+                      : apt.status === "pending"
+                      ? "bg-yellow-100 text-yellow-700 border border-yellow-300"
+                      : "bg-gray-100 text-gray-700"
+                  }`}
                 >
-                  <ExternalLink className="w-4 h-4 mr-2" />
-                  Join Video Call
+                  {apt.status}
+                </span>
+              </div>
+              
+              {/* Actions */}
+              <div className="flex justify-end mt-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setSelectedPatient(patient);
+                    setShowPatientModal(true);
+                  }}
+                >
+                  View Details
                 </Button>
               </div>
-            )}
+            </div>
           </div>
           
-          {/* Actions */}
-          <div className="flex flex-row md:flex-col gap-2 min-w-[120px] justify-end">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                setSelectedPatient(patient);
-                setShowPatientModal(true);
-              }}
-            >
-              View Details
-            </Button>
+          {/* Video Call Section - Fixed container to prevent layout shift */}
+          <div className="mt-4">
+            {apt.status === 'ongoing' && apt.roomUrl && (
+              <div className="p-4 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg text-white">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Video className="w-5 h-5" />
+                    <span className="font-semibold">Consultation Room</span>
+                  </div>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    className="bg-white text-blue-600 hover:bg-gray-100 font-medium"
+                    onClick={() => window.open(apt.roomUrl, '_blank')}
+                  >
+                    <ExternalLink className="w-4 h-4 mr-2" />
+                    Join Video Call
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
