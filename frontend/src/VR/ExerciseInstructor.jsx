@@ -64,15 +64,6 @@ const ExerciseInstructor = ({ exercise, isActive, repsCompleted }) => {
 
   return (
     <a-entity ref={instructorRef} position={getInstructorPosition()}>
-      
-      {/* 🎯 SIMPLE PLATFORM */}
-      <a-cylinder 
-        position="0 0.02 0" 
-        radius="1.2" 
-        height="0.04" 
-        material="color: #e2e8f0; roughness: 0.8"
-        shadow="receive: true"
-      ></a-cylinder>
 
       {/* 🤖 INSTRUCTOR MODEL */}
       <a-gltf-model 
