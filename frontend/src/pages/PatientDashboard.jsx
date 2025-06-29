@@ -207,14 +207,14 @@ const PatientDashboard = () => {
 
           {/* Settings & Logout */}
           <div className="p-4 space-y-2">
-            <motion.button
+            {/* <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all duration-150"
             >
               <FaCog className="h-5 w-5" />
               <span>Settings</span>
-            </motion.button>
+            </motion.button> */}
 
             <motion.button
               whileHover={{ scale: 1.02 }}
