@@ -46,7 +46,7 @@ const ARTherapyApp = () => {
   const [loading, setLoading] = useState(true);
   
   // UI States
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [facingMode, setFacingMode] = useState('environment');
   const [showHelp, setShowHelp] = useState(false);
   const [modelControlsActive, setModelControlsActive] = useState(false);
