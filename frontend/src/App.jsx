@@ -6,10 +6,11 @@ import Login from './pages/Login.jsx'
 import Register from './pages/Register.jsx'
 import PatientDashboard from './pages/PatientDashboard.jsx'
 import DoctorDashboard from './pages/DoctorDashboard.jsx'
-import VRTherapyApp from './VR/VRTherapyApp.jsx'
 import TherapyRoutines from './VR/TherapyRoutines.jsx' // NEW IMPORT
 import { Toaster } from "sonner";
-import ARTherapyApp from './pages/ARTherapyApp.jsx' // UPDATED IMPORT
+import { lazy, Suspense } from "react";
+const VRTherapyApp = lazy(() => import("./VR/VRTherapyApp"));
+const ARTherapyApp = lazy(() => import("./pages/ARTherapyApp"));
 // Component to handle root route redirection
 const RootRedirect = () => {
   const { user, loading } = useUser();
@@ -34,6 +35,7 @@ const RootRedirect = () => {
 };
 
 const AppRoutes = () => {
+
   return (
     <Router>
       <Routes>
@@ -44,8 +46,16 @@ const AppRoutes = () => {
         <Route path="/patient-dashboard" element={<PatientDashboard />} />
         <Route path="/doctor-dashboard" element={<DoctorDashboard />} />
         <Route path="/therapy-routines" element={<TherapyRoutines />} /> {/* NEW ROUTE */}
-        <Route path="/vr-therapy/:therapyId" element={<VRTherapyApp />} /> {/* UPDATED ROUTE */}
-        <Route path="/ar-therapy/:therapyId" element={<ARTherapyApp />} /> {/* UPDATED ROUTE */}
+<Route path="/vr-therapy/:therapyId" element={
+  <Suspense fallback={<div>Loading VR...</div>}>
+    <VRTherapyApp />
+  </Suspense>
+} />
+<Route path="/ar-therapy/:therapyId" element={
+  <Suspense fallback={<div>Loading AR...</div>}>
+    <ARTherapyApp />
+  </Suspense>
+} />
       </Routes>
     </Router>
   );
