@@ -184,6 +184,22 @@ static async getPatientAnalytics(req, res) {
       .sort((a, b) => b.visits - a.visits)
       .slice(0, 5);
 
+    // Average ratings of visited doctors (real data only)
+    const averageRatings = myAppointments
+      .filter(apt => apt.doctorId && apt.doctorId.averageRating)
+      .reduce((acc, apt) => {
+        const doctorName = `Dr. ${apt.doctorId.firstName} ${apt.doctorId.lastName}`;
+        const rating = apt.doctorId.averageRating || 0;
+        
+        const existing = acc.find(d => d.doctor === doctorName);
+        if (!existing) {
+          acc.push({ doctor: doctorName, rating: parseFloat(rating.toFixed(1)) });
+        }
+        return acc;
+      }, [])
+      .sort((a, b) => b.rating - a.rating)
+      .slice(0, 5);
+
     // Recent activities (real data only)
     const recentActivities = myAppointments
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
@@ -212,6 +228,7 @@ static async getPatientAnalytics(req, res) {
       appointmentsTrend,
       appointmentsByStatus,
       doctorsVisited,
+      averageRatings,
       
       // Activities
       recentActivities,

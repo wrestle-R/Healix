@@ -18,7 +18,6 @@ import {
   ResponsiveContainer
 } from 'recharts';
 import {
-  FaHeartbeat,
   FaCalendarCheck,
   FaUserMd,
   FaChartLine,
@@ -387,7 +386,7 @@ const DoctorAnalytics = () => {
           <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
             <CardHeader>
               <CardTitle className="text-gray-800 flex items-center">
-                <FaHeartbeat className="w-5 h-5 mr-2 text-red-500" />
+                <FaStethoscope className="w-5 h-5 mr-2 text-red-500" />
                 Recent Activities
               </CardTitle>
             </CardHeader>

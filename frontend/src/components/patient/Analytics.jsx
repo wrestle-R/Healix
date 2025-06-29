@@ -18,7 +18,6 @@ import {
   ResponsiveContainer
 } from 'recharts';
 import {
-  FaHeartbeat,
   FaCalendarCheck,
   FaUserMd,
   FaChartLine,
@@ -29,9 +28,6 @@ import {
   FaEye,
   FaArrowUp,
   FaArrowDown,
-  FaWalking,
-  FaTint,
-  FaBed,
   FaChartBar
 } from 'react-icons/fa';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -158,7 +154,7 @@ const Analytics = () => {
           <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
             <div>
               <h1 className="text-4xl font-bold text-gray-800 mb-2">My Health Analytics</h1>
-              <p className="text-lg text-gray-600">Track your health journey and progress</p>
+              <p className="text-lg text-gray-600">Track your appointments and medical journey</p>
             </div>
             
             <div className="flex items-center gap-4 mt-4 md:mt-0">
@@ -209,77 +205,47 @@ const Analytics = () => {
           />
         </motion.div>
 
-        {/* Health Metrics */}
+        {/* Charts Grid */}
+        {/* Full Width Appointments Trend */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
+          transition={{ delay: 0.1 }}
+          className="mb-8"
         >
-          <StatCard
-            title="Daily Steps"
-            value={analyticsData?.healthMetrics?.steps || 0}
-            icon={FaWalking}
-            color={colors.info}
-          />
-          <StatCard
-            title="Heart Rate"
-            value={`${analyticsData?.healthMetrics?.heartRate || 0} bpm`}
-            icon={FaHeartbeat}
-            color={colors.error}
-          />
-          <StatCard
-            title="Sleep Hours"
-            value={`${analyticsData?.healthMetrics?.sleepHours || 0}h`}
-            icon={FaBed}
-            color={colors.accent}
-          />
-          <StatCard
-            title="Water Intake"
-            value={`${analyticsData?.healthMetrics?.waterIntake || 0} glasses`}
-            icon={FaTint}
-            color={colors.neutral}
-          />
+          <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+            <CardHeader>
+              <CardTitle className="text-gray-800 flex items-center">
+                <FaChartLine className="w-5 h-5 mr-2 text-blue-500" />
+                My Appointments Trend
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={400}>
+                <AreaChart data={analyticsData?.appointmentsTrend || []}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                  <XAxis dataKey="date" stroke="#6B7280" />
+                  <YAxis stroke="#6B7280" />
+                  <Tooltip />
+                  <Area
+                    type="monotone"
+                    dataKey="appointments"
+                    stroke="#FF9AA2"
+                    fill="#FF9AA2"
+                    fillOpacity={0.3}
+                    strokeWidth={2}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
         </motion.div>
 
-        {/* Charts Grid */}
+        {/* Second Row - Two Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-          {/* Appointments Trend */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.1 }}
-          >
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
-              <CardHeader>
-                <CardTitle className="text-gray-800 flex items-center">
-                  <FaChartLine className="w-5 h-5 mr-2 text-blue-500" />
-                  My Appointments Trend
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <AreaChart data={analyticsData?.appointmentsTrend || []}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                    <XAxis dataKey="date" stroke="#6B7280" />
-                    <YAxis stroke="#6B7280" />
-                    <Tooltip />
-                    <Area
-                      type="monotone"
-                      dataKey="appointments"
-                      stroke="#FF9AA2"
-                      fill="#FF9AA2"
-                      fillOpacity={0.3}
-                      strokeWidth={2}
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-          </motion.div>
-
           {/* Appointment Status */}
           <motion.div
-            initial={{ opacity: 0, x: 20 }}
+            initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2 }}
           >
@@ -291,14 +257,14 @@ const Analytics = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
+                <ResponsiveContainer width="100%" height={350}>
                   <PieChart>
                     <Pie
                       data={analyticsData?.appointmentsByStatus || []}
                       cx="50%"
                       cy="50%"
-                      innerRadius={60}
-                      outerRadius={120}
+                      innerRadius={70}
+                      outerRadius={140}
                       paddingAngle={5}
                       dataKey="count"
                     >
@@ -313,14 +279,11 @@ const Analytics = () => {
               </CardContent>
             </Card>
           </motion.div>
-        </div>
 
-        {/* Second Row Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
           {/* Doctors Visited */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.3 }}
           >
             <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
@@ -331,7 +294,7 @@ const Analytics = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
+                <ResponsiveContainer width="100%" height={350}>
                   <BarChart data={analyticsData?.doctorsVisited || []}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
                     <XAxis dataKey="name" stroke="#6B7280" />
@@ -343,45 +306,18 @@ const Analytics = () => {
               </CardContent>
             </Card>
           </motion.div>
-
-          {/* Therapy Sessions */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-          >
-            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
-              <CardHeader>
-                <CardTitle className="text-gray-800 flex items-center">
-                  <FaEye className="w-5 h-5 mr-2 text-indigo-500" />
-                  Therapy Sessions
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={analyticsData?.therapySessions || []}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                    <XAxis dataKey="therapy" stroke="#6B7280" />
-                    <YAxis stroke="#6B7280" />
-                    <Tooltip />
-                    <Bar dataKey="completed" fill="#BAE1FF" name="Completed" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-          </motion.div>
         </div>
 
         {/* Recent Activities */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
+          transition={{ delay: 0.4 }}
         >
           <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
             <CardHeader>
               <CardTitle className="text-gray-800 flex items-center">
-                <FaHeartbeat className="w-5 h-5 mr-2 text-red-500" />
+                <FaCalendarCheck className="w-5 h-5 mr-2 text-red-500" />
                 Recent Activities
               </CardTitle>
             </CardHeader>
@@ -391,7 +327,7 @@ const Analytics = () => {
                   <div key={index} className="flex items-center justify-between p-4 rounded-lg" style={{ backgroundColor: colors.neutral }}>
                     <div className="flex items-center">
                       <div className="w-10 h-10 rounded-full flex items-center justify-center mr-4" style={{ backgroundColor: chartColors[index % chartColors.length] }}>
-                        <FaHeartbeat className="w-4 h-4 text-gray-700" />
+                        <FaUserMd className="w-4 h-4 text-gray-700" />
                       </div>
                       <div>
                         <p className="font-semibold text-gray-800">{activity.action}</p>
