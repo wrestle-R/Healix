@@ -5,6 +5,7 @@ import 'aframe-environment-component';
 import TherapyEnvironment from './TherapyEnvironment';
 import ExerciseInstructor from './ExerciseInstructor';
 import ExerciseArea from './ExerciseArea';
+import 'aframe-orbit-controls-component-3dof';
 
 const VRScene = ({ exercise, isActive, therapy, currentExerciseIndex, repsCompleted, timeElapsed }) => {
   useEffect(() => {
@@ -245,14 +246,26 @@ const VRScene = ({ exercise, isActive, therapy, currentExerciseIndex, repsComple
       ></a-gltf-model>
 
       {/* 📱 CAMERA - Better positioning */}
-      <a-entity id="cameraRig" position="0 1.6 4">
-        <a-camera 
-          look-controls="enabled: true" 
-          wasd-controls="enabled: true; acceleration: 60" 
-          cursor="rayOrigin: mouse"
-          fov="75"
-        ></a-camera>
-      </a-entity>
+      <a-entity id="cameraRig" position="0 2 4">
+  <a-camera
+    orbit-controls="
+      target: 0 1 0;
+      enableDamping: true;
+      dampingFactor: 0.125;
+      rotateSpeed:0.3;
+      minDistance: 2;
+      maxDistance: 10;
+      minPolarAngle: 0;
+maxPolarAngle: 3.13;
+      autoRotate: false;
+      enablePan: true;
+      enableZoom: true;
+    "
+    look-controls="enabled: false"
+    wasd-controls="enabled: false"
+    fov="75"
+  ></a-camera>
+</a-entity>
     </a-scene>
   );
 };
