@@ -5,6 +5,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
+import { motion, AnimatePresence } from "framer-motion";
+import { X, Plus } from "lucide-react";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -125,47 +127,88 @@ const DoctorProfileForm = () => {
     }
   };
 
-  const handleSpecializationAdd = () => {
-    if (
-      specializationInput &&
-      !profile.specializations.includes(specializationInput)
-    ) {
+  // Enhanced specialization handling with comma support
+  const handleSpecializationKeyDown = (e) => {
+    if (e.key === "," || e.key === "Enter") {
+      e.preventDefault();
+      addSpecialization();
+    }
+  };
+
+  const addSpecialization = () => {
+    const trimmedInput = specializationInput.trim().replace(/,$/, ""); // Remove trailing comma
+    if (trimmedInput && !profile.specializations.includes(trimmedInput)) {
       setProfile((prev) => ({
         ...prev,
-        specializations: [...prev.specializations, specializationInput],
+        specializations: [...prev.specializations, trimmedInput],
       }));
       setSpecializationInput("");
     }
   };
 
-  const handleSpecializationRemove = (spec) => {
-    setProfile((prev) => ({
-      ...prev,
-      specializations: prev.specializations.filter((s) => s !== spec),
-    }));
+  const handleSpecializationChange = (e) => {
+    const value = e.target.value;
+    // Check if comma was typed
+    if (value.includes(",")) {
+      const parts = value.split(",");
+      const newSpecs = parts
+        .slice(0, -1)
+        .map((s) => s.trim())
+        .filter((s) => s && !profile.specializations.includes(s));
+
+      if (newSpecs.length > 0) {
+        setProfile((prev) => ({
+          ...prev,
+          specializations: [...prev.specializations, ...newSpecs],
+        }));
+      }
+
+      // Keep the text after the last comma
+      setSpecializationInput(parts[parts.length - 1]);
+    } else {
+      setSpecializationInput(value);
+    }
   };
 
-  const handleSubSpecializationAdd = () => {
-    if (
-      subSpecializationInput &&
-      !profile.subSpecializations.includes(subSpecializationInput)
-    ) {
+  // Enhanced sub-specialization handling with comma support
+  const handleSubSpecializationKeyDown = (e) => {
+    if (e.key === "," || e.key === "Enter") {
+      e.preventDefault();
+      addSubSpecialization();
+    }
+  };
+
+  const addSubSpecialization = () => {
+    const trimmedInput = subSpecializationInput.trim().replace(/,$/, "");
+    if (trimmedInput && !profile.subSpecializations.includes(trimmedInput)) {
       setProfile((prev) => ({
         ...prev,
-        subSpecializations: [
-          ...prev.subSpecializations,
-          subSpecializationInput,
-        ],
+        subSpecializations: [...prev.subSpecializations, trimmedInput],
       }));
       setSubSpecializationInput("");
     }
   };
 
-  const handleSubSpecializationRemove = (spec) => {
-    setProfile((prev) => ({
-      ...prev,
-      subSpecializations: prev.subSpecializations.filter((s) => s !== spec),
-    }));
+  const handleSubSpecializationChange = (e) => {
+    const value = e.target.value;
+    if (value.includes(",")) {
+      const parts = value.split(",");
+      const newSpecs = parts
+        .slice(0, -1)
+        .map((s) => s.trim())
+        .filter((s) => s && !profile.subSpecializations.includes(s));
+
+      if (newSpecs.length > 0) {
+        setProfile((prev) => ({
+          ...prev,
+          subSpecializations: [...prev.subSpecializations, ...newSpecs],
+        }));
+      }
+
+      setSubSpecializationInput(parts[parts.length - 1]);
+    } else {
+      setSubSpecializationInput(value);
+    }
   };
 
   const handleEducationChange = (idx, e) => {
@@ -301,6 +344,20 @@ const DoctorProfileForm = () => {
     }
   };
 
+  const handleSpecializationRemove = (spec) => {
+    setProfile((prev) => ({
+      ...prev,
+      specializations: prev.specializations.filter((s) => s !== spec),
+    }));
+  };
+
+  const handleSubSpecializationRemove = (spec) => {
+    setProfile((prev) => ({
+      ...prev,
+      subSpecializations: prev.subSpecializations.filter((s) => s !== spec),
+    }));
+  };
+
   return (
     <Card>
       <CardContent className="p-6">
@@ -316,7 +373,7 @@ const DoctorProfileForm = () => {
             </Badge>
           )}
         </div>
-        <form onSubmit={handleSubmit} className="grid gap-4">
+        <form onSubmit={handleSubmit} className="grid gap-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm mb-1">
@@ -483,80 +540,142 @@ const DoctorProfileForm = () => {
               />
             </div>
           </div>
-          <div>
-            <label className="block text-sm mb-1">
-              Specializations <span className="text-red-500">*</span>
-            </label>
-            <div className="flex gap-2 mb-2">
-              <input
-                type="text"
-                className="border rounded px-2 py-1 flex-1"
-                value={specializationInput}
-                onChange={(e) => setSpecializationInput(e.target.value)}
-                placeholder="Add specialization"
-              />
-              <Button
-                type="button"
-                onClick={handleSpecializationAdd}
-                disabled={!specializationInput}
-              >
-                Add
-              </Button>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {profile.specializations.map((spec) => (
-                <span
-                  key={spec}
-                  className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs flex items-center"
-                >
-                  {spec}
-                  <button
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                Specializations <span className="text-red-500">*</span>
+              </label>
+              <div className="space-y-3">
+                <div className="relative">
+                  <input
+                    type="text"
+                    className="w-full border rounded px-2 py-1 pr-12 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+                    value={specializationInput}
+                    onChange={handleSpecializationChange}
+                    onKeyDown={handleSpecializationKeyDown}
+                    placeholder="Type specializations separated by commas..."
+                  />
+                  <Button
                     type="button"
-                    className="ml-1 text-red-500"
-                    onClick={() => handleSpecializationRemove(spec)}
+                    size="sm"
+                    onClick={addSpecialization}
+                    disabled={!specializationInput.trim()}
+                    className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 p-0"
                   >
-                    ×
-                  </button>
-                </span>
-              ))}
+                    <Plus className="w-3 h-3" />
+                  </Button>
+                </div>
+
+                <div className="flex flex-wrap gap-2 min-h-[40px] p-3 bg-muted/30 rounded-lg border-2 border-dashed border-border">
+                  <AnimatePresence mode="popLayout">
+                    {profile.specializations.map((spec) => (
+                      <motion.div
+                        key={spec}
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.9 }}
+                        transition={{ duration: 0.15, ease: "easeOut" }}
+                        className="group"
+                      >
+                        <Badge
+                          variant="secondary"
+                          className="bg-primary/10 text-primary border border-primary/20 px-3 py-1.5 text-sm flex items-center gap-2 hover:bg-primary/20 transition-colors cursor-default"
+                        >
+                          <span>{spec}</span>
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="ghost"
+                            className="h-4 w-4 p-0 hover:bg-destructive/20 hover:text-destructive rounded-full"
+                            onClick={() => handleSpecializationRemove(spec)}
+                          >
+                            <X className="w-3 h-3" />
+                          </Button>
+                        </Badge>
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                  {profile.specializations.length === 0 && (
+                    <div className="text-muted-foreground text-sm italic">
+                      No specializations added yet
+                    </div>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Type your specializations and press comma or Enter to add them
+                </p>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                Sub-Specializations
+              </label>
+              <div className="space-y-3">
+                <div className="relative">
+                  <input
+                    type="text"
+                    className="w-full border rounded px-2 py-1 pr-12 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+                    value={subSpecializationInput}
+                    onChange={handleSubSpecializationChange}
+                    onKeyDown={handleSubSpecializationKeyDown}
+                    placeholder="Type sub-specializations separated by commas..."
+                  />
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={addSubSpecialization}
+                    disabled={!subSpecializationInput.trim()}
+                    className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 p-0"
+                  >
+                    <Plus className="w-3 h-3" />
+                  </Button>
+                </div>
+
+                <div className="flex flex-wrap gap-2 min-h-[40px] p-3 bg-muted/30 rounded-lg border-2 border-dashed border-border">
+                  <AnimatePresence mode="popLayout">
+                    {profile.subSpecializations?.map((spec) => (
+                      <motion.div
+                        key={spec}
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.9 }}
+                        transition={{ duration: 0.15, ease: "easeOut" }}
+                        className="group"
+                      >
+                        <Badge
+                          variant="outline"
+                          className="bg-secondary/10 text-secondary-foreground border border-secondary/30 px-3 py-1.5 text-sm flex items-center gap-2 hover:bg-secondary/20 transition-colors cursor-default"
+                        >
+                          <span>{spec}</span>
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="ghost"
+                            className="h-4 w-4 p-0 hover:bg-destructive/20 hover:text-destructive rounded-full"
+                            onClick={() => handleSubSpecializationRemove(spec)}
+                          >
+                            <X className="w-3 h-3" />
+                          </Button>
+                        </Badge>
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                  {(!profile.subSpecializations ||
+                    profile.subSpecializations.length === 0) && (
+                    <div className="text-muted-foreground text-sm italic">
+                      No sub-specializations added yet
+                    </div>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Type your sub-specializations and press comma or Enter to add
+                  them
+                </p>
+              </div>
             </div>
           </div>
-          <div>
-            <label className="block text-sm mb-1">Sub-Specializations</label>
-            <div className="flex gap-2 mb-2">
-              <input
-                type="text"
-                className="border rounded px-2 py-1 flex-1"
-                value={subSpecializationInput}
-                onChange={(e) => setSubSpecializationInput(e.target.value)}
-                placeholder="Add sub-specialization"
-              />
-              <Button
-                type="button"
-                onClick={handleSubSpecializationAdd}
-                disabled={!subSpecializationInput}
-              >
-                Add
-              </Button>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {profile.subSpecializations?.map((spec) => (
-                <span
-                  key={spec}
-                  className="bg-blue-50 text-blue-700 px-2 py-1 rounded text-xs flex items-center"
-                >
-                  {spec}
-                  <button
-                    type="button"
-                    className="ml-1 text-red-500"
-                    onClick={() => handleSubSpecializationRemove(spec)}
-                  >
-                    ×
-                  </button>
-                </span>
-              ))}
-            </div>
-          </div>
+
           <div>
             <label className="block text-sm mb-1">Bio</label>
             <textarea

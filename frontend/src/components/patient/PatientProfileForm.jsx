@@ -617,7 +617,7 @@ const PatientProfileForm = () => {
             {profile.medicalHistory.map((mh, idx) => (
               <div
                 key={idx}
-                className="flex flex-col gap-2 mb-2 md:grid md:grid-cols-4 md:gap-2 md:items-center"
+                className="flex flex-col gap-2 mb-2 md:grid md:grid-cols-4 md:gap-2 md:items-center p-3 border border-border rounded-lg"
               >
                 <input
                   type="text"
@@ -655,15 +655,17 @@ const PatientProfileForm = () => {
                   onChange={(e) => handleMedicalHistoryChange(idx, e)}
                 />
                 {profile.medicalHistory.length > 1 && (
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="sm"
-                    className="md:col-span-4"
-                    onClick={() => removeMedicalHistory(idx)}
-                  >
-                    Remove
-                  </Button>
+                  <div className="md:col-span-4 flex justify-end mt-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300 hover:text-red-700"
+                      onClick={() => removeMedicalHistory(idx)}
+                    >
+                      Remove
+                    </Button>
+                  </div>
                 )}
               </div>
             ))}
@@ -684,7 +686,7 @@ const PatientProfileForm = () => {
             {profile.allergies.map((al, idx) => (
               <div
                 key={idx}
-                className="flex flex-col gap-2 mb-2 md:grid md:grid-cols-4 md:gap-2 md:items-center"
+                className="flex flex-col gap-2 mb-2 md:grid md:grid-cols-4 md:gap-2 md:items-center p-3 border border-border rounded-lg"
               >
                 <input
                   type="text"
@@ -700,7 +702,9 @@ const PatientProfileForm = () => {
                   value={al.severity}
                   onChange={(e) => handleAllergyChange(idx, e)}
                 >
-                  <option value="" disabled>Severity</option>
+                  <option value="" disabled>
+                    Severity
+                  </option>
                   {allergySeverities.map((s) => (
                     <option key={s} value={s}>
                       {s.charAt(0).toUpperCase() + s.slice(1)}
@@ -724,15 +728,17 @@ const PatientProfileForm = () => {
                   onChange={(e) => handleAllergyChange(idx, e)}
                 />
                 {profile.allergies.length > 1 && (
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="sm"
-                    className="md:col-span-4"
-                    onClick={() => removeAllergy(idx)}
-                  >
-                    Remove
-                  </Button>
+                  <div className="md:col-span-4 flex justify-end mt-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300 hover:text-red-700"
+                      onClick={() => removeAllergy(idx)}
+                    >
+                      Remove
+                    </Button>
+                  </div>
                 )}
               </div>
             ))}
@@ -755,7 +761,7 @@ const PatientProfileForm = () => {
             {profile.emergencyContacts.map((contact, idx) => (
               <div
                 key={idx}
-                className="flex flex-col gap-2 mb-2 md:grid md:grid-cols-4 md:gap-2 md:items-center"
+                className="flex flex-col gap-2 mb-2 md:grid md:grid-cols-4 md:gap-2 md:items-center p-3 border border-border rounded-lg"
               >
                 <input
                   type="text"
@@ -793,15 +799,17 @@ const PatientProfileForm = () => {
                   onChange={(e) => handleEmergencyContactChange(idx, e)}
                 />
                 {profile.emergencyContacts.length > 1 && (
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    size="sm"
-                    className="md:col-span-4"
-                    onClick={() => removeEmergencyContact(idx)}
-                  >
-                    Remove
-                  </Button>
+                  <div className="md:col-span-4 flex justify-end mt-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300 hover:text-red-700"
+                      onClick={() => removeEmergencyContact(idx)}
+                    >
+                      Remove
+                    </Button>
+                  </div>
                 )}
               </div>
             ))}
