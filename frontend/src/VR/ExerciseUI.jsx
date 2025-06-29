@@ -14,7 +14,6 @@ const ExerciseUI = ({
   therapy,
   exerciseIndex
 }) => {
-  const [isDragging, setIsDragging] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
 
   const formatTime = (seconds) => {
@@ -49,203 +48,186 @@ const ExerciseUI = ({
 
   return (
     <AnimatePresence>
-      <motion.div
-        drag
-        dragMomentum={false}
-        dragElastic={0.05}
-        dragConstraints={{
-          left: -200,
-          right: 200,
-          top: -200,
-          bottom: 200
-        }}
-        onDragStart={() => setIsDragging(true)}
-        onDragEnd={() => setIsDragging(false)}
-        className={`fixed bottom-6 right-6 z-[1000] select-none ${
-          isDragging ? 'cursor-grabbing' : 'cursor-grab'
-        }`}
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-        transition={{ type: "spring", stiffness: 300, damping: 30 }}
-      >
-        {/* 🎨 MINIMIZED STATE */}
-        {isMinimized ? (
-          <motion.div
-            layoutId="ui-container"
-            className="w-14 h-14 bg-gradient-to-br from-primary to-primary/80 rounded-full shadow-xl flex items-center justify-center cursor-pointer border-3 border-white"
-            onClick={() => setIsMinimized(false)}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ type: "spring", stiffness: 400 }}
-          >
-            <div className="text-white font-bold text-xs">
-              {repsCompleted}/{totalReps}
-            </div>
-          </motion.div>
-        ) : (
-          
-          /* 🚀 FULL UI - Modern Card Design */
-          <motion.div
-            layoutId="ui-container"
-            className="w-80 bg-gradient-to-br from-slate-800/95 to-slate-900/95 backdrop-blur-2xl text-white rounded-2xl border border-slate-600/50 shadow-2xl overflow-hidden"
-            initial={{ scale: 0.9, opacity: 0, y: 20 }}
-            animate={{ scale: 1, opacity: 1, y: 0 }}
-            transition={{ type: "spring", stiffness: 300, damping: 25 }}
-          >
-            {/* 🎯 HEADER */}
-            <div className="bg-gradient-to-r from-primary/80 to-primary/60 p-4 relative">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className={`w-3 h-3 rounded-full ${isActive ? 'bg-emerald-400 animate-pulse' : 'bg-slate-400'}`}></div>
-                  <div>
-                    <h3 className="font-bold text-white text-base leading-tight">
-                      {exercise?.exerciseName || 'Loading...'}
-                    </h3>
-                    <p className="text-white/70 text-xs">
-                      Exercise {exerciseIndex + 1} of {therapy?.exercises.length}
-                    </p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => setIsMinimized(true)}
-                    className="w-7 h-7 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-colors"
-                  >
-                    <span className="text-white text-xs">−</span>
-                  </button>
-                  <div className="w-4 h-1 bg-white/40 rounded-full"></div>
+      {!isMinimized ? (
+        <motion.div
+          key="sidebar"
+          initial={{ x: 300, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          exit={{ x: 300, opacity: 0 }}
+          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+          className="fixed top-0 right-0 h-full w-80 bg-background/95 backdrop-blur-xl border-l border-border shadow-2xl z-[1000] flex flex-col"
+        >
+          <div className="bg-primary/10 border-b border-border p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className={`w-3 h-3 rounded-full ${isActive ? 'bg-primary animate-pulse' : 'bg-muted'}`}></div>
+                <div>
+                  <h3 className="font-bold text-foreground text-lg">
+                    {exercise?.exerciseName || 'Loading...'}
+                  </h3>
+                  <p className="text-muted-foreground text-sm">
+                    Exercise {exerciseIndex + 1} of {therapy?.exercises.length}
+                  </p>
                 </div>
               </div>
-            </div>
-
-            <div className="p-5 space-y-5">
               
-              {/* 📊 PROGRESS */}
-              <div className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-slate-300 font-medium text-sm">Progress</span>
-                  <div className="text-right">
-                    <div className="text-emerald-400 font-bold text-xl">
-                      {repsCompleted}
-                    </div>
-                    <div className="text-slate-400 text-xs">
-                      of {totalReps} reps
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="relative">
-                  <div className="w-full bg-slate-700 rounded-full h-3 overflow-hidden">
-                    <motion.div 
-                      className="bg-gradient-to-r from-emerald-500 to-emerald-400 h-3 rounded-full relative"
-                      initial={{ width: 0 }}
-                      animate={{ width: `${repProgress}%` }}
-                      transition={{ duration: 0.5, ease: "easeOut" }}
-                    >
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse"></div>
-                    </motion.div>
-                  </div>
-                </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setIsMinimized(true)}
+                  className="w-8 h-8 bg-muted hover:bg-muted/80 rounded-full flex items-center justify-center transition-colors"
+                >
+                  <span className="text-muted-foreground text-sm">-</span>
+                </button>
               </div>
+            </div>
+          </div>
 
-              {/* ⏰ TIME */}
+          <div className="p-6 border-b border-border">
+            <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <span className="text-slate-300 font-medium text-sm">Time</span>
+                <span className="text-muted-foreground font-medium">Progress</span>
                 <div className="text-right">
-                  <div className="text-cyan-400 font-bold text-lg">
-                    {formatTime(timeElapsed)}
+                  <div className="text-primary font-bold text-xl">
+                    {repsCompleted}
                   </div>
-                  <div className="text-slate-400 text-xs">
-                    ~{getRepDuration(exercise?.exerciseId || 'stand')}s per rep
+                  <div className="text-muted-foreground text-sm">
+                    of {totalReps} reps
                   </div>
                 </div>
               </div>
-
-              {/* 💡 INSTRUCTIONS */}
-              <div className="bg-slate-700/50 rounded-xl p-3 border border-slate-600/30">
-                <div className="text-slate-400 text-xs mb-1 font-medium">Instructions</div>
-                <div className="text-slate-200 text-xs leading-relaxed">
-                  {exercise?.instructions || 'Follow the instructor model for proper form'}
-                </div>
-              </div>
-
-              {/* 🎉 STATUS */}
-              {isActive && (
-                <motion.div
-                  initial={{ scale: 0.9, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  className="bg-gradient-to-r from-emerald-900/40 to-cyan-900/40 border border-emerald-500/30 rounded-xl p-3"
-                >
-                  <div className="text-emerald-300 font-medium text-center text-xs">
-                    {repsCompleted >= totalReps ? 
-                      '🎉 Exercise Complete! Moving to next...' : 
-                      `💪 Keep Going! ${totalReps - repsCompleted} reps remaining`
-                    }
-                  </div>
-                </motion.div>
-              )}
-
-              {/* 🚀 BUTTONS */}
-              <div className="space-y-2">
-                {!isActive ? (
-                  <motion.button 
-                    onClick={onStart}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    className="w-full bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white py-3 px-4 rounded-xl font-bold text-sm transition-all duration-200 flex items-center justify-center shadow-lg"
-                  >
-                    <span className="mr-2 text-lg">🚀</span>
-                    Start Exercise
-                  </motion.button>
-                ) : (
-                  <motion.button 
-                    onClick={onNext}
-                    disabled={repsCompleted < totalReps}
-                    whileHover={repsCompleted >= totalReps ? { scale: 1.02 } : {}}
-                    whileTap={repsCompleted >= totalReps ? { scale: 0.98 } : {}}
-                    className={`w-full py-3 px-4 rounded-xl font-bold text-sm transition-all duration-200 flex items-center justify-center ${
-                      repsCompleted >= totalReps 
-                        ? 'bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white shadow-lg' 
-                        : 'bg-slate-700 text-slate-400 cursor-not-allowed'
-                    }`}
-                  >
-                    <span className="mr-2 text-base">⏭️</span>
-                    {repsCompleted >= totalReps ? 'Next Exercise' : 'Complete All Reps First'}
-                  </motion.button>
-                )}
-                
-                <motion.button 
-                  onClick={onExit}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="w-full bg-slate-700 hover:bg-red-600/80 text-white py-2 px-4 rounded-xl font-medium text-sm transition-all duration-200 flex items-center justify-center"
-                >
-                  <span className="mr-2">🚪</span>
-                  Exit VR Session
-                </motion.button>
-              </div>
-
-              {/* 📈 OVERALL PROGRESS */}
-              <div className="pt-3 border-t border-slate-700">
-                <div className="text-slate-400 text-xs text-center mb-2">
-                  Therapy Progress: {exerciseIndex + 1}/{therapy?.exercises.length} exercises
-                </div>
-                <div className="w-full bg-slate-700 rounded-full h-2 overflow-hidden">
+              
+              <div className="relative">
+                <div className="w-full bg-muted rounded-full h-3 overflow-hidden">
                   <motion.div 
-                    className="bg-gradient-to-r from-amber-500 to-orange-500 h-2 rounded-full"
-                    initial={{ width: 0 }}
-                    animate={{ width: `${((exerciseIndex + (repsCompleted/totalReps)) / therapy?.exercises.length) * 100}%` }}
+                    className="bg-primary h-3 rounded-full"
+                    animate={{ width: `${repProgress}%` }}
                     transition={{ duration: 0.5 }}
-                  />
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary-foreground/30 to-transparent animate-pulse"></div>
+                  </motion.div>
                 </div>
               </div>
             </div>
-          </motion.div>
-        )}
-      </motion.div>
+          </div>
+
+          <div className="p-6 border-b border-border">
+            <div className="flex justify-between items-center">
+              <span className="text-muted-foreground font-medium">Time</span>
+              <div className="text-right">
+                <div className="text-primary font-bold text-lg">
+                  {formatTime(timeElapsed)}
+                </div>
+                <div className="text-muted-foreground text-sm">
+                  ~{getRepDuration(exercise?.exerciseId || 'stand')}s per rep
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="p-6 border-b border-border flex-1">
+            <div className="bg-muted/50 rounded-lg p-4 border border-border/50">
+              <div className="text-muted-foreground text-sm mb-2 font-medium">Instructions</div>
+              <div className="text-foreground text-sm leading-relaxed">
+                {exercise?.instructions || 'Follow the instructor model for proper form'}
+              </div>
+            </div>
+
+            {isActive && (
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                className="bg-primary/10 border border-primary/30 rounded-lg p-3 mt-4"
+              >
+                <div className="text-primary font-medium text-center text-sm">
+                  {repsCompleted >= totalReps ? 
+                    '🎉 Exercise Complete! Moving to next...' : 
+                    `💪 Keep Going! ${totalReps - repsCompleted} reps remaining`
+                  }
+                </div>
+              </motion.div>
+            )}
+          </div>
+
+          <div className="p-6 space-y-3 bg-muted/20">
+            {!isActive ? (
+              <motion.button 
+                onClick={onStart}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-3 px-4 rounded-lg font-bold transition-all duration-200 flex items-center justify-center shadow-lg"
+              >
+                <span className="mr-2 text-lg">🚀</span>
+                Start Exercise
+              </motion.button>
+            ) : (
+              <motion.button 
+                onClick={onNext}
+                disabled={repsCompleted < totalReps}
+                whileHover={repsCompleted >= totalReps ? { scale: 1.02 } : {}}
+                whileTap={repsCompleted >= totalReps ? { scale: 0.98 } : {}}
+                className={`w-full py-3 px-4 rounded-lg font-bold transition-all duration-200 flex items-center justify-center ${
+                  repsCompleted >= totalReps 
+                    ? 'bg-secondary hover:bg-secondary/90 text-secondary-foreground shadow-lg' 
+                    : 'bg-muted text-muted-foreground cursor-not-allowed'
+                }`}
+              >
+                <span className="mr-2 text-base">⏭️</span>
+                {repsCompleted >= totalReps ? 'Next Exercise' : 'Complete All Reps First'}
+              </motion.button>
+            )}
+            
+            <motion.button 
+              onClick={onExit}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="w-full bg-destructive/80 hover:bg-destructive text-destructive-foreground py-2 px-4 rounded-lg font-medium transition-all duration-200 flex items-center justify-center"
+            >
+              <span className="mr-2">🚪</span>
+              Exit VR Session
+            </motion.button>
+
+            <div className="pt-3 border-t border-border">
+              <div className="text-muted-foreground text-xs text-center mb-2">
+                Therapy Progress: {exerciseIndex + 1}/{therapy?.exercises.length} exercises
+              </div>
+              <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
+                <motion.div 
+                  className="bg-secondary h-2 rounded-full"
+                  animate={{ width: `${((exerciseIndex + (repsCompleted/totalReps)) / therapy?.exercises.length) * 100}%` }}
+                  transition={{ duration: 0.5 }}
+                />
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      ) : (
+        <motion.div
+          key="minimized"
+          initial={{ x: 100, opacity: 0, scale: 0.8 }}
+          animate={{ x: 0, opacity: 1, scale: 1 }}
+          exit={{ x: 100, opacity: 0, scale: 0.8 }}
+          transition={{ type: "spring", stiffness: 400, damping: 25 }}
+          className="fixed top-4 right-4 z-[1000]"
+        >
+          <motion.button
+            onClick={() => setIsMinimized(false)}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="w-20 h-20 bg-primary hover:bg-primary/90 text-primary-foreground rounded-full shadow-2xl flex flex-col items-center justify-center transition-all border-2 border-primary-foreground/20"
+          >
+            <div className="text-sm font-bold">{repsCompleted}/{totalReps}</div>
+            <div className="text-xs opacity-70">{formatTime(timeElapsed)}</div>
+          </motion.button>
+
+          {isActive && (
+            <motion.div
+              className="absolute inset-0 rounded-full bg-primary/30"
+              animate={{ scale: [1, 1.3, 1], opacity: [0.3, 0, 0.3] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            />
+          )}
+        </motion.div>
+      )}
     </AnimatePresence>
   );
 };

@@ -79,7 +79,7 @@ const VRScene = ({ exercise, isActive, therapy, currentExerciseIndex, repsComple
 <a-box 
   position="-6 3 0" 
   width="0.2" 
-  height="6" 
+  height="8" 
   depth="12" 
   material="src: /wall-texture.jpg; repeat: 1 3" 
   shadow="receive: true"
@@ -89,7 +89,7 @@ const VRScene = ({ exercise, isActive, therapy, currentExerciseIndex, repsComple
 <a-box 
   position="6 3 0" 
   width="0.2" 
-  height="6" 
+  height="8" 
   depth="12" 
   material="src: /wall-texture.jpg; repeat: 1 3" 
   shadow="receive: true"
@@ -117,7 +117,7 @@ const VRScene = ({ exercise, isActive, therapy, currentExerciseIndex, repsComple
 <a-box 
   position="0 3 -6" 
   width="12" 
-  height="6" 
+  height="8" 
   depth="0.2" 
   material="src: /wall-texture.jpg; repeat: 6 3" 
   shadow="receive: true"
@@ -127,7 +127,7 @@ const VRScene = ({ exercise, isActive, therapy, currentExerciseIndex, repsComple
 <a-box 
   position="0 3 6" 
   width="12" 
-  height="6" 
+  height="8" 
   depth="0.2" 
   material="src: /wall-texture.jpg; repeat: 6 3" 
   shadow="receive: true"
@@ -135,7 +135,7 @@ const VRScene = ({ exercise, isActive, therapy, currentExerciseIndex, repsComple
 
 {/* 🏠 CEILING - HIGHER UP */}
 <a-plane 
-  position="0 6 0" 
+  position="0 7 0" 
   rotation="90 0 0" 
   width="12" 
   height="12" 
