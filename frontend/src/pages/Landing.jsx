@@ -9,6 +9,7 @@ import DoctorsSection from "../components/landing/DoctorsSection";
 import TestimonialsSection from "../components/landing/TestimonialsSection";
 import CTASection from "../components/landing/CTASection";
 import Footer from "../components/landing/Footer";
+import TherapySection from "../components/landing/TherapySection"
 
 const Landing = () => {
   const navigate = useNavigate();
@@ -65,6 +66,13 @@ const Landing = () => {
               </motion.a>
               <motion.a
                 whileHover={{ scale: 1.05 }}
+                href="#therapy"
+                className="text-foreground hover:text-primary transition-colors font-medium"
+              >
+                Therapy
+              </motion.a>
+              <motion.a
+                whileHover={{ scale: 1.05 }}
                 href="#about"
                 className="text-foreground hover:text-primary transition-colors font-medium"
               >
@@ -100,6 +108,7 @@ const Landing = () => {
       <HeroSection />
       <ServicesSection />
       <DoctorsSection />
+      <TherapySection />
       <TestimonialsSection />
       <CTASection />
       <Footer />

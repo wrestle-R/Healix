@@ -51,11 +51,11 @@ const ExerciseUI = ({
       {!isMinimized ? (
         <motion.div
           key="sidebar"
-          initial={{ x: 300, opacity: 0 }}
+          initial={{ x: -300, opacity: 0 }} // ✅ CHANGED: Start from LEFT
           animate={{ x: 0, opacity: 1 }}
-          exit={{ x: 300, opacity: 0 }}
+          exit={{ x: -300, opacity: 0 }} // ✅ CHANGED: Exit to LEFT
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          className="fixed top-0 right-0 h-full w-80 bg-background/95 backdrop-blur-xl border-l border-border shadow-2xl z-[1000] flex flex-col"
+          className="fixed top-0 left-0 h-full w-80 bg-background/95 backdrop-blur-xl border-r border-border shadow-2xl z-[1000] flex flex-col" // ✅ CHANGED: left-0 and border-r
         >
           <div className="bg-primary/10 border-b border-border p-6">
             <div className="flex items-center justify-between mb-4">
@@ -102,6 +102,9 @@ const ExerciseUI = ({
                     className="bg-primary h-3 rounded-full"
                     animate={{ width: `${repProgress}%` }}
                     transition={{ duration: 0.5 }}
+                  />
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-transparent via-primary-foreground/30 to-transparent animate-pulse"
                   >
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary-foreground/30 to-transparent animate-pulse"></div>
                   </motion.div>
@@ -203,11 +206,11 @@ const ExerciseUI = ({
       ) : (
         <motion.div
           key="minimized"
-          initial={{ x: 100, opacity: 0, scale: 0.8 }}
+          initial={{ x: -100, opacity: 0, scale: 0.8 }} // ✅ CHANGED: Start from LEFT
           animate={{ x: 0, opacity: 1, scale: 1 }}
-          exit={{ x: 100, opacity: 0, scale: 0.8 }}
+          exit={{ x: -100, opacity: 0, scale: 0.8 }} // ✅ CHANGED: Exit to LEFT
           transition={{ type: "spring", stiffness: 400, damping: 25 }}
-          className="fixed top-4 right-4 z-[1000]"
+          className="fixed top-4 left-4 z-[1000]" // ✅ CHANGED: left-4 instead of right-4
         >
           <motion.button
             onClick={() => setIsMinimized(false)}

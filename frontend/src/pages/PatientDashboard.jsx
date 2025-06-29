@@ -18,6 +18,7 @@ import {
   FaTimes,
   FaComments,
   FaChartBar,
+  FaVrCardboard,
 } from "react-icons/fa";
 import { useUser } from "../context/UserContext.jsx";
 import { toast } from "sonner";
@@ -29,6 +30,7 @@ import PatientProfileForm from "@/components/patient/PatientProfileForm";
 import PatientScheduleCalendar from "@/components/patient/appointments/PatientScheduleCalendar";
 import TalkingDoctorChatbot from "@/components/ChatBot/DoctorModel.jsx";
 import Analytics from "@/components/patient/Analytics.jsx";
+import TherapyRoutines from "@/VR/TherapyRoutines.jsx";
 
 const PatientDashboard = () => {
   const [loading, setLoading] = useState(true);
@@ -85,9 +87,10 @@ const PatientDashboard = () => {
     { id: "dashboard", label: "Dashboard", icon: FaTachometerAlt },
     { id: "appointments", label: "Appointments", icon: FaCalendarCheck },
     { id: "calendar", label: "Calendar", icon: FaCalendarPlus },
-    { id: "profile", label: "Profile", icon: FaUser },
+    { id: "therapy", label: "VR/AR Therapy", icon: FaVrCardboard }, 
     { id: "chat", label: "Chat", icon: FaComments },
     { id: "analytics", label: "Analytics", icon: FaChartBar },
+    { id: "profile", label: "Profile", icon: FaUser },
   ];
 
   const containerVariants = {
@@ -189,7 +192,13 @@ const PatientDashboard = () => {
                   key={item.id}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  onClick={() => setActiveTab(item.id)}
+                  onClick={() => {
+  if (item.id === "therapy") {
+    navigate("/therapy-routines");
+  } else {
+    setActiveTab(item.id);
+  }
+}}
                   className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-150 ${
                     activeTab === item.id
                       ? "bg-primary text-primary-foreground shadow-md"
@@ -293,9 +302,14 @@ const PatientDashboard = () => {
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         onClick={() => {
-                          setActiveTab(item.id);
-                          setIsMobileMenuOpen(false);
-                        }}
+    if (item.id === "therapy") {
+      setIsMobileMenuOpen(false);
+      navigate("/therapy-routines");
+    } else {
+      setActiveTab(item.id);
+      setIsMobileMenuOpen(false);
+    }
+  }}
                         className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-150 ${
                           activeTab === item.id
                             ? "bg-primary text-primary-foreground shadow-md"
@@ -421,6 +435,7 @@ const PatientDashboard = () => {
                 </div>
               </motion.div>
             )}
+            
 
             {/* Book Appointment Quick Action */}
             {activeTab === "dashboard" && (
