@@ -8,8 +8,7 @@ const patientRoutes = require('./routes/patientRoutes.js');
 const appointmentRoutes = require('./routes/appointmentRoutes.js');
 const doctorAvailabilityRoutes = require('./routes/doctorAvailabilityRoutes.js');
 const therapyRoutes = require('./routes/therapyRoutes.js');
-
-const googleAuthRoutes = require('./routes/googleAuth');
+const chatbotRoutes=require('./routes/chatbotRoutes');
 
 const PORT = process.env.PORT || 5000;
 dotenv.config();
@@ -28,9 +27,9 @@ app.use('/api/doctors', doctorRoutes);
 app.use('/api/patients', patientRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/availability', doctorAvailabilityRoutes);
-app.use('/', googleAuthRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/therapies', therapyRoutes);
+app.use('/api/medical',chatbotRoutes );
 
 
 

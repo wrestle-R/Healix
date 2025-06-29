@@ -338,7 +338,7 @@ export default function TalkingDoctorChatbot() {
 
   const getMedicalAdvice = async () => {
     try {
-      const response = await fetch("http://localhost:8000/get_medical_advice", {
+      const response = await fetch("http://localhost:5000/api/medical/get-medical-advice", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
