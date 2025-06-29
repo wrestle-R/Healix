@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Dialog } from "@headlessui/react";
 import { Button } from "@/components/ui/button";
-import { X, CalendarPlus } from "lucide-react";
+import { X, CalendarPlus, Plus } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Badge } from "@/components/ui/badge";
 import CalendarSlotPicker from "./CalendarSlotPicker";
 import { toast } from "sonner";
 
@@ -22,24 +24,74 @@ const BookAppointmentModal = ({ open, onClose, doctor, user }) => {
       setSelectedSlot(null);
       setBookingData({ reasonForVisit: "", symptoms: [] });
       setSymptomsInput("");
-    } else if (bookingData.symptoms.length) {
-      setSymptomsInput(bookingData.symptoms.join(", "));
     }
   }, [open, doctor]);
 
+  // Enhanced symptoms handling with comma support
+  const handleSymptomsKeyDown = (e) => {
+    if (e.key === "," || e.key === "Enter") {
+      e.preventDefault();
+      addSymptom();
+    }
+  };
+
+  const addSymptom = () => {
+    const trimmedInput = symptomsInput.trim().replace(/,$/, ""); // Remove trailing comma
+    if (trimmedInput && !bookingData.symptoms.includes(trimmedInput)) {
+      setBookingData((prev) => ({
+        ...prev,
+        symptoms: [...prev.symptoms, trimmedInput],
+      }));
+      setSymptomsInput("");
+    }
+  };
+
+  const handleSymptomsChange = (e) => {
+    const value = e.target.value;
+    // Check if comma was typed
+    if (value.includes(",")) {
+      const parts = value.split(",");
+      const newSymptoms = parts
+        .slice(0, -1)
+        .map((s) => s.trim())
+        .filter((s) => s && !bookingData.symptoms.includes(s));
+
+      if (newSymptoms.length > 0) {
+        setBookingData((prev) => ({
+          ...prev,
+          symptoms: [...prev.symptoms, ...newSymptoms],
+        }));
+      }
+
+      // Keep the text after the last comma
+      setSymptomsInput(parts[parts.length - 1]);
+    } else {
+      setSymptomsInput(value);
+    }
+  };
+
+  const removeSymptom = (symptom) => {
+    setBookingData((prev) => ({
+      ...prev,
+      symptoms: prev.symptoms.filter((s) => s !== symptom),
+    }));
+  };
+
   const handleBookingSubmit = async () => {
     if (!selectedSlot || !bookingData.reasonForVisit) return;
-    
+
     // Validate that the selected slot is not in the past
-    const slotDateTime = new Date(`${selectedSlot.date}T${selectedSlot.startTime}`);
+    const slotDateTime = new Date(
+      `${selectedSlot.date}T${selectedSlot.startTime}`
+    );
     const now = new Date();
-    
+
     if (slotDateTime <= now) {
       toast.error("Cannot book appointments for past dates or times");
       setSelectedSlot(null);
       return;
     }
-    
+
     try {
       setLoading(true);
       const res = await fetch(`${API_URL}/api/appointments/book`, {
@@ -65,7 +117,7 @@ const BookAppointmentModal = ({ open, onClose, doctor, user }) => {
         setBookingData({ reasonForVisit: "", symptoms: [] });
         setSymptomsInput("");
         onClose();
-        
+
         // Add to Google Calendar after successful booking
         addToGoogleCalendar();
       } else {
@@ -83,10 +135,10 @@ const BookAppointmentModal = ({ open, onClose, doctor, user }) => {
 
     // Format the date and time for Google Calendar
     const formatDateTime = (dateStr, timeStr) => {
-      const [year, month, day] = dateStr.split('-');
-      const [hours, minutes] = timeStr.split(':');
+      const [year, month, day] = dateStr.split("-");
+      const [hours, minutes] = timeStr.split(":");
       const date = new Date(year, month - 1, day, hours, minutes);
-      return date.toISOString().replace(/-|:|\.\d{3}/g, '');
+      return date.toISOString().replace(/-|:|\.\d{3}/g, "");
     };
 
     const startDateTime = formatDateTime(selectedSlot.date, selectedSlot.startTime);
@@ -177,28 +229,73 @@ const BookAppointmentModal = ({ open, onClose, doctor, user }) => {
                         }
                       />
                     </div>
+
                     <div>
                       <label className="block text-sm font-medium text-foreground mb-2">
                         Symptoms (Optional)
                       </label>
-                      <input
-                        type="text"
-                        className="w-full px-3 py-2 border border-border rounded-md bg-background"
-                        placeholder="Comma-separated symptoms..."
-                        value={symptomsInput}
-                        onChange={(e) => setSymptomsInput(e.target.value)}
-                        onBlur={() =>
-                          setBookingData((prev) => ({
-                            ...prev,
-                            symptoms: symptomsInput
-                              .split(",")
-                              .map((s) => s.trim())
-                              .filter((s) => s),
-                          }))
-                        }
-                      />
+                      <div className="space-y-3">
+                        <div className="relative">
+                          <input
+                            type="text"
+                            className="w-full px-3 py-2 pr-12 border border-border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+                            placeholder="Type symptoms separated by commas..."
+                            value={symptomsInput}
+                            onChange={handleSymptomsChange}
+                            onKeyDown={handleSymptomsKeyDown}
+                          />
+                          <Button
+                            type="button"
+                            size="sm"
+                            onClick={addSymptom}
+                            disabled={!symptomsInput.trim()}
+                            className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 p-0"
+                          >
+                            <Plus className="w-3 h-3" />
+                          </Button>
+                        </div>
+
+                        <div className="flex flex-wrap gap-2 min-h-[40px] p-3 border border-border rounded-md bg-muted/30">
+                          <AnimatePresence mode="popLayout">
+                            {bookingData.symptoms.map((symptom) => (
+                              <motion.div
+                                key={symptom}
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.9 }}
+                                transition={{ duration: 0.15, ease: "easeOut" }}
+                              >
+                                <Badge
+                                  variant="secondary"
+                                  className="bg-primary/10 text-primary border border-primary/20 px-3 py-1.5 text-sm flex items-center gap-2 hover:bg-primary/20 transition-colors cursor-default"
+                                >
+                                  <span>{symptom}</span>
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="ghost"
+                                    className="h-4 w-4 p-0 hover:bg-destructive/20 hover:text-destructive rounded-full"
+                                    onClick={() => removeSymptom(symptom)}
+                                  >
+                                    <X className="w-3 h-3" />
+                                  </Button>
+                                </Badge>
+                              </motion.div>
+                            ))}
+                          </AnimatePresence>
+                          {bookingData.symptoms.length === 0 && (
+                            <div className="text-muted-foreground text-sm italic">
+                              No symptoms added yet
+                            </div>
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          Type your symptoms and press comma or Enter to add them
+                        </p>
+                      </div>
                     </div>
                   </div>
+
                   <div className="bg-muted p-4 rounded-md mb-4">
                     <h4 className="font-medium mb-2 text-foreground">
                       Appointment Summary
@@ -220,9 +317,17 @@ const BookAppointmentModal = ({ open, onClose, doctor, user }) => {
                     <p className="text-sm font-medium text-green-600 mb-1">
                       Fee: ₹{doctor?.consultationFee}
                     </p>
+                    {bookingData.symptoms.length > 0 && (
+                      <div className="mt-2">
+                        <p className="text-sm text-muted-foreground mb-1">
+                          Symptoms: {bookingData.symptoms.join(", ")}
+                        </p>
+                      </div>
+                    )}
                     <p className="text-sm text-blue-600 mt-2 flex items-center gap-1">
                       <CalendarPlus className="w-4 h-4" />
-                      You'll have the option to add this to Google Calendar after booking
+                      You'll have the option to add this to Google Calendar after
+                      booking
                     </p>
                   </div>
                   <div className="flex justify-end space-x-3">
