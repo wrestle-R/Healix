@@ -3,7 +3,6 @@ import React, { useRef, useEffect } from 'react';
 const ExerciseInstructor = ({ exercise, isActive, repsCompleted }) => {
   const instructorRef = useRef();
 
-  // FIX: Use CORRECT model paths that match your actual models
   const getModelPath = () => {
     if (!exercise?.exerciseId) return '/models/Stand.glb';
     
@@ -28,18 +27,59 @@ const ExerciseInstructor = ({ exercise, isActive, repsCompleted }) => {
     }
   };
 
+  const getAnimationSpeed = () => {
+    if (!exercise?.exerciseId) return 0.25;
+    
+    switch (exercise.exerciseId) {
+      case 'arm-stretching': return 0.067;
+      case 'arms-up': return 0.1;
+      case 'burpee': return 0.2;
+      case 'front-raises': return 0.077;
+      case 'jogging': return 0.2;
+      case 'left-leg-balance': return 0.25;
+      case 'neck-stretching': return 0.67;
+      case 'plank': return 0.25;
+      case 'push-up': return 0.33;
+      case 'right-leg-balance': return 0.25;
+      case 'situps': return 0.33;
+      case 'squat': return 0.5;
+      case 'stair-climbing': return 0.33;
+      case 'stand': return 0.33;
+      case 'walking': return 0.67;
+      case 'warming-up': return 0.2;
+      default: return 0.25;
+    }
+  };
+
+  const getInstructorPosition = () => {
+    if (exercise?.exerciseId === 'jogging' || exercise?.exerciseId === 'walking') {
+      return "0 0 -2"; 
+    }
+    return "0 0 -1"; 
+  };
+
   useEffect(() => {
     console.log('🤖 Instructor Model:', exercise?.exerciseName, getModelPath());
   }, [exercise]);
 
   return (
-    <a-entity ref={instructorRef} position="2.5 0 -1">
-      {/* Model with CORRECT path and SYNCED animation speed */}
+    <a-entity ref={instructorRef} position={getInstructorPosition()}>
+      
+      {/* 🎯 SIMPLE PLATFORM */}
+      <a-cylinder 
+        position="0 0.02 0" 
+        radius="1.2" 
+        height="0.04" 
+        material="color: #e2e8f0; roughness: 0.8"
+        shadow="receive: true"
+      ></a-cylinder>
+
+      {/* 🤖 INSTRUCTOR MODEL */}
       <a-gltf-model 
         src={getModelPath()}
         position="0 0 0"
-        scale="1.2 1.2 1.2"
-        rotation="0 -60 0"
+        scale="1.8 1.8 1.8"
+        rotation="0 0 0"
         shadow="cast: true"
         animation-mixer={isActive ? 
           `clip: *; loop: repeat;` : 
@@ -47,33 +87,26 @@ const ExerciseInstructor = ({ exercise, isActive, repsCompleted }) => {
         }
       ></a-gltf-model>
 
-      {/* Status indicator above model */}
+      {/* 🎯 STATUS - POSITIONED TO RIGHT SIDE so it doesn't cover poster */}
       {isActive ? (
-        <a-text 
-          position="0 2.8 0" 
-          value={`Follow Me!\nRep ${repsCompleted}/${exercise?.repsTarget || 10}`}
-          align="center" 
-          color="#00FF00"
-          scale="0.8 0.8 0.8"
-        ></a-text>
-      ) : (
-        <a-text 
-          position="0 2.8 0" 
-          value="Ready to Exercise!\nClick Start to begin"
-          align="center" 
-          color="#FFD700"
-          scale="0.8 0.8 0.8"
-        ></a-text>
-      )}
-
-      {/* Exercise name display */}
-      <a-text 
-        position="0 2.2 0" 
-        value={exercise?.exerciseName || 'Exercise'}
-        align="center" 
-        color="#FFFFFF"
-        scale="0.6 0.6 0.6"
-      ></a-text>
+  <a-text 
+    position="3 3.5 0" 
+    value={`${exercise?.exerciseName}\nRep ${repsCompleted}/${exercise?.repsTarget || 10}`}
+    align="center" 
+    color="#10b981"
+    scale="1.2 1.2 1.2"
+    font="dejavu"
+  ></a-text>
+) : (
+  <a-text 
+    position="3 3.5 0" 
+    value={`Ready: ${exercise?.exerciseName || 'Exercise'}\nClick Start to begin`}
+    align="center" 
+    color="#f59e0b"
+    scale="1.0 1.0 1.0"
+    font="dejavu"
+  ></a-text>
+)}
     </a-entity>
   );
 };
