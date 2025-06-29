@@ -259,12 +259,25 @@ class AppointmentController {
         
         const doctorName = `Dr. ${doctor.firstName} ${doctor.lastName}`;
         
+        // Calculate expires_at time (1 hour after appointment ends)
+        const appointmentDateTime = new Date(appointmentDate);
+        const [endHour, endMinute] = endTime.split(':');
+        appointmentDateTime.setHours(parseInt(endHour), parseInt(endMinute), 0, 0);
+        
+        // Add 1 hour to the appointment end time
+        const expiresAt = new Date(appointmentDateTime.getTime() + (60 * 60 * 1000));
+        const expiresAtString = expiresAt.toISOString().slice(0, 19).replace('T', ' ');
+        
+        console.log('Appointment end time:', appointmentDateTime);
+        console.log('Room expires at:', expiresAtString);
+        
         const roomData = {
           team_id: TEAM_ID,
           friendly_url: roomId,
           privacy: 'public',
           name: `Appointment Room - ${doctorName}`,
           description: `Video consultation room for appointment between ${doctorName} and ${patient.firstName} ${patient.lastName}`,
+          expires_at: expiresAtString,
           features: {
             chat: true,
             screen_sharing: true,
