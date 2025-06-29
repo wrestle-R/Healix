@@ -29,6 +29,17 @@ const BookAppointmentModal = ({ open, onClose, doctor, user }) => {
 
   const handleBookingSubmit = async () => {
     if (!selectedSlot || !bookingData.reasonForVisit) return;
+    
+    // Validate that the selected slot is not in the past
+    const slotDateTime = new Date(`${selectedSlot.date}T${selectedSlot.startTime}`);
+    const now = new Date();
+    
+    if (slotDateTime <= now) {
+      toast.error("Cannot book appointments for past dates or times");
+      setSelectedSlot(null);
+      return;
+    }
+    
     try {
       setLoading(true);
       const res = await fetch(`${API_URL}/api/appointments/book`, {

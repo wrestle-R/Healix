@@ -25,6 +25,22 @@ const CalendarSlotPicker = ({
   const [slots, setSlots] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  // Filter out past time slots for today
+  const filterPastSlots = (slots, selectedDate) => {
+    const today = new Date();
+    const isToday = selectedDate.toDateString() === today.toDateString();
+
+    if (!isToday) return slots;
+
+    const currentTime = today.getHours() * 60 + today.getMinutes();
+
+    return slots.filter((slot) => {
+      const [hours, minutes] = slot.startTime.split(":").map(Number);
+      const slotTime = hours * 60 + minutes;
+      return slotTime > currentTime;
+    });
+  };
+
   // Fetch slots for the selected date
   useEffect(() => {
     if (!doctorId || !selectedDate) return;
@@ -38,11 +54,13 @@ const CalendarSlotPicker = ({
       .then((res) => res.json())
       .then((data) => {
         const dateStr = format(selectedDate, "yyyy-MM-dd");
-        setSlots(
-          data.success
-            ? data.slots.map((slot) => ({ ...slot, date: dateStr }))
-            : []
-        );
+        const rawSlots = data.success
+          ? data.slots.map((slot) => ({ ...slot, date: dateStr }))
+          : [];
+
+        // Filter out past slots if it's today
+        const filteredSlots = filterPastSlots(rawSlots, selectedDate);
+        setSlots(filteredSlots);
       })
       .catch(() => setSlots([]))
       .finally(() => setLoading(false));
@@ -58,7 +76,8 @@ const CalendarSlotPicker = ({
             selected={selectedDate}
             onSelect={setSelectedDate}
             className="rounded-lg border bg-background"
-            disabled={disabled}
+            disabled={(date) => disabled || date < new Date(new Date().setHours(0, 0, 0, 0))}
+            fromDate={new Date()}
           />
         </div>
         {/* Slots column */}
