@@ -54,8 +54,8 @@ const VRScene = ({ exercise, isActive, therapy, currentExerciseIndex, repsComple
         <a-asset-item id="small-table" src="/models/room/small-table.glb"></a-asset-item>
         <a-asset-item id="mirror-wall" src="/models/room/mirror-wall.glb"></a-asset-item>
         <a-asset-item id="mirror" src="/models/room/mirror.glb"></a-asset-item>
-  <a-asset-item id="therapy-ball" src="/models/room/therapy-ball.glb"></a-asset-item>
-  <a-asset-item id="window" src="/models/room/window.glb"></a-asset-item>
+        <a-asset-item id="therapy-ball" src="/models/room/therapy-ball.glb"></a-asset-item>
+        <a-asset-item id="window" src="/models/room/window.glb"></a-asset-item>
       </a-assets>
 
       {/* 🌟 PROPER LIGHTING */}
@@ -124,14 +124,14 @@ const VRScene = ({ exercise, isActive, therapy, currentExerciseIndex, repsComple
 ></a-box>
 
 {/* 🏠 CEILING - HIGHER UP */}
-{/* <a-plane 
+<a-plane 
   position="0 6 0" 
   rotation="90 0 0" 
   width="12" 
   height="12" 
   material="src: /ceiling.jpg; repeat: 4 4; color: #f8fafc" 
   shadow="receive: true"
-></a-plane> */}
+></a-plane>
 
       {/* 🪞 MIRROR with YOUR TEXTURE */}
       <a-plane 
@@ -187,8 +187,8 @@ const VRScene = ({ exercise, isActive, therapy, currentExerciseIndex, repsComple
 {/* ⚽ THERAPY BALL - PROPER SIZE */}
 <a-gltf-model 
   src="#therapy-ball" 
-  position="0 2 2" 
-  scale="4 4 5"
+  position="-1 0 -3" 
+  scale="0.02 0.02 0.02"
   shadow="cast: true; receive: true"
 ></a-gltf-model>
 
