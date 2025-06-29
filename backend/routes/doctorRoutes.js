@@ -10,6 +10,9 @@ router.put(
   DoctorController.createOrUpdateProfile
 );
 
+// 📊 DOCTOR ANALYTICS ROUTE - MUST BE BEFORE /:doctorId
+router.get('/analytics', verifyToken, DoctorController.getDoctorAnalytics);
+
 // Get doctor profile by ID
 router.get("/:doctorId", DoctorController.getProfile);
 

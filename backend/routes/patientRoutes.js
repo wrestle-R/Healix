@@ -9,6 +9,7 @@ router.put(
   verifyToken,
   PatientController.createOrUpdateProfile
 );
+router.get('/analytics', verifyToken, PatientController.getPatientAnalytics);
 
 // Get patient profile by ID
 router.get("/:patientId", verifyToken, PatientController.getProfile);

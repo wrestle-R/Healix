@@ -16,6 +16,7 @@ import {
   FaTimes,
   FaCalendarPlus,
   FaClock,
+  FaChartBar
 } from "react-icons/fa";
 import { useUser } from "../context/UserContext.jsx";
 import { toast } from "sonner";
@@ -25,6 +26,7 @@ import DoctorAppointmentsList from "@/components/doctor/appointments/DoctorAppoi
 import DoctorScheduleCalendar from "@/components/doctor/appointments/DoctorScheduleCalendar";
 import DoctorProfileForm from "@/components/doctor/DoctorProfileForm";
 import DoctorAvailabilitySettings from "@/components/doctor/appointments/DoctorAvailabilitySettings";
+import DoctorAnalytics from "@/components/doctor/Analytics.jsx";
 
 const DoctorDashboard = () => {
   const [loading, setLoading] = useState(true);
@@ -82,6 +84,7 @@ const DoctorDashboard = () => {
     { id: "appointments", label: "Appointments", icon: FaCalendarCheck },
     { id: "calendar", label: "Calendar", icon: FaCalendarPlus },
     { id: "availability", label: "Availability", icon: FaClock },
+    { id: "analytics", label: "Analytics", icon: FaChartBar },
     { id: "profile", label: "Profile", icon: FaUser },
   ];
 
@@ -409,6 +412,11 @@ const DoctorDashboard = () => {
             {activeTab === "availability" && (
               <motion.div variants={itemVariants}>
                 <DoctorAvailabilitySettings />
+              </motion.div>
+            )}
+            {activeTab === "analytics" && (
+              <motion.div variants={itemVariants}>
+                <DoctorAnalytics />
               </motion.div>
             )}
 
