@@ -10,8 +10,9 @@ const VRScene = ({ exercise, isActive, therapy, currentExerciseIndex, repsComple
   useEffect(() => {
     if (typeof window !== 'undefined' && window.AFRAME) {
       console.log('🎮 VR Therapy Room - READY!');
+      console.log('🏃 Current Exercise:', exercise?.exerciseName, exercise?.exerciseId);
     }
-  }, []);
+  }, [exercise]);
 
   return (
     <a-scene 
@@ -21,13 +22,25 @@ const VRScene = ({ exercise, isActive, therapy, currentExerciseIndex, repsComple
       background="color: #E8F4FD"
       shadow="type: pcf; shadowMapWidth: 2048; shadowMapHeight: 2048"
     >
-      {/* Assets */}
+      {/* Assets - NO SOUND FILES */}
       <a-assets>
+        {/* Load ALL your models */}
+        <a-asset-item id="arm-stretching-model" src="/models/Arm_Stretching.glb"></a-asset-item>
         <a-asset-item id="arms-up-model" src="/models/Arms_Up.glb"></a-asset-item>
+        <a-asset-item id="burpee-model" src="/models/Burpee.glb"></a-asset-item>
+        <a-asset-item id="front-raises-model" src="/models/Front_Raises.glb"></a-asset-item>
+        <a-asset-item id="jogging-model" src="/models/Jogging.glb"></a-asset-item>
+        <a-asset-item id="left-leg-balance-model" src="/models/Left_Leg_Balance.glb"></a-asset-item>
+        <a-asset-item id="neck-stretching-model" src="/models/Neck Stretching.glb"></a-asset-item>
+        <a-asset-item id="plank-model" src="/models/Plank.glb"></a-asset-item>
+        <a-asset-item id="push-up-model" src="/models/Push_Up.glb"></a-asset-item>
+        <a-asset-item id="right-leg-balance-model" src="/models/Right_Leg_Balance.glb"></a-asset-item>
+        <a-asset-item id="situps-model" src="/models/Situps.glb"></a-asset-item>
         <a-asset-item id="squat-model" src="/models/Squat.glb"></a-asset-item>
+        <a-asset-item id="stair-climbing-model" src="/models/Stair_Climbing.glb"></a-asset-item>
         <a-asset-item id="stand-model" src="/models/Stand.glb"></a-asset-item>
-        <audio id="success-sound" src="/sounds/success.mp3" preload="auto"></audio>
-        <audio id="complete-sound" src="/sounds/complete.mp3" preload="auto"></audio>
+        <a-asset-item id="walking-model" src="/models/Walking.glb"></a-asset-item>
+        <a-asset-item id="warming-up-model" src="/models/Warming_Up.glb"></a-asset-item>
       </a-assets>
 
       {/* Lighting optimized for model visibility */}
@@ -37,7 +50,7 @@ const VRScene = ({ exercise, isActive, therapy, currentExerciseIndex, repsComple
       {/* Environment */}
       <TherapyEnvironment />
 
-      {/* Instructor with realistic animation */}
+      {/* Instructor with FIXED model paths */}
       <ExerciseInstructor 
         exercise={exercise} 
         isActive={isActive} 
@@ -67,7 +80,7 @@ const VRScene = ({ exercise, isActive, therapy, currentExerciseIndex, repsComple
         shadow="receive: true"
       ></a-plane>
 
-      {/* 🔥 INSTRUCTIONS DISPLAY - Always visible when active */}
+      {/* 🔥 THERAPY INFO - Always visible when active */}
       {isActive && exercise && (
         <a-text 
           position="0 3.5 -2" 
@@ -78,7 +91,7 @@ const VRScene = ({ exercise, isActive, therapy, currentExerciseIndex, repsComple
         ></a-text>
       )}
 
-      {/* 🔥 EXERCISE INSTRUCTIONS - Big and visible */}
+      {/* 🔥 EXERCISE INSTRUCTIONS */}
       {isActive && exercise && exercise.instructions && (
         <a-text 
           position="0 2.8 -2" 

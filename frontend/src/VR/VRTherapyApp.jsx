@@ -38,13 +38,25 @@ const VRTherapyApp = () => {
 
   const currentExercise = therapy?.exercises[currentExerciseIndex];
 
-  // FIXED TIMING - Each rep takes EXACTLY what we say
+  // USING YOUR EXACT TIMINGS from the models
   const getRepDuration = (exerciseId) => {
     switch (exerciseId) {
-      case 'stand': return 3000; // 3 seconds per hold
-      case 'arm-raise': return 4000; // 4 seconds per rep
-      case 'squat': return 5000; // 5 seconds per rep  
-      case 'balance': return 4000; // 4 seconds per balance
+      case 'arm-stretching': return 15000; // 15 seconds per rep
+      case 'arms-up': return 10000; // 10 seconds per rep
+      case 'burpee': return 5000; // 5 seconds per rep
+      case 'front-raises': return 13000; // 13 seconds per rep
+      case 'jogging': return 5000; // 5 seconds per rep
+      case 'left-leg-balance': return 4000; // 4 seconds hold
+      case 'neck-stretching': return 1500; // 1.5 seconds per rep
+      case 'plank': return 4000; // 4 seconds hold
+      case 'push-up': return 3000; // 3 seconds per rep
+      case 'right-leg-balance': return 4000; // 4 seconds hold
+      case 'situps': return 3000; // 3 seconds per rep
+      case 'squat': return 2000; // 2 seconds per rep
+      case 'stair-climbing': return 3000; // 3 seconds per rep
+      case 'stand': return 3000; // 3 seconds hold
+      case 'walking': return 1500; // 1.5 seconds per rep
+      case 'warming-up': return 5000; // 5 seconds per rep
       default: return 4000;
     }
   };
@@ -60,7 +72,7 @@ const VRTherapyApp = () => {
     return () => clearInterval(timeInterval);
   }, [isExerciseActive]);
 
-  // REP COUNTING - Matches model animation
+  // REP COUNTING - Using YOUR EXACT TIMINGS
   useEffect(() => {
     let repInterval;
     if (isExerciseActive && currentExercise && repsCompleted < currentExercise.repsTarget) {
@@ -71,11 +83,8 @@ const VRTherapyApp = () => {
           const newReps = prev + 1;
           console.log(`✅ Rep ${newReps}/${currentExercise.repsTarget} - ${currentExercise.exerciseName}`);
           
-          // Play success sound
-          try {
-            const audio = document.querySelector('#success-sound');
-            if (audio) audio.play();
-          } catch (e) { console.log('Sound not available'); }
+          // NO SOUND - Just console log
+          console.log('🔔 Rep completed!');
           
           return newReps;
         });

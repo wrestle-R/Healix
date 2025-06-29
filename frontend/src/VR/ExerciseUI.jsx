@@ -23,13 +23,25 @@ const ExerciseUI = ({
   // Calculate progress percentage
   const repProgress = (repsCompleted / totalReps) * 100;
   
-  // Get expected time for current reps completed
+  // YOUR EXACT TIMINGS per rep in seconds
   const getRepDuration = (exerciseId) => {
     switch (exerciseId) {
-      case 'stand': return 3; // 3 seconds per rep
-      case 'arm-raise': return 4; // 4 seconds per rep
-      case 'squat': return 5; // 5 seconds per rep
-      case 'balance': return 4; // 4 seconds per rep
+      case 'arm-stretching': return 15; // 15 seconds per rep
+      case 'arms-up': return 10; // 10 seconds per rep
+      case 'burpee': return 5; // 5 seconds per rep
+      case 'front-raises': return 13; // 13 seconds per rep
+      case 'jogging': return 5; // 5 seconds per rep
+      case 'left-leg-balance': return 4; // 4 seconds hold
+      case 'neck-stretching': return 1.5; // 1.5 seconds per rep
+      case 'plank': return 4; // 4 seconds hold
+      case 'push-up': return 3; // 3 seconds per rep
+      case 'right-leg-balance': return 4; // 4 seconds hold
+      case 'situps': return 3; // 3 seconds per rep
+      case 'squat': return 2; // 2 seconds per rep
+      case 'stair-climbing': return 3; // 3 seconds per rep
+      case 'stand': return 3; // 3 seconds hold
+      case 'walking': return 1.5; // 1.5 seconds per rep
+      case 'warming-up': return 5; // 5 seconds per rep
       default: return 4;
     }
   };
