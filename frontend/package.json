@@ -20,7 +20,7 @@
     "@radix-ui/react-separator": "^1.1.7",
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-tabs": "^1.1.12",
-    "@react-three/drei": "^10.3.0",
+    "@react-three/drei": "^9.108.4",
     "@react-three/fiber": "^9.1.2",
     "@readyplayerme/react-avatar-creator": "^0.5.0",
     "@readyplayerme/visage": "^6.12.0",

@@ -90,7 +90,7 @@ function FallbackDoctor({ isListening, isSpeaking }) {
   return (
     <group ref={meshRef}>
       <mesh position={[0, 0, 0]}>
-        <capsuleGeometry args={[0.5, 1.5, 4, 8]} />
+        <cylinderGeometry args={[0.5, 0.5, 1.5, 8]} />
         <meshStandardMaterial color="#4A90E2" />
       </mesh>
       <mesh position={[0, 1.2, 0]}>
@@ -173,6 +173,7 @@ export default function TalkingDoctorChatbot() {
   const [textInput, setTextInput] = useState("");
   const [conversation, setConversation] = useState([]);
   const [browserSupported, setBrowserSupported] = useState(true);
+  const [conversationStarted, setConversationStarted] = useState(false);
 
   const patientData = useRef({
     symptoms: "",
@@ -245,10 +246,7 @@ export default function TalkingDoctorChatbot() {
     };
 
     recognitionRef.current.onend = () => {
-      if (isListening) {
-        // Only restart if we're still supposed to be listening
-        recognitionRef.current.start();
-      }
+      setIsListening(false);
     };
 
     return () => {
@@ -266,28 +264,38 @@ export default function TalkingDoctorChatbot() {
     conversationEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [conversation]);
 
-  // Start conversation
+  // Start conversation only once
   useEffect(() => {
-    if (currentStep === 0 && conversation.length === 0) {
+    if (!conversationStarted) {
+      setConversationStarted(true);
       setTimeout(() => askQuestion(0), 1000);
     }
   }, []);
 
+  // Function to clean markdown formatting from text
+  const cleanMarkdownText = (text) => {
+    return text
+      .replace(/\*\*(.*?)\*\*/g, '$1') // Remove **bold** formatting
+      .replace(/\*(.*?)\*/g, '$1')     // Remove *italic* formatting
+      .replace(/__(.*?)__/g, '$1')     // Remove __underline__ formatting
+      .replace(/_(.*?)_/g, '$1')       // Remove _italic_ formatting
+      .trim();
+  };
+
   const speak = (text) => {
     if (!voiceEnabled || !synthRef.current) return;
 
+    // Clean the text before speaking
+    const cleanText = cleanMarkdownText(text);
+    
     setIsSpeaking(true);
-    const utterance = new SpeechSynthesisUtterance(text);
+    const utterance = new SpeechSynthesisUtterance(cleanText);
     utterance.rate = 0.9;
     utterance.pitch = 1;
     utterance.volume = 0.8;
 
     utterance.onend = () => {
       setIsSpeaking(false);
-      // If we were listening before the bot spoke, restart listening
-      if (isListening) {
-        startListening();
-      }
     };
 
     synthRef.current.speak(utterance);
@@ -306,6 +314,12 @@ export default function TalkingDoctorChatbot() {
 
   const handleUserInput = (input) => {
     if (!input.trim()) return;
+
+    // Stop any ongoing speech when user provides input
+    if (synthRef.current && isSpeaking) {
+      synthRef.current.cancel();
+      setIsSpeaking(false);
+    }
 
     setConversation((prev) => [...prev, { type: "patient", text: input }]);
 
@@ -366,11 +380,14 @@ export default function TalkingDoctorChatbot() {
       responseText +=
         "\n\nRemember, this is general advice. Please consult with a healthcare professional for proper diagnosis and treatment.";
 
+      // Clean the response text before displaying and speaking
+      const cleanedResponse = cleanMarkdownText(responseText);
+
       setConversation((prev) => [
         ...prev,
-        { type: "doctor", text: responseText },
+        { type: "doctor", text: cleanedResponse },
       ]);
-      speak(responseText);
+      speak(cleanedResponse);
     } catch (error) {
       const errorMessage =
         "I'm sorry, I'm having trouble accessing my medical database right now. Please try again later or consult with a healthcare professional.";
@@ -427,7 +444,9 @@ export default function TalkingDoctorChatbot() {
     };
     stopSpeaking();
     stopListening();
-    setTimeout(() => askQuestion(0), 500);
+    setTimeout(() => {
+      askQuestion(0);
+    }, 500);
   };
 
   return (
