@@ -1,11 +1,11 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 
 const ExerciseInstructor = ({ exercise, isActive, repsCompleted }) => {
   const instructorRef = useRef();
+  const [modelLoading, setModelLoading] = useState(true);
 
   const getModelPath = () => {
     if (!exercise?.exerciseId) return '/models/Stand.glb';
-    
     switch (exercise.exerciseId) {
       case 'arm-stretching': return '/models/Arm_Stretching.glb';
       case 'arms-up': return '/models/Arms_Up.glb';
@@ -27,30 +27,6 @@ const ExerciseInstructor = ({ exercise, isActive, repsCompleted }) => {
     }
   };
 
-  const getAnimationSpeed = () => {
-    if (!exercise?.exerciseId) return 0.25;
-    
-    switch (exercise.exerciseId) {
-      case 'arm-stretching': return 0.067;
-      case 'arms-up': return 0.1;
-      case 'burpee': return 0.2;
-      case 'front-raises': return 0.077;
-      case 'jogging': return 0.2;
-      case 'left-leg-balance': return 0.25;
-      case 'neck-stretching': return 0.67;
-      case 'plank': return 0.25;
-      case 'push-up': return 0.33;
-      case 'right-leg-balance': return 0.25;
-      case 'situps': return 0.33;
-      case 'squat': return 0.5;
-      case 'stair-climbing': return 0.33;
-      case 'stand': return 0.33;
-      case 'walking': return 0.67;
-      case 'warming-up': return 0.2;
-      default: return 0.25;
-    }
-  };
-
   const getInstructorPosition = () => {
     if (exercise?.exerciseId === 'jogging' || exercise?.exerciseId === 'walking') {
       return "0 0 -2"; 
@@ -59,46 +35,81 @@ const ExerciseInstructor = ({ exercise, isActive, repsCompleted }) => {
   };
 
   useEffect(() => {
-    console.log('🤖 Instructor Model:', exercise?.exerciseName, getModelPath());
+    setModelLoading(true);
+    // Listen for A-Frame model-loaded event
+    const entity = instructorRef.current;
+    if (entity) {
+      const handler = () => setModelLoading(false);
+      entity.addEventListener('model-loaded', handler);
+      return () => entity.removeEventListener('model-loaded', handler);
+    }
   }, [exercise]);
 
   return (
-    <a-entity ref={instructorRef} position={getInstructorPosition()}>
+    <>
+      {/* Loading Spinner Overlay */}
+      {modelLoading && (
+        <a-entity position="0 2 -1">
+          <a-plane 
+            color="#fff" 
+            opacity="0.85" 
+            width="2" 
+            height="1" 
+            position="0 0 0.1"
+          ></a-plane>
+          <a-text 
+            value="Loading Model..." 
+            color="#2563eb" 
+            align="center" 
+            position="0 0 0.2"
+            width="2"
+          ></a-text>
+          <a-circle 
+            color="#2563eb" 
+            radius="0.15" 
+            position="0 -0.3 0.2"
+            animation="property: rotation; to: 0 0 360; loop: true; dur: 1000"
+            opacity="0.7"
+          ></a-circle>
+        </a-entity>
+      )}
 
-      {/* 🤖 INSTRUCTOR MODEL */}
-      <a-gltf-model 
-        src={getModelPath()}
-        position="0 0 0"
-        scale="1.8 1.8 1.8"
-        rotation="0 0 0"
-        shadow="cast: true"
-        animation-mixer={isActive ? 
-          `clip: *; loop: repeat;` : 
-          ""
-        }
-      ></a-gltf-model>
+      <a-entity ref={instructorRef} position={getInstructorPosition()}>
+        {/* 🤖 INSTRUCTOR MODEL */}
+        <a-gltf-model 
+          src={getModelPath()}
+          position="0 0 0"
+          scale="1.8 1.8 1.8"
+          rotation="0 0 0"
+          shadow="cast: true"
+          animation-mixer={isActive ? 
+            `clip: *; loop: repeat;` : 
+            ""
+          }
+        ></a-gltf-model>
 
-      {/* 🎯 STATUS - POSITIONED TO RIGHT SIDE so it doesn't cover poster */}
-      {isActive ? (
-  <a-text 
-    position="3 3.5 0" 
-    value={`${exercise?.exerciseName}\nRep ${repsCompleted}/${exercise?.repsTarget || 10}`}
-    align="center" 
-    color="#10b981"
-    scale="1.2 1.2 1.2"
-    font="dejavu"
-  ></a-text>
-) : (
-  <a-text 
-    position="3 3.5 0" 
-    value={`Ready: ${exercise?.exerciseName || 'Exercise'}\nClick Start to begin`}
-    align="center" 
-    color="#f59e0b"
-    scale="1.0 1.0 1.0"
-    font="dejavu"
-  ></a-text>
-)}
-    </a-entity>
+        {/* 🎯 STATUS - POSITIONED TO RIGHT SIDE so it doesn't cover poster */}
+        {isActive ? (
+          <a-text 
+            position="3 3.5 0" 
+            value={`${exercise?.exerciseName}\nRep ${repsCompleted}/${exercise?.repsTarget || 10}`}
+            align="center" 
+            color="#10b981"
+            scale="1.2 1.2 1.2"
+            font="dejavu"
+          ></a-text>
+        ) : (
+          <a-text 
+            position="3 3.5 0" 
+            value={`Ready: ${exercise?.exerciseName || 'Exercise'}\nClick Start to begin`}
+            align="center" 
+            color="#f59e0b"
+            scale="1.0 1.0 1.0"
+            font="dejavu"
+          ></a-text>
+        )}
+      </a-entity>
+    </>
   );
 };
 
