@@ -71,6 +71,13 @@ const Landing = () => {
               >
                 Therapy
               </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                onClick={() => document.getElementById('testimonials')?.scrollIntoView({ behavior: 'smooth' })}
+                className="text-foreground hover:text-primary transition-colors font-medium bg-transparent border-none cursor-pointer"
+              >
+                Testimonials
+              </motion.button>
               
             </div>
 
