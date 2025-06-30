@@ -4,6 +4,11 @@
 
 ---
 
+## Live Demo
+
+[Healix](https://healix-med.vercel.app/)
+
+
 ## Features
 
 - **Secure Authentication** (JWT, Firebase)
@@ -18,6 +23,7 @@
 - **Accessibility & Internationalization Ready**
 
 ---
+
 
 ## Tech Stack
 
