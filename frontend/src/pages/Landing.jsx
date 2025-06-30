@@ -71,13 +71,7 @@ const Landing = () => {
               >
                 Therapy
               </motion.a>
-              <motion.a
-                whileHover={{ scale: 1.05 }}
-                href="#about"
-                className="text-foreground hover:text-primary transition-colors font-medium"
-              >
-                About
-              </motion.a>
+              
             </div>
 
             <div className="flex items-center space-x-4">
