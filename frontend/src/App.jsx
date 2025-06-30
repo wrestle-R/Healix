@@ -1,6 +1,7 @@
 import React from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { UserProvider, useUser } from './context/UserContext.jsx'
+import Loading from './components/Loading.jsx'
 import Landing from './pages/Landing.jsx'
 import Login from './pages/Login.jsx'
 import Register from './pages/Register.jsx'
@@ -16,11 +17,7 @@ const RootRedirect = () => {
   const { user, loading } = useUser();
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-white text-xl">Loading...</div>
-      </div>
-    );
+    return <Loading />;
   }
 
   if (user) {
@@ -45,16 +42,16 @@ const AppRoutes = () => {
         <Route path="/patient-dashboard" element={<PatientDashboard />} />
         <Route path="/doctor-dashboard" element={<DoctorDashboard />} />
         <Route path="/therapy-routines" element={<TherapyRoutines />} /> {/* NEW ROUTE */}
-<Route path="/vr-therapy/:therapyId" element={
-  <Suspense fallback={<div>Loading VR...</div>}>
-    <VRTherapyApp />
-  </Suspense>
-} />
-<Route path="/ar-therapy/:therapyId" element={
-  <Suspense fallback={<div>Loading AR...</div>}>
-    <ARTherapyApp />
-  </Suspense>
-} />
+        <Route path="/vr-therapy/:therapyId" element={
+          <Suspense fallback={<Loading message="Loading VR..." />}>
+            <VRTherapyApp />
+          </Suspense>
+        } />
+        <Route path="/ar-therapy/:therapyId" element={
+          <Suspense fallback={<Loading message="Loading AR..." />}>
+            <ARTherapyApp />
+          </Suspense>
+        } />
       </Routes>
     </Router>
   );
@@ -70,3 +67,4 @@ const App = () => {
 };
 
 export default App;
+
