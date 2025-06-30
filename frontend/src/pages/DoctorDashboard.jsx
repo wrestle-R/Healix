@@ -27,12 +27,19 @@ import DoctorScheduleCalendar from "@/components/doctor/appointments/DoctorSched
 import DoctorProfileForm from "@/components/doctor/DoctorProfileForm";
 import DoctorAvailabilitySettings from "@/components/doctor/appointments/DoctorAvailabilitySettings";
 import DoctorAnalytics from "@/components/doctor/Analytics.jsx";
+import TodaysSchedule from "@/components/doctor/dashboard/TodaysSchedule";
+import RegularPatients from "@/components/doctor/dashboard/RegularPatients";
+import ProfileCompletion from "@/components/doctor/dashboard/ProfileCompletion";
+import PatientDetailsModal from "@/components/patient/PatientDetailsModal";
 
 const DoctorDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("dashboard");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [doctorProfile, setDoctorProfile] = useState(null);
+  const [dashboardData, setDashboardData] = useState(null);
+  const [showPatientModal, setShowPatientModal] = useState(false);
+  const [selectedPatient, setSelectedPatient] = useState(null);
   const navigate = useNavigate();
   const { logout } = useUser();
 
@@ -62,10 +69,29 @@ const DoctorDashboard = () => {
     return () => unsubscribe();
   }, [navigate]);
 
-  const displayFirstName = doctorProfile?.firstName;
-  const displayLastName = doctorProfile?.lastName;
-  const displayProfilePicture = doctorProfile?.profilePicture;
-  const displayEmail = doctorProfile?.email;
+  useEffect(() => {
+    if (doctorProfile && activeTab === "dashboard") {
+      fetchDashboardData();
+    }
+  }, [doctorProfile, activeTab]);
+
+  const fetchDashboardData = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await axios.get(
+        `${import.meta.env.VITE_API_URL}/api/doctors/dashboard`,
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+      if (res.data.success) {
+        setDashboardData(res.data.data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch dashboard data:", error);
+      toast.error("Failed to load dashboard data");
+    }
+  };
 
   const handleLogout = async () => {
     try {
@@ -78,6 +104,20 @@ const DoctorDashboard = () => {
       toast.error("Failed to logout");
     }
   };
+
+  const handleViewPatientDetails = (patient) => {
+    setSelectedPatient(patient);
+    setShowPatientModal(true);
+  };
+
+  const handleCompleteProfile = () => {
+    setActiveTab("profile");
+  };
+
+  const displayFirstName = doctorProfile?.firstName;
+  const displayLastName = doctorProfile?.lastName;
+  const displayProfilePicture = doctorProfile?.profilePicture;
+  const displayEmail = doctorProfile?.email;
 
   const sidebarItems = [
     { id: "dashboard", label: "Dashboard", icon: FaTachometerAlt },
@@ -351,8 +391,8 @@ const DoctorDashboard = () => {
           >
             {/* Tab Content */}
             {activeTab === "dashboard" && (
-              <motion.div variants={itemVariants}>
-                <Card className="bg-background/50 backdrop-blur-sm border-border/50 mb-6">
+              <motion.div variants={itemVariants} className="space-y-6">
+                <Card className="bg-background/50 backdrop-blur-sm border-border/50">
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                       <div>
@@ -386,7 +426,28 @@ const DoctorDashboard = () => {
                     </div>
                   </CardContent>
                 </Card>
-                {/* You can add more dynamic stats or quick actions here if you want */}
+
+                {/* Dashboard Grid */}
+                {dashboardData && (
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div className="lg:col-span-2">
+                      <TodaysSchedule appointments={dashboardData.todaysAppointments} />
+                    </div>
+                    <div className="space-y-6">
+                      <ProfileCompletion 
+                        profileData={dashboardData.profileCompletion}
+                        onCompleteProfile={handleCompleteProfile}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {dashboardData && (
+                  <RegularPatients 
+                    patients={dashboardData.regularPatients}
+                    onViewDetails={handleViewPatientDetails}
+                  />
+                )}
               </motion.div>
             )}
 
@@ -421,6 +482,13 @@ const DoctorDashboard = () => {
           </motion.div>
         </div>
       </div>
+
+      {/* Patient Details Modal */}
+      <PatientDetailsModal
+        open={showPatientModal}
+        onClose={() => setShowPatientModal(false)}
+        patient={selectedPatient}
+      />
     </div>
   );
 };

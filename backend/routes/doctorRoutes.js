@@ -3,15 +3,18 @@ const router = express.Router();
 const DoctorController = require("../controllers/doctorController");
 const { verifyToken, requireDoctor } = require("../middleware/auth");
 
+// 📊 DOCTOR ANALYTICS ROUTE - MUST BE BEFORE /:doctorId
+router.get('/analytics', verifyToken, requireDoctor, DoctorController.getDoctorAnalytics);
+
+// 📋 DOCTOR DASHBOARD ROUTE - MUST BE BEFORE /:doctorId
+router.get('/dashboard', verifyToken, requireDoctor, DoctorController.getDashboardData);
+
 // Create or update doctor profile
 router.put(
   "/profile/:firebaseUid",
   verifyToken,
   DoctorController.createOrUpdateProfile
 );
-
-// 📊 DOCTOR ANALYTICS ROUTE - MUST BE BEFORE /:doctorId
-router.get('/analytics', verifyToken, DoctorController.getDoctorAnalytics);
 
 // Get doctor profile by ID
 router.get("/:doctorId", DoctorController.getProfile);

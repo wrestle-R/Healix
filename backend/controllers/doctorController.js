@@ -1,4 +1,5 @@
 const Doctor = require("../models/doctor");
+
 const mongoose = require("mongoose");
 const Appointment = require("../models/appointment");
 class DoctorController {
@@ -471,6 +472,175 @@ class DoctorController {
         error: error.message
       });
     }
+  }
+
+  // Get doctor's dashboard data
+  static async getDashboardData(req, res) {
+    try {
+      const doctorId = req.user?.userId || req.user?.id;
+      
+      if (!doctorId) {
+        return res.status(400).json({
+          success: false,
+          message: 'Doctor ID not found in token'
+        });
+      }
+
+      const today = new Date();
+      const startOfDay = new Date(today.setHours(0, 0, 0, 0));
+      const endOfDay = new Date(today.setHours(23, 59, 59, 999));
+
+      // Convert to ObjectId
+      const doctorObjectId = new mongoose.Types.ObjectId(doctorId);
+
+      // Get today's appointments
+      const todaysAppointments = await Appointment.find({
+        doctorId: doctorObjectId,
+        appointmentDate: { $gte: startOfDay, $lte: endOfDay }
+      })
+      .populate('patientId', 'firstName lastName profilePicture phoneNumber dateOfBirth gender bloodGroup')
+      .sort({ startTime: 1 });
+
+      // Get regular patients (patients with 2+ appointments)
+      const patientAppointmentCounts = await Appointment.aggregate([
+        { $match: { doctorId: doctorObjectId } },
+        { $group: { _id: '$patientId', appointmentCount: { $sum: 1 } } },
+        { $match: { appointmentCount: { $gte: 2 } } },
+        { $sort: { appointmentCount: -1 } },
+        { $limit: 6 }
+      ]);
+
+      const regularPatientIds = patientAppointmentCounts.map(p => p._id);
+      const Patient = require('../models/patient');
+      const regularPatients = await Patient.find({
+        _id: { $in: regularPatientIds }
+      }).select('firstName lastName profilePicture phoneNumber dateOfBirth gender bloodGroup address');
+
+      // Add appointment count to each patient
+      const regularPatientsWithCount = regularPatients.map(patient => {
+        const countData = patientAppointmentCounts.find(p => p._id.toString() === patient._id.toString());
+        return {
+          ...patient.toObject(),
+          appointmentCount: countData?.appointmentCount || 0
+        };
+      });
+
+      // Get doctor profile for completion check
+      const doctor = await Doctor.findById(doctorId);
+      const profileCompletion = DoctorController.calculateProfileCompletion(doctor);
+
+      res.json({
+        success: true,
+        data: {
+          todaysAppointments,
+          regularPatients: regularPatientsWithCount,
+          profileCompletion
+        }
+      });
+
+    } catch (error) {
+      console.error('Dashboard data error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch dashboard data',
+        error: error.message
+      });
+    }
+  }
+
+  // Calculate profile completion percentage and missing fields
+  static calculateProfileCompletion(doctor) {
+    const requiredFields = [
+      'firstName', 'lastName', 'email', 'phoneNumber', 'dateOfBirth', 
+      'gender', 'medicalLicenseNumber', 'yearsOfExperience', 'bio'
+    ];
+    
+    const addressFields = ['street', 'city', 'state', 'zipCode'];
+    const arrayFields = ['specializations', 'education'];
+
+    let completedFields = 0;
+    let totalFields = requiredFields.length + addressFields.length + arrayFields.length;
+    const missingFields = [];
+
+    // Check basic required fields
+    requiredFields.forEach(field => {
+      if (doctor[field] && doctor[field].toString().trim() !== '') {
+        completedFields++;
+      } else {
+        missingFields.push(field);
+      }
+    });
+
+    // Check address fields
+    addressFields.forEach(field => {
+      if (doctor.address && doctor.address[field] && doctor.address[field].toString().trim() !== '') {
+        completedFields++;
+      } else {
+        missingFields.push(`address.${field}`);
+      }
+    });
+
+    // Check array fields
+    arrayFields.forEach(field => {
+      if (Array.isArray(doctor[field]) && doctor[field].length > 0) {
+        completedFields++;
+      } else {
+        missingFields.push(field);
+      }
+    });
+
+    const percentage = Math.round((completedFields / totalFields) * 100);
+    
+    return {
+      percentage,
+      isComplete: percentage === 100,
+      completedFields,
+      totalFields,
+      missingFields,
+      suggestions: DoctorController.getCompletionSuggestions(missingFields)
+    };
+  }
+
+  static getCompletionSuggestions(missingFields) {
+    const suggestions = [];
+    
+    if (missingFields.includes('bio')) {
+      suggestions.push({
+        field: 'bio',
+        title: 'Add Your Bio',
+        description: 'Help patients know more about you and your expertise',
+        priority: 'high'
+      });
+    }
+    
+    if (missingFields.includes('specializations')) {
+      suggestions.push({
+        field: 'specializations',
+        title: 'Add Your Specializations',
+        description: 'List your medical specialties to attract relevant patients',
+        priority: 'high'
+      });
+    }
+    
+    if (missingFields.some(f => f.startsWith('address.'))) {
+      suggestions.push({
+        field: 'address',
+        title: 'Complete Your Address',
+        description: 'Patients need to know your location for visits',
+        priority: 'medium'
+      });
+    }
+    
+    if (missingFields.includes('education')) {
+      suggestions.push({
+        field: 'education',
+        title: 'Add Your Education',
+        description: 'Build trust by showcasing your qualifications',
+        priority: 'medium'
+      });
+    }
+
+    return suggestions;
   }
 }
 
