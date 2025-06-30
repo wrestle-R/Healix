@@ -154,9 +154,6 @@ const BookAppointment = ({ user }) => {
         <div className="text-xl font-semibold mb-2 text-destructive">
           Please complete your profile to book an appointment.
         </div>
-        <Button onClick={() => navigate("/profile")} className="mt-2">
-          Go to Profile
-        </Button>
       </div>
     );
   }

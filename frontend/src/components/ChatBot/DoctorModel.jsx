@@ -184,6 +184,7 @@ export default function TalkingDoctorChatbot() {
   const recognitionRef = useRef(null);
   const synthRef = useRef(null);
   const conversationEndRef = useRef(null);
+  const hasAskedFirstQuestion = useRef(false);
 
   const questions = [
     {
@@ -263,9 +264,12 @@ export default function TalkingDoctorChatbot() {
     conversationEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [conversation]);
 
-  // Start conversation
+  // Start conversation only once
   useEffect(() => {
-    setTimeout(() => askQuestion(0), 1000);
+    if (!hasAskedFirstQuestion.current) {
+      hasAskedFirstQuestion.current = true;
+      setTimeout(() => askQuestion(0), 1000);
+    }
     // eslint-disable-next-line
   }, []);
 

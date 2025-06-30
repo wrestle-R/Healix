@@ -50,34 +50,35 @@ const Landing = () => {
             </div>
 
             <div className="hidden md:flex items-center space-x-8">
-              <motion.a
+              <motion.button
                 whileHover={{ scale: 1.05 }}
-                href="#services"
-                className="text-foreground hover:text-primary transition-colors font-medium"
+                onClick={() => document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' })}
+                className="text-foreground hover:text-primary transition-colors font-medium bg-transparent border-none cursor-pointer"
               >
                 Services
-              </motion.a>
-              <motion.a
+              </motion.button>
+              <motion.button
                 whileHover={{ scale: 1.05 }}
-                href="#doctors"
-                className="text-foreground hover:text-primary transition-colors font-medium"
+                onClick={() => document.getElementById('doctors')?.scrollIntoView({ behavior: 'smooth' })}
+                className="text-foreground hover:text-primary transition-colors font-medium bg-transparent border-none cursor-pointer"
               >
                 Doctors
-              </motion.a>
-              <motion.a
+              </motion.button>
+              <motion.button
                 whileHover={{ scale: 1.05 }}
-                href="#therapy"
-                className="text-foreground hover:text-primary transition-colors font-medium"
+                onClick={() => document.getElementById('therapy')?.scrollIntoView({ behavior: 'smooth' })}
+                className="text-foreground hover:text-primary transition-colors font-medium bg-transparent border-none cursor-pointer"
               >
                 Therapy
-              </motion.a>
-              <motion.a
+              </motion.button>
+              <motion.button
                 whileHover={{ scale: 1.05 }}
-                href="#about"
-                className="text-foreground hover:text-primary transition-colors font-medium"
+                onClick={() => document.getElementById('testimonials')?.scrollIntoView({ behavior: 'smooth' })}
+                className="text-foreground hover:text-primary transition-colors font-medium bg-transparent border-none cursor-pointer"
               >
-                About
-              </motion.a>
+                Testimonials
+              </motion.button>
+              
             </div>
 
             <div className="flex items-center space-x-4">

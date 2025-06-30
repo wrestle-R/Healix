@@ -153,7 +153,7 @@ const TherapyRoutines = () => {
 
       <div className="max-w-7xl mx-auto px-4 py-12 relative z-10">
         <Button
-        onClick={() => navigate('/landing')}
+        onClick={() => navigate('/')}
         className="mb-8 bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary text-white px-6 py-3 rounded-full shadow-lg transition-all duration-300 flex items-center gap-2"
         >
           <ArrowLeft className="w-5 h-5" />

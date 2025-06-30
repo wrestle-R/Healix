@@ -297,7 +297,7 @@ class AppointmentController {
 
       // Generate room ID first
       const roomId = generateRoomId();
-      let roomUrl = `https://${SUBDOMAIN}/${roomId}`;
+      let roomUrl = `https://healix.digitalsamba.com/${roomId}`;
       
       // Create Digital Samba room
       try {
